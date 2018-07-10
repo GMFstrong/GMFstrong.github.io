@@ -170,6 +170,61 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-伪协议" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/07/09/伪协议/" class="article-date">
+  	<time datetime="2018-07-09T15:29:13.000Z" itemprop="datePublished">2018-07-09</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/09/伪协议/">
+        伪协议
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于伪协议</code>：<br>首先在php.ini中有两个比较重要的配置，allow_url_fopen和allow_url_include会影响到fopen和include等函数对伪协议的支持。<br>然而allow_url_include依赖于allow_url_fopen，所以allow_url_fopen不开启的话，allow_url_include也无法使用。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-链接收藏" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -280,10 +335,10 @@
 
 
   
-    <article id="post-CTF" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-CSRF" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2018/04/18/CTF/" class="article-date">
+      <a href="/2018/04/18/CSRF/" class="article-date">
   	<time datetime="2018-04-18T04:37:59.000Z" itemprop="datePublished">2018-04-18</time>
 </a>
     </div>
@@ -297,8 +352,8 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/18/CTF/">
-        CTF
+      <a class="article-title" href="/2018/04/18/CSRF/">
+        CSRF
         
       </a>
     </h1>
@@ -309,7 +364,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>今天开始了第一波CTF的征程！！！<br>就从南邮的CTF平台入手吧！！！</p>
+        <p><code>关于CSRF请求伪造</code>：<br>就是可以劫持其它用户进行一些请求，而这个CSRF的危害性就取决于该请求是什么操作了，主要用于越权操作故而经常出现在有权限控制的地方。<br>像管理后台，会员中心，论坛帖子，交易管理等。<br><code>利用条件：</code><br>（1）浏览器登录了当前所预想的权限用户。<br>（2）构造实现目标所需要的请求。<br><code>挖掘要点</code>：<br>首先打开几个非静态页面，抓包看看有没有token，如果没有token的话，再直接请求这个页面，若不带referer，并且返回的数据还相同。则很有可<br>能就是CSRF漏洞了。在白盒测试中，就要看看几个核心文件有没有验证token和referer的相关代码。<br><code>漏洞防范</code>：<br>防御CSRF漏洞的最主要问题就是解决可信问题，即使管理员权限提交到服务器的数据也是不完全可信的，故而做到如下两点防御措施：<br>（1）增加token、referer验证避免img标签请求的水坑攻击。<br>（2）增加验证码。<br>其中token验证是使用最多的一种，也是效果最好的一种，可以理解为在页面或cookie里面加一个不可预测的字符串，服务器在接收操作请求的时候<br>验证一下这个字符串是不是上次访问留下来的即可判断是不是可信请求，因为不访问上一个页面是无法得到这个token的。除非通过XSS漏洞或者其它<br>手段得到通信数据。<br>而考虑到用户体验验证码就没有token实用了，不可能让用户每个页面都输入验证码，说以验证码只用在像登录页面这样的敏感操作中。其实现方式<br>跟token差不多，都是在上一个页面生成一个随机数，看看前台提交过来的是否一致。</p>
 
       
     </div>
