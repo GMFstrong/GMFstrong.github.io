@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>伪协议 | ConqUeroR</title>
+  <title>文件包含 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="关于伪协议：首先在php.ini中有两个比较重要的配置，allow_url_fopen和allow_url_include会影响到fopen和include等函数对伪协议的支持。然而allow_url_include依赖于allow_url_fopen，所以allow_url_fopen不开启的话，allow_url_include也无法使用。">
+  <meta name="description" content="关于文件包含：PHP的文件包含漏洞可以直接执行包含文件的代码，并且包含文件的格式不受限制，只要能正常执行即可。文件包含分为远程包含和本地包含，但是两种漏洞都是比较高危的，在渗透与测试过程中该漏洞大都可以直接利用获取Webshell 。文件包含函数有include()，include_once()和require()，require_once()，其中关于两者的区别，inculde()和includ">
 <meta property="og:type" content="article">
-<meta property="og:title" content="伪协议">
-<meta property="og:url" content="http://gmfdevops.com.com/2018/07/09/伪协议/index.html">
+<meta property="og:title" content="文件包含">
+<meta property="og:url" content="http://gmfdevops.com.com/2018/07/11/文件包含/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="关于伪协议：首先在php.ini中有两个比较重要的配置，allow_url_fopen和allow_url_include会影响到fopen和include等函数对伪协议的支持。然而allow_url_include依赖于allow_url_fopen，所以allow_url_fopen不开启的话，allow_url_include也无法使用。">
+<meta property="og:description" content="关于文件包含：PHP的文件包含漏洞可以直接执行包含文件的代码，并且包含文件的格式不受限制，只要能正常执行即可。文件包含分为远程包含和本地包含，但是两种漏洞都是比较高危的，在渗透与测试过程中该漏洞大都可以直接利用获取Webshell 。文件包含函数有include()，include_once()和require()，require_once()，其中关于两者的区别，inculde()和includ">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-07-09T15:50:23.169Z">
+<meta property="og:updated_time" content="2018-07-11T16:35:34.459Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="伪协议">
-<meta name="twitter:description" content="关于伪协议：首先在php.ini中有两个比较重要的配置，allow_url_fopen和allow_url_include会影响到fopen和include等函数对伪协议的支持。然而allow_url_include依赖于allow_url_fopen，所以allow_url_fopen不开启的话，allow_url_include也无法使用。">
+<meta name="twitter:title" content="文件包含">
+<meta name="twitter:description" content="关于文件包含：PHP的文件包含漏洞可以直接执行包含文件的代码，并且包含文件的格式不受限制，只要能正常执行即可。文件包含分为远程包含和本地包含，但是两种漏洞都是比较高危的，在渗透与测试过程中该漏洞大都可以直接利用获取Webshell 。文件包含函数有include()，include_once()和require()，require_once()，其中关于两者的区别，inculde()和includ">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -169,11 +169,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-伪协议" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-文件包含" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2018/07/09/伪协议/" class="article-date">
-  	<time datetime="2018-07-09T15:29:13.000Z" itemprop="datePublished">2018-07-09</time>
+      <a href="/2018/07/11/文件包含/" class="article-date">
+  	<time datetime="2018-07-11T12:54:09.000Z" itemprop="datePublished">2018-07-11</time>
 </a>
     </div>
   
@@ -186,7 +186,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      伪协议
+      文件包含
       
     </h1>
   
@@ -204,7 +204,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><code>关于伪协议</code>：<br>首先在php.ini中有两个比较重要的配置，allow_url_fopen和allow_url_include会影响到fopen和include等函数对伪协议的支持。<br>然而allow_url_include依赖于allow_url_fopen，所以allow_url_fopen不开启的话，allow_url_include也无法使用。</p>
+        <p><code>关于文件包含</code>：<br>PHP的文件包含漏洞可以直接执行包含文件的代码，并且包含文件的格式不受限制，只要能正常执行即可。文件包含分为远程包含和本地包含，<br>但是两种漏洞都是比较高危的，在渗透与测试过程中该漏洞大都可以直接利用获取Webshell 。文件包含函数有include()，include_once()和<br>require()，require_once()，其中关于两者的区别，inculde()和include_once()在包含文件遇到错误时，下面代码会继续执行，而require()<br>和require_once()则会直接报错并退出程序。并且include()是在代码执行到该函数时才将文件包含进来，而require()是在程序开始执行时，<br>立即包含进来。<br><code>漏洞挖掘</code>：<br>文件包含漏洞大多出现在模块加载，模板加载以及cache调用的地方，例如传入的模块名参数，实际上是直接拼接到文件包含路径中的。所以在<br>挖掘文件包含漏洞的时候可以先跟踪一下程序运行流程，看看模块加载时的文件是否可控，也可在白盒审计的时候直接搜索include(),require()<br>直接回溯看看有没有可控变量，一般这类本地包含大多需要截断。<br><code>本地文件包含（LFI）</code>：<br>顾名思义是指只能包含本机文件的文件包含漏洞，大都出现在模块加载，模板加载，cache调用的地方，渗透测试的时候利用起来并不鸡肋，仅仅<br>需要上传一个允许上传的文件格式再包含该文件来执行代码；也可包含PHP的临时文件，在URL/ua里面加入要执行的代码，当webserver记录到日志后<br>再包含webserver日志文件；在Linux中也可以包含/proc/self/eenviron文件。<br><code>远程文件包含（RFI）：</code><br>是指可以包含远程文件的包含漏洞，远程文件包含需要设置allow_url_include=on，在php5.2之后这个选项的可修改范围是PHP_INI_ALL。四个文件包<br>含函数都支持HTTP,FTP等协议，相当于本地文件包含，它更容易利用，不过出现的频率没有本地包含多。<br>其中基于HTTP协议的测试代码：<br>&lt;?php<br>include($_GET[‘url’])；<br>?&gt;<br>只需要在GET请求URL中传入参数即可，（”<a href="http://test/test.txt&quot;）；" target="_blank" rel="noopener">http://test/test.txt&quot;）；</a><br>远程文件包含还有一种输入输出流的利用方式，可以直接执行POST提交的代码。例如：<br>只要执行POST请求1.php?a=php://input，而在POST的内容里面填写要执行的代码即可。<br><code>文件截断：</code><br>大多数的文件包含都需要截断，因为正常程序里面包含的文件代码一般像include($test.’.php’)这样的格式，如果我们不能写入以.php为扩展名的文件<br>那我们是需要截断来利用的。<br>（1）%00截断虽然很古老，但还是存在。首先，%00受GPC和addslashes等函数的影响，在开启GPC的情况下是不可用的，另外在PHP5.3之后的版本也不可<br>用，因为已经修复了该漏洞。<br>（2）另外，也可以利用多个英文句号(.)和反斜杠(/)来接断，这种方式不收GPC影响，但同样在PHP5.3之后不可用。<br>（3）在远程文件包含中，可利用问号（?）来伪截断，并且不受GPC和PHP版本的影响，其原理是在包含’<a href="http://test/test.txt?.php&#39;时，web服务器将？" target="_blank" rel="noopener">http://test/test.txt?.php&#39;时，web服务器将？</a><br>之后的内容当做参数，txt又不解析，故而参数对test.txt的内容没有影响。所以和包含’<a href="http://tets/test.txt&#39;返回的结果一样。从而实现了伪截断。" target="_blank" rel="noopener">http://tets/test.txt&#39;返回的结果一样。从而实现了伪截断。</a></p>
 
       
     </div>
@@ -214,18 +214,9 @@
     
 <nav id="article-nav">
   
-    <a href="/2018/07/11/文件包含/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">&lt;</strong>
-      <div class="article-nav-title">
-        
-          文件包含
-        
-      </div>
-    </a>
   
-  
-    <a href="/2018/04/18/链接收藏/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">链接收藏</div>
+    <a href="/2018/07/09/伪协议/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">伪协议</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -235,7 +226,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="伪协议" data-title="伪协议" data-url="http://gmfdevops.com.com/2018/07/09/伪协议/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="伪协议">
+<div class="ds-share share" data-thread-key="文件包含" data-title="文件包含" data-url="http://gmfdevops.com.com/2018/07/11/文件包含/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="文件包含">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>

@@ -170,6 +170,61 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-文件包含" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/07/11/文件包含/" class="article-date">
+  	<time datetime="2018-07-11T12:54:09.000Z" itemprop="datePublished">2018-07-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/11/文件包含/">
+        文件包含
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于文件包含</code>：<br>PHP的文件包含漏洞可以直接执行包含文件的代码，并且包含文件的格式不受限制，只要能正常执行即可。文件包含分为远程包含和本地包含，<br>但是两种漏洞都是比较高危的，在渗透与测试过程中该漏洞大都可以直接利用获取Webshell 。文件包含函数有include()，include_once()和<br>require()，require_once()，其中关于两者的区别，inculde()和include_once()在包含文件遇到错误时，下面代码会继续执行，而require()<br>和require_once()则会直接报错并退出程序。并且include()是在代码执行到该函数时才将文件包含进来，而require()是在程序开始执行时，<br>立即包含进来。<br><code>漏洞挖掘</code>：<br>文件包含漏洞大多出现在模块加载，模板加载以及cache调用的地方，例如传入的模块名参数，实际上是直接拼接到文件包含路径中的。所以在<br>挖掘文件包含漏洞的时候可以先跟踪一下程序运行流程，看看模块加载时的文件是否可控，也可在白盒审计的时候直接搜索include(),require()<br>直接回溯看看有没有可控变量，一般这类本地包含大多需要截断。<br><code>本地文件包含（LFI）</code>：<br>顾名思义是指只能包含本机文件的文件包含漏洞，大都出现在模块加载，模板加载，cache调用的地方，渗透测试的时候利用起来并不鸡肋，仅仅<br>需要上传一个允许上传的文件格式再包含该文件来执行代码；也可包含PHP的临时文件，在URL/ua里面加入要执行的代码，当webserver记录到日志后<br>再包含webserver日志文件；在Linux中也可以包含/proc/self/eenviron文件。<br><code>远程文件包含（RFI）：</code><br>是指可以包含远程文件的包含漏洞，远程文件包含需要设置allow_url_include=on，在php5.2之后这个选项的可修改范围是PHP_INI_ALL。四个文件包<br>含函数都支持HTTP,FTP等协议，相当于本地文件包含，它更容易利用，不过出现的频率没有本地包含多。<br>其中基于HTTP协议的测试代码：<br>&lt;?php<br>include($_GET[‘url’])；<br>?&gt;<br>只需要在GET请求URL中传入参数即可，（”<a href="http://test/test.txt&quot;）；" target="_blank" rel="noopener">http://test/test.txt&quot;）；</a><br>远程文件包含还有一种输入输出流的利用方式，可以直接执行POST提交的代码。例如：<br>只要执行POST请求1.php?a=php://input，而在POST的内容里面填写要执行的代码即可。<br><code>文件截断：</code><br>大多数的文件包含都需要截断，因为正常程序里面包含的文件代码一般像include($test.’.php’)这样的格式，如果我们不能写入以.php为扩展名的文件<br>那我们是需要截断来利用的。<br>（1）%00截断虽然很古老，但还是存在。首先，%00受GPC和addslashes等函数的影响，在开启GPC的情况下是不可用的，另外在PHP5.3之后的版本也不可<br>用，因为已经修复了该漏洞。<br>（2）另外，也可以利用多个英文句号(.)和反斜杠(/)来接断，这种方式不收GPC影响，但同样在PHP5.3之后不可用。<br>（3）在远程文件包含中，可利用问号（?）来伪截断，并且不受GPC和PHP版本的影响，其原理是在包含’<a href="http://test/test.txt?.php&#39;时，web服务器将？" target="_blank" rel="noopener">http://test/test.txt?.php&#39;时，web服务器将？</a><br>之后的内容当做参数，txt又不解析，故而参数对test.txt的内容没有影响。所以和包含’<a href="http://tets/test.txt&#39;返回的结果一样。从而实现了伪截断。" target="_blank" rel="noopener">http://tets/test.txt&#39;返回的结果一样。从而实现了伪截断。</a></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-伪协议" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
