@@ -3,22 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2018/7 | ConqUeroR</title>
+  <title>代码执行 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="From Zero to the DevOps">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ConqUeroR">
-<meta property="og:url" content="http://gmfdevops.com.com/archives/2018/07/index.html">
+  <meta name="description" content="关于代码执行漏洞：定义:由于应用程序本身过滤不严，用户可以通过请求把代码注入到应用中执行。直白一点，就是类似于SQL注入，可以把SQL语句注入到SQL服务中执行，在PHP代码中执行漏洞则是可以把代码注入到应用中最终Webserver去执行。这样的漏洞如果没有过滤，相当于一个web后门，相当严重。成因；该漏洞主要是由于eval(),assert(),preg_replace(),call_user_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码执行">
+<meta property="og:url" content="http://gmfdevops.com.com/2018/07/14/代码执行/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="From Zero to the DevOps">
+<meta property="og:description" content="关于代码执行漏洞：定义:由于应用程序本身过滤不严，用户可以通过请求把代码注入到应用中执行。直白一点，就是类似于SQL注入，可以把SQL语句注入到SQL服务中执行，在PHP代码中执行漏洞则是可以把代码注入到应用中最终Webserver去执行。这样的漏洞如果没有过滤，相当于一个web后门，相当严重。成因；该漏洞主要是由于eval(),assert(),preg_replace(),call_user_">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-07-14T16:22:35.761Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ConqUeroR">
-<meta name="twitter:description" content="From Zero to the DevOps">
+<meta name="twitter:title" content="代码执行">
+<meta name="twitter:description" content="关于代码执行漏洞：定义:由于应用程序本身过滤不严，用户可以通过请求把代码注入到应用中执行。直白一点，就是类似于SQL注入，可以把SQL语句注入到SQL服务中执行，在PHP代码中执行漏洞则是可以把代码注入到应用中最终Webserver去执行。这样的漏洞如果没有过滤，相当于一个web后门，相当严重。成因；该漏洞主要是由于eval(),assert(),preg_replace(),call_user_">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -168,146 +169,81 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap">
+      <div class="body-wrap"><article id="post-代码执行" class="article article-type-post" itemscope itemprop="blogPost">
   
+    <div class="article-meta">
+      <a href="/2018/07/14/代码执行/" class="article-date">
+  	<time datetime="2018-07-14T15:55:34.000Z" itemprop="datePublished">2018-07-14</time>
+</a>
+    </div>
   
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      代码执行
       
+    </h1>
+  
+
+      </header>
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/14/代码执行/" class="archive-article-date">
-  	<time datetime="2018-07-14T15:55:34.000Z" itemprop="datePublished">7月 14</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/14/代码执行/">
-        代码执行
+      <div class="article-info article-info-post">
         
-      </a>
-    </h1>
-  
-
-        <div class="article-info info-on-left">
-          
-          
-
-          
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/12/文件读取（下载，上传）/" class="archive-article-date">
-  	<time datetime="2018-07-12T13:36:55.000Z" itemprop="datePublished">7月 12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/12/文件读取（下载，上传）/">
-        文件读取（下载，上传）
         
-      </a>
-    </h1>
-  
 
-        <div class="article-info info-on-left">
-          
-          
-
-          
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/11/文件包含/" class="archive-article-date">
-  	<time datetime="2018-07-11T12:54:09.000Z" itemprop="datePublished">7月 11</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/11/文件包含/">
-        文件包含
         
-      </a>
-    </h1>
-  
-
-        <div class="article-info info-on-left">
-          
-          
-
-          
-        </div>
         <div class="clearfix"></div>
-    </header>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于代码执行漏洞</code>：<br>定义:<br>由于应用程序本身过滤不严，用户可以通过请求把代码注入到应用中执行。直白一点，就是类似于SQL注入，可以把SQL语句注入到SQL服务中执行，<br>在PHP代码中执行漏洞则是可以把代码注入到应用中最终Webserver去执行。<br>这样的漏洞如果没有过滤，相当于一个web后门，相当严重。<br>成因；<br>该漏洞主要是由于eval(),assert(),preg_replace(),call_user_func(),call_user_func_array(),array_map()等函数过滤不严导致的。另外，PHP<br>的动态函数（$a($b)）也是目前出现比较多的。<br><code>挖掘经验</code>：<br>eval(),assert()函数导致的代码执行漏洞大多数是因为载入模块或者缓存亦或者是对变量过滤不严导致的。例如：直接把外部可控的参数直接拼接到<br>模板里面，然后调用这两个函授去当成PHP代码执行。<br>preg_replace()函数的代码执行漏洞需要满足’/e‘参数存在，因为这个函数是处理字符串的，所以漏洞出现最多的是在对字符串处理上。比如在对URL<br>HTML标签以及文章内容过滤功能。</p>
+
+      
+    </div>
+    
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/07/12/文件读取（下载，上传）/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">文件读取（下载，上传）</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/09/伪协议/" class="archive-article-date">
-  	<time datetime="2018-07-09T15:29:13.000Z" itemprop="datePublished">7月 9</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/09/伪协议/">
-        伪协议
-        
-      </a>
-    </h1>
-  
 
-        <div class="article-info info-on-left">
-          
-          
 
-          
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+<div class="ds-share share" data-thread-key="代码执行" data-title="代码执行" data-url="http://gmfdevops.com.com/2018/07/14/代码执行/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="代码执行">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
 
-    
+
+
+
 
 </div>
       <footer id="footer">
@@ -333,8 +269,8 @@
 		mathjax: true,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false
