@@ -170,6 +170,61 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Linex的简单安全配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/07/Linex的简单安全配置/" class="article-date">
+  	<time datetime="2018-09-07T11:27:25.000Z" itemprop="datePublished">2018-09-07</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/07/Linex的简单安全配置/">
+        Linex的简单安全配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于阻止地址伪装：</code>（基于iptable）<br>IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。<br>首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。<br>步骤如下：<br>（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。<br>iptables -A INPUT -i lo -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/1.png"><br>（2）为本地系统发起的连接创建规则，该规则将允许所有外出流量包通过，包括远程服务器的响应，如web站点的访问：<br>iptables -A INPUT -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/2.png"><br>（3）创建一个新链，用来存放阻止IP伪装的规则。<br>iptables -N blocked_ip<br>（4）将生成的新链插入到INPUT链中；<br>iptables -I INPUT 2 -j blocked_ip<br><img src="/2018/09/07/Linex的简单安全配置/3.png"><br><img src="/2018/09/07/Linex的简单安全配置/4.png"><br>（5）将需要阻止的虚假IP地址规则插入到blocked_ip中,通过该规则可以阻塞该地址的连接。<br>iptables -A blocked_ip -s 192.168.1.2 -j DROP<br><img src="/2018/09/07/Linex的简单安全配置/5.png"><br>其次，通过/etc/host.conf文件阻止IP欺骗。打开该文件在文件中添加一下几行内容：<br>order hosts,bind<br>multi on<br>nospoof on<br>这里 “nospoof on”选项表示开启IP地址的比较操作，本地主机通过主机名查找对应的ip地址，并将查到的IP地址与数据包中的源IP比较，如果不一致，这说明<br>该IP为伪造ip，系统会发出虚假IP地址警告！</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-代码执行" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -538,13 +593,13 @@
 <li><p>编程语言</p>
 <ul>
 <li>脚本语言<ul>
-<li>php<img src="/2018/04/14/博客常用语法语法/456.png" title="这是一个博客的图片说明">
-</li>
+<li>php</li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
+<img src="/2018/04/14/博客常用语法语法/456.png" title="这是一个博客的图片说明">
 
       
     </div>
