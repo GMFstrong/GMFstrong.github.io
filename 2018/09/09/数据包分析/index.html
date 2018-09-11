@@ -3,29 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Linex的简单安全配置 | ConqUeroR</title>
+  <title>数据包分析 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="关于阻止地址伪装：（基于iptable）IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。步骤如下：（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。iptabl">
+  <meta name="description" content="数据包分析：就是数据包嗅探或者协议分析，是指捕获并解析网络上在线传输数据的过程。目的是为了更详细的了解网络上发生的事情。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linex的简单安全配置">
-<meta property="og:url" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/index.html">
+<meta property="og:title" content="数据包分析">
+<meta property="og:url" content="http://gmfdevops.com.com/2018/09/09/数据包分析/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="关于阻止地址伪装：（基于iptable）IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。步骤如下：（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。iptabl">
+<meta property="og:description" content="数据包分析：就是数据包嗅探或者协议分析，是指捕获并解析网络上在线传输数据的过程。目的是为了更详细的了解网络上发生的事情。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/1.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/2.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/3.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/4.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/5.png">
-<meta property="og:updated_time" content="2018-09-07T12:48:24.657Z">
+<meta property="og:updated_time" content="2018-09-09T05:52:38.913Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linex的简单安全配置">
-<meta name="twitter:description" content="关于阻止地址伪装：（基于iptable）IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。步骤如下：（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。iptabl">
-<meta name="twitter:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/1.png">
+<meta name="twitter:title" content="数据包分析">
+<meta name="twitter:description" content="数据包分析：就是数据包嗅探或者协议分析，是指捕获并解析网络上在线传输数据的过程。目的是为了更详细的了解网络上发生的事情。">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -175,11 +169,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-Linex的简单安全配置" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-数据包分析" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2018/09/07/Linex的简单安全配置/" class="article-date">
-  	<time datetime="2018-09-07T11:27:25.000Z" itemprop="datePublished">2018-09-07</time>
+      <a href="/2018/09/09/数据包分析/" class="article-date">
+  	<time datetime="2018-09-09T05:47:11.000Z" itemprop="datePublished">2018-09-09</time>
 </a>
     </div>
   
@@ -192,7 +186,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Linex的简单安全配置
+      数据包分析
       
     </h1>
   
@@ -210,7 +204,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><code>关于阻止地址伪装：</code>（基于iptable）<br>IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。<br>首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。<br>步骤如下：<br>（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。<br>iptables -A INPUT -i lo -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/1.png"><br>（2）为本地系统发起的连接创建规则，该规则将允许所有外出流量包通过，包括远程服务器的响应，如web站点的访问：<br>iptables -A INPUT -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/2.png"><br>（3）创建一个新链，用来存放阻止IP伪装的规则。<br>iptables -N blocked_ip<br>（4）将生成的新链插入到INPUT链中；<br>iptables -I INPUT 2 -j blocked_ip<br><img src="/2018/09/07/Linex的简单安全配置/3.png"><br><img src="/2018/09/07/Linex的简单安全配置/4.png"><br>（5）将需要阻止的虚假IP地址规则插入到blocked_ip中,通过该规则可以阻塞该地址的连接。<br>iptables -A blocked_ip -s 192.168.1.2 -j DROP<br><img src="/2018/09/07/Linex的简单安全配置/5.png"><br>其次，通过/etc/host.conf文件阻止IP欺骗。打开该文件在文件中添加一下几行内容：<br>order hosts,bind<br>multi on<br>nospoof on<br>这里 “nospoof on”选项表示开启IP地址的比较操作，本地主机通过主机名查找对应的ip地址，并将查到的IP地址与数据包中的源IP比较，如果不一致，这说明<br>该IP为伪造ip，系统会发出虚假IP地址警告！</p>
+        <p><code>数据包分析</code>：就是数据包嗅探或者协议分析，是指捕获并解析网络上在线传输数据的过程。目的是为了更详细的了解网络上发生的事情。</p>
 
       
     </div>
@@ -220,18 +214,18 @@
     
 <nav id="article-nav">
   
-    <a href="/2018/09/09/数据包分析/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2018/09/11/python扫描脚本/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          数据包分析
+          python扫描脚本
         
       </div>
     </a>
   
   
-    <a href="/2018/07/14/代码执行/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">代码执行</div>
+    <a href="/2018/09/07/Linex的简单安全配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Linex的简单安全配置</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -241,7 +235,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="Linex的简单安全配置" data-title="Linex的简单安全配置" data-url="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Linex的简单安全配置">
+<div class="ds-share share" data-thread-key="数据包分析" data-title="数据包分析" data-url="http://gmfdevops.com.com/2018/09/09/数据包分析/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="数据包分析">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
