@@ -16,13 +16,13 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="[[]]表达式与[]和test用法的选项部分是相同的，其与[]和test测试表达式的区别在于，在[[]]中可以使用通配符等进行模式匹配；并且&amp;amp;&amp;amp;、||、&amp;gt;、&amp;lt;等操作符可以应用于[[]]中，但不能应用于[]中，在[]中一般使用-a、-o、-gt（用于整数）、-lt（用于整数）等操作符代替上文提到的用于[[]]中的符号。   用[]测试变量时，如果被测试的变量不加双引号，">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://gmfdevops.com.com/2019/07/17/No1/No1/1.jpg">
-<meta property="og:image" content="http://gmfdevops.com.com/2019/07/17/No1/No1/2.jpg">
-<meta property="og:updated_time" content="2019-07-16T12:17:45.000Z">
+<meta property="og:image" content="http://gmfdevops.com.com/2019/07/17/No1/1.jpg">
+<meta property="og:image" content="http://gmfdevops.com.com/2019/07/17/No1/2.jpg">
+<meta property="og:updated_time" content="2019-07-16T12:21:10.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="No1">
 <meta name="twitter:description" content="[[]]表达式与[]和test用法的选项部分是相同的，其与[]和test测试表达式的区别在于，在[[]]中可以使用通配符等进行模式匹配；并且&amp;amp;&amp;amp;、||、&amp;gt;、&amp;lt;等操作符可以应用于[[]]中，但不能应用于[]中，在[]中一般使用-a、-o、-gt（用于整数）、-lt（用于整数）等操作符代替上文提到的用于[[]]中的符号。   用[]测试变量时，如果被测试的变量不加双引号，">
-<meta name="twitter:image" content="http://gmfdevops.com.com/2019/07/17/No1/No1/1.jpg">
+<meta name="twitter:image" content="http://gmfdevops.com.com/2019/07/17/No1/1.jpg">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -220,7 +220,7 @@
 <blockquote>
 <p>字符串不加双引号，可能会导致判断上出现逻辑错误，即使语法没问题，但是结果依然可能不对。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# var=&quot;&quot; #&lt;==将变量内容置为空。</span><br><span class="line">[root@oldboy ~]# [ -n &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0  #&lt;==有双引号。</span><br><span class="line">0 #&lt;==给变量加双引号，返回0，-n不为空时为真，因为变量内容为空，因此输出0是对的。</span><br><span class="line">[root@oldboy ~]# [ -n $var ] &amp;&amp; echo 1 || echo 0     #&lt;==去掉双引号。</span><br><span class="line">1 #&lt;==同样的表达式，不加引号和加双引号后测试的结果相反，可见加双引号的重要性。</span><br><span class="line">[root@oldboy ~]# [ -z &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==如果字符串长度为0，则</span><br><span class="line">                                                           输出1，否则输出0。</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<p><img src="./No1/1.jpg" alt="img"><br><img src="./No1/2.jpg" alt="img"></p>
+<p><img src="1.jpg" alt="img"><br><img src="2.jpg" alt="img"></p>
 
       
     </div>

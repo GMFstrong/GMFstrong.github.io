@@ -212,7 +212,7 @@
 <blockquote>
 <p>字符串不加双引号，可能会导致判断上出现逻辑错误，即使语法没问题，但是结果依然可能不对。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# var=&quot;&quot; #&lt;==将变量内容置为空。</span><br><span class="line">[root@oldboy ~]# [ -n &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0  #&lt;==有双引号。</span><br><span class="line">0 #&lt;==给变量加双引号，返回0，-n不为空时为真，因为变量内容为空，因此输出0是对的。</span><br><span class="line">[root@oldboy ~]# [ -n $var ] &amp;&amp; echo 1 || echo 0     #&lt;==去掉双引号。</span><br><span class="line">1 #&lt;==同样的表达式，不加引号和加双引号后测试的结果相反，可见加双引号的重要性。</span><br><span class="line">[root@oldboy ~]# [ -z &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==如果字符串长度为0，则</span><br><span class="line">                                                           输出1，否则输出0。</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<p><img src="./No1/1.jpg" alt="img"><br><img src="./No1/2.jpg" alt="img"></p>
+<p><img src="1.jpg" alt="img"><br><img src="2.jpg" alt="img"></p>
 
       
     </div>
