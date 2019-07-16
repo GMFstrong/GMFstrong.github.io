@@ -199,7 +199,21 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <blockquote>
+<p>[[]]����ʽ��[]��test�÷���ѡ�������ͬ�ģ�����[]��test���Ա���ʽ���������ڣ���[[]]�п���ʹ��ͨ�����Ƚ���ģʽƥ�䣻����&amp;&amp;��||��&gt;��&lt;�Ȳ���������Ӧ����[[]]�У�������Ӧ����[]�У���[]��һ��ʹ��-a��-o��-gt��������������-lt�������������Ȳ��������������ᵽ������[[]]�еķ��š�</p>
+</blockquote>
+<blockquote>
+<p>��[]���Ա���ʱ�����������Եı�������˫���ţ���ô���Խ������ܻ��ǲ���ȷ�ģ�ʾ�����£�<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# echo $oldgirl   #&lt;==����һ�������ڵı��������������Ѿ����壬����</span><br><span class="line">                                     ��ִ��unset oldgirlȡ����</span><br><span class="line">[root@oldboy ~]# [ -f $oldgirl ] &amp;&amp; echo 1 || echo 0   #&lt;==�������Ų��Ա�����</span><br><span class="line">1 #&lt;==����$oldgirl�������������ݻ�����1���߼��Ͳ�����</span><br><span class="line">[root@oldboy ~]# [ -f &quot;$oldgirl&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==�����Ų��Ա�����</span><br><span class="line">0 #&lt;==����˫���žͷ���0���߼��Ͷ��ˡ�</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>�ַ����Ƚ�ʱ���Ⱥ�����û�пո������ᵼ���жϳ����߼����󣬼�ʹ�﷨û���⣬���ǽ�����Ȼ���ܲ��ԡ�</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# [ &quot;abc&quot;=&quot;1&quot; ] &amp;&amp; echo 1||echo 0  #&lt;==���Ⱥ����˲����ո�������</span><br><span class="line">                                                         �������Ե��߼�������</span><br><span class="line">1  #&lt;==��������ʽ��������ȴ������1��</span><br><span class="line">[root@oldboy ~]# [ &quot;abc&quot; = &quot;1&quot; ] &amp;&amp; echo 1||echo 0 #&lt;==���ո��ľ���׼ȷ�ġ�</span><br><span class="line">0  #&lt;==����ʽ������������0��</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>�ַ�������˫���ţ����ܻᵼ���ж��ϳ����߼����󣬼�ʹ�﷨û���⣬���ǽ�����Ȼ���ܲ��ԡ�<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# var=&quot;&quot; #&lt;==������������Ϊ�ա�</span><br><span class="line">[root@oldboy ~]# [ -n &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0  #&lt;==��˫���š�</span><br><span class="line">0 #&lt;==��������˫���ţ�����0��-n��Ϊ��ʱΪ�棬��Ϊ��������Ϊ�գ���������0�ǶԵġ�</span><br><span class="line">[root@oldboy ~]# [ -n $var ] &amp;&amp; echo 1 || echo 0     #&lt;==ȥ��˫���š�</span><br><span class="line">1 #&lt;==ͬ���ı���ʽ���������źͼ�˫���ź����ԵĽ����෴���ɼ���˫���ŵ���Ҫ�ԡ�</span><br><span class="line">[root@oldboy ~]# [ -z &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==�����ַ�������Ϊ0����</span><br><span class="line">                                                           ����1����������0��</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><img src="1.jpg" alt="img"><br><img src="2.jpg" alt="img"></p>
+
       
     </div>
     
