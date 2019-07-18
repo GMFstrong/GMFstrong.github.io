@@ -182,10 +182,10 @@
 </nav>
       <div class="body-wrap">
   
-    <article id="post-No1" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/No1/" class="article-date">
+      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
   	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
 </a>
     </div>
@@ -199,8 +199,87 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/No1/">
-        No1
+      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
+        Linux下的桥接网卡配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br> 也可以通过修改配置文件来配置桥设备：<br>  (1)cd /etc/syscoonfig/network-scripts<br>  (2)cp ifcfg-eth0 ifcfg-br0<br>  (3)vim ifcfg-br0<br>  (4)更改其中的配置项：</p>
+<pre><code>#TYPE=Ethernet                      #改为Bridge
+#BOOTPROTO=dhcp                     #改为none
+#IPV6INIT=yes
+#DEVICE=ens33                       #改为br0
+#ONBOOT=yes
+#NM_CONTROLLED=no                   #添加该选项
+#IPADDR=192.168.1.97
+#NETMASK=255.255.255.0
+#GATEWAY=192.168.1.1
+#DNS1=
+#USERCTL=no
+</code></pre><p>  (5)vim ifcfg-ens33更改其中的配置项</p>
+<pre><code>#DEVICE=ens33
+#BOOTPROTO=none
+#NM_CONTROLLED=no                   #添加该选项
+#ONBOOT=yes
+#TYPE=Ethernet
+#BRIDHE=br0                         #指明将该设备桥接到那个设备上
+#IPV6INIT=yes
+#USERCTL=no
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-shell条件判断" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/17/shell条件判断/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/17/shell条件判断/">
+        shell条件判断
         
       </a>
     </h1>
@@ -233,6 +312,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
 
       
       <div class="clearfix"></div>
@@ -309,67 +392,6 @@
 
 
   
-    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/03/02/Linux下的桥接网卡配置/" class="article-date">
-  	<time datetime="2019-03-02T15:13:26.023Z" itemprop="datePublished">2019-03-02</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br> 也可以通过修改配置文件来配置桥设备：<br>  (1)cd /etc/syscoonfig/network-scripts<br>  (2)cp ifcfg-eth0 ifcfg-br0<br>  (3)vim ifcfg-br0<br>  (4)更改其中的配置项：</p>
-<pre><code>#TYPE=Ethernet                      #改为Bridge
-#BOOTPROTO=dhcp                     #改为none
-#IPV6INIT=yes
-#DEVICE=ens33                       #改为br0
-#ONBOOT=yes
-#NM_CONTROLLED=no                   #添加该选项
-#IPADDR=192.168.1.97
-#NETMASK=255.255.255.0
-#GATEWAY=192.168.1.1
-#DNS1=
-#USERCTL=no
-</code></pre><p>  (5)vim ifcfg-ens33更改其中的配置项</p>
-<pre><code>#DEVICE=ens33
-#BOOTPROTO=none
-#NM_CONTROLLED=no                   #添加该选项
-#ONBOOT=yes
-#TYPE=Ethernet
-#BRIDHE=br0                         #指明将该设备桥接到那个设备上
-#IPV6INIT=yes
-#USERCTL=no
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
     <article id="post-web安全-逻辑攻击类-逻辑攻击类测试" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -408,6 +430,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
 
       
       <div class="clearfix"></div>
@@ -463,6 +489,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
 
       
       <div class="clearfix"></div>
@@ -518,6 +548,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
 
       
       <div class="clearfix"></div>
@@ -581,61 +615,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
 
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-渗透测试流程" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/12/26/渗透测试流程/" class="article-date">
-  	<time datetime="2018-12-25T22:40:31.000Z" itemprop="datePublished">2018-12-26</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/26/渗透测试流程/">
-        渗透测试流程
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>学习渗透测试专业也近两年有余了，由于法律的硬性规定与道德原因，所以在平日里得到实战很少，虽然偶尔也到海外的小站看看，熟悉一下技术。但是毕竟很少做标准的渗透测试，在临近新年之际，闲来无事决定对渗透测试的标准流程做一个总结。<br>一：明确目标</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
 
       
       <div class="clearfix"></div>
@@ -692,6 +675,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
 
       
       <div class="clearfix"></div>
@@ -751,6 +738,65 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-python扫描脚本" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/11/python扫描脚本/" class="article-date">
+  	<time datetime="2018-09-11T08:51:51.000Z" itemprop="datePublished">2018-09-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/11/python扫描脚本/">
+        python扫描脚本
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>端口扫描：</code><br>最近学习python闲来无事，决定写一个Python扫描器实践一下最近的学习成果：<br>最初因为不会控制线程个数，在代码上查错了好久：<br><img src="/2018/09/11/python扫描脚本/3.png"><br>最后估计是生成线程太多，导致系统崩溃。（毕竟，底层不太了解暂时这么认为。）<br><img src="/2018/09/11/python扫描脚本/4.png"><br><img src="/2018/09/11/python扫描脚本/5.png"><br>后来改变扫描的端口数量，程序不再报错：<br><img src="/2018/09/11/python扫描脚本/6.png"><br><img src="/2018/09/11/python扫描脚本/7.png"><br>最初过于单纯，不了解多线程的可怕之处，导致自己不小心踩了坑。可是经过半天搜索学习，解决了自己这半天的单纯。<br>这次引入线程池，控制线程数量，从而解决了问题：<br>附上代码：<br><img src="/2018/09/11/python扫描脚本/1.png"><br>运行结果如下：<br><img src="/2018/09/11/python扫描脚本/2.png"></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
 
       
       <div class="clearfix"></div>
@@ -770,7 +816,7 @@
   
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </div>
