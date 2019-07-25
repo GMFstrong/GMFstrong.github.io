@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。 所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-20T03:04:37.000Z">
+<meta property="og:updated_time" content="2019-07-25T02:21:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux下添加网卡及静态网络配置">
 <meta name="twitter:description" content="无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。 所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name">
@@ -229,7 +229,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）<br>添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。</p>
-<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
+<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">GATEWAY=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -239,18 +239,9 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/07/20/vim常用技巧/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">&lt;</strong>
-      <div class="article-nav-title">
-        
-          Linux下添加网卡及静态网络配置
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/07/17/Linux下的桥接网卡配置/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Linux下的桥接网卡配置</div>
+    <a href="/2019/07/20/关于文件系统挂载的一点感悟/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">关于文件系统挂载的一点感悟</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
