@@ -190,6 +190,253 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-关于文件系统挂载的一点感悟" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/20/关于文件系统挂载的一点感悟/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/20/关于文件系统挂载的一点感悟/">
+        Linux下添加网卡及静态网络配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前两天无意中见朋友在讨论，关于不同分区挂载后，inode号相同的问题。（例如：一个Linux系统在安装时分为：/;/boot;/data;/swap几个分区挂载点）</p>
+<blockquote>
+<p>首先：用stat命令查看各个挂载点的inode号：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat /</span><br><span class="line">  File: ‘/’</span><br><span class="line">  Size: 4096      	Blocks: 8          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 128         Links: 18</span><br><span class="line">Access: (0555/dr-xr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.068000230 +0800</span><br><span class="line">Modify: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line">Change: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line"> Birth: -</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 48        	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 805h/2053d	Inode: 128         Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:etc_runtime_t:s0</span><br><span class="line">Access: 2019-07-24 20:42:41.043900505 +0800</span><br><span class="line">Modify: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line">Change: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
+<p>发现/和/date的inode号都为128。对于新手会一脸懵逼。</p>
+<blockquote>
+<p>于是乎,我们用umount卸载/date:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# umount /date/</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 6         	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 134217856   Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.112000232 +0800</span><br><span class="line">Modify: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line">Change: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
+<p>发现inode号发生了改变。至于其中原委如下：</p>
+<blockquote>
+<p>在这之前大家需要弄清楚一下几点：</p>
+</blockquote>
+<p>(1)在<strong>Linux系统</strong>下，整个 <strong>文件和目录</strong>结构是单根的倒立树状结构，我们成为目录树，而<strong>非Linux系统</strong>下整个文件系统是单根的。</p>
+<p>(2)挂载是动作，是Linux文件系统和目录树结合起来的动作。</p>
+<p>(3)挂载点，是目录非inode,该目录是进入该文件系统的入口。例如：/，/boot</p>
+<p>(4)一个目录只能挂载一个磁盘分区或设备。</p>
+<p>(5)我们在进行分区的时候，无论是ext3,ext4或其它格式的文件系统，我们划分了三个分区，分别挂载到了/;/boot;/data目录下。swap分区就另当别论了。<strong>注意以上三个目录是不同的挂载点</strong>这三个目录在作为挂载点时，是水平等价关系。</p>
+<p>(6)虽然三个分区都是ext4的文件系统，但他们是三个独立的文件系统，仅仅是格式一样而已。它们三个分区也是平行的等价关系。</p>
+<blockquote>
+<p>在弄清楚以上七点后，得出以下结论：</p>
+</blockquote>
+<pre><code>我们有三个文件系统挂载到了三个不同的目录下(挂载点)。
+</code></pre><p>所以就有了我们为啥在开始的时候，/和/data还有/boot三个目录(挂载点)的inode号相同了。不是所一个inode号只能对应一个文件吗？(linux下一切皆文件。)但他们三个确确实实是不同的三个文件。故而，这仅仅是3个相同数值的inode号而已。</p>
+<pre><code>例如：/的inode为128它是sda2分区文件系统最顶层目录的inode号。
+     /boot的inode为128它是sda1分区文件系统最顶层目录的inode号。
+</code></pre><blockquote>
+<p>此时或许你会问：如果寻找/etc/passwd文件，系统会根据/的inode号进入/的数据块寻找etc的inode号，根据etc的inode号再进入etc的数据块寻找passwd的inode号，最终找到passwd的数据内容。但是如果我们要是寻找/boot/grub文件，系统是如何从/进入/boot的呢？以为/和/boot的inode号相同啊？</p>
+</blockquote>
+<pre><code>首先，先纠正一下，系统进入/boot不是从/进入的。不要主观意识的这样认为。因为他们同为不同分区的顶级目录，如前文所诉他们在地位上是平等的。
+    如果进入/etc/passwd，通过查询挂载信息，顶级目录是/(文件系统1)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
+    如果进入/boot/gurb，通过查询挂载信息，顶级目录是/boot(文件系统2)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/20/vim常用技巧/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/20/vim常用技巧/">
+        Linux下添加网卡及静态网络配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>以只读方式打开文件：</p>
+</blockquote>
+<pre><code>vim -m filename
+</code></pre><blockquote>
+<p>在底行模式下（按“:”）</p>
+</blockquote>
+<pre><code>!command 执行命令
+r!command 读入命令的输出结果
+</code></pre><blockquote>
+<p>在命令模式下的光标跳转：</p>
+</blockquote>
+<pre><code>在当前页跳转：
+H页首    M页面中间    L页底
+^ 跳转至行首的第一个非空白字符
+0 跳转至行首 
+$ 跳转至行尾 
+
+
+行间移动：
+#G 或者扩展命令模式下:#   跳转至由第#行 
+    例如：5G 跳转到第5行
+G   最后一行 
+1G, gg 第一行 
+</code></pre><blockquote>
+<p>命令模式下的字符编辑：</p>
+</blockquote>
+<pre><code>~ 转换大小写
+删除命令：
+    x 删除光标处的字符  
+    dd：删除光标所在的行 
+    #dd 多行删除 
+    D：从当前光标位置一直删除到行尾，等同于d$ 
+复制命令(y, yank)：
+    yy：复制行 
+    #yy 复制多行 
+    Y：复制整行 
+
+粘贴命令(p, paste)： 
+    p 缓冲区存的如果为整行，则粘贴当前光标所在行的下方；否则，则粘 贴至当前光标所在处的后面
+    P 缓冲区存的如果为整行，则粘贴当前光标所在行的上方；否则，则粘 贴至当前光标所在处的前面 
+
+查找：
+    /PATTERN：从当前光标所在处向文件尾部查找     
+    ?PATTERN：从当前光标所在处向文件首部查找   
+
+撤销更改：
+    u 撤销最近的更改 
+    #u 撤销之前多次更改 
+</code></pre><blockquote>
+<p>关于vim寄存器：</p>
+</blockquote>
+<pre><code>有26个命名寄存器和1个无命名寄存器，常存放不同的剪贴版内容，可以不同会话间共享
+
+寄存器名称a，b,…,z,格式：“寄存器放在数字和命令之间如：3&quot;tyy 表示复制3行到t寄存器中   &quot;tp  表示将t寄存器内容粘贴 
+
+未指定，将使用无命名寄存器 
+
+有10个数字寄存器，用0，1，…，9表示，0存放最近复制内容，1存放最近删除内容。 当新的文本变更和删除时，1转存到2，2转存到3，以此类推。数字寄存器不能在不 同会话间共享 
+</code></pre><blockquote>
+<p>在底行模式下查找并替换:</p>
+</blockquote>
+<pre><code>查找替换中的分隔符/可替换为其它字符
+    s@/etc@/var@g 
+    s#/boot#/#i 
+i 忽略大小写 
+g 全局替换，默认情况下，每一行只替换第一次出现 
+gc 全局替换，每次替换前询问
+</code></pre><blockquote>
+<p>使用多个窗口</p>
+</blockquote>
+<pre><code>vim -o|-O FILE1 FILE2 ... 
+    -o: 水平分割 
+    -O: 垂直分割 
+在窗口间切换：Ctrl+w r
+</code></pre><blockquote>
+<p>定制vim的工作特性：</p>
+</blockquote>
+<pre><code>配置文件：永久有效
+    全局：/etc/vimrc  
+    个人：~/.vimrc 
+底行模式：当前vim进程有效 
+    (1) 行号 
+        显示：set number，简写 set nu 
+        取消显示：set nonumber, 简写 set nonu 
+    (2) 忽略字符的大小写 
+        启用：set ignorecase，简写 set ic 
+        不忽略：set noic 
+    (3) 自动缩进 
+        启用：set autoindent，简写 set ai 
+        禁用：set noai 
+    (4) 设置光标所在行的标识线 
+        启用：set cursorline，简写 set cul 
+        禁用：set nocursorline 
+    (5) 文件格式 
+        启用windows格式：set  fileformat=dos 
+        启用unix格式：set fileformat=unix 
+        简写 set ff=dos|unix 
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -708,132 +955,9 @@
 
 
   
-    <article id="post-记一次拿服务器失败的测试" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/12/11/记一次拿服务器失败的测试/" class="article-date">
-  	<time datetime="2018-12-10T23:24:17.000Z" itemprop="datePublished">2018-12-11</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/11/记一次拿服务器失败的测试/">
-        记一次拿服务器失败的测试
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <pre><code>随着天气逐渐变凉，实在不想再去图书馆充实自己的精神领域！！！但又不想荒废这大好时光，于是乎就搞搞中国宝岛的小站吧！！！
-</code></pre><p>首先打开网站主页。<br><img src="/2018/12/11/记一次拿服务器失败的测试/zy.png"><br>    如图就是一个一般的门户网站，炸一看除了产品介绍，和新闻这两项可能存在SQL注入，基本上没有什么可测得。<br>    于是乎打开Nmap，这款号称扫描之王的神器，扫了一波，扫描同时再手动测试一波看看有没有SQl注入漏洞，Nmap得到如下结果：<br><img src="/2018/12/11/记一次拿服务器失败的测试/dk.png"><br>    发现扫描结果中，只开启80和81端口。80端口就不用说了，好奇81端口是啥？于是乎打开Google，发现有点二小惊喜！哈！哈！哈！<br>    如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/phpmyadmin.png"><br>    惊不惊喜，意不意外！<br>    打开御剑开始扫描，看看能不能扫出后台，或者前辈留下的shell，亦或者开发人员遗留下来的测试文件等！基础字典没发现后台，也没发现shell。但是一个“aa.php”成功的吸引了我。没想到又是一个小惊喜！<br><img src="/2018/12/11/记一次拿服务器失败的测试/aa.png"><br>    正在为如何爆破PHPMyadmin纠结时，又发现更惊喜的了！！！主页竟然存在一个SQL注入漏洞。哈！哈！哈！<br>    于是乎就又拿出了，另一款神器SQLmap,忽然发现竟是root用户！！！今天还真是惊喜连连啊！！！毕竟MYsql的root用户在Linux中是很少见的。心想今天难道要拿到Linux的服务器了？通过SQL注入漏洞拿到MYSQL的root用户的密码，很自然的通过phpMyadmin进入数据库。<br>    如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/sql.png"><br>    经过一阵Google操作发现还是可以通过phpmyadmin拿到shell的，但是这种操作都是别的：<br><img src="/2018/12/11/记一次拿服务器失败的测试/cs.png"><br>    将“general log”改为“ON”，这一步很顺利，毫无疑问！但是在更改“general log file”时。开始衰了！！！本想通过“aa.php”获得的信息更改，可是，可是…<br><img src="/2018/12/11/记一次拿服务器失败的测试/xk.png"><br>竟然不让更改！于是乎进行另一种利用phpMyadmin拿shell的方法。结果如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/hq.png"><br>经过Google发现原来是管理员更改了配置，可以执行“show variables like ‘%secure%’”查看“secure-file_priv”的当前值。<br><img src="/2018/12/11/记一次拿服务器失败的测试/sec.png"><br>导出的数据必须是这个值得路径才可以。默认有可能是Null代表禁止导出若需要可以在my.ini中更改！更改后需要重启数据库！<br><img src="/2018/12/11/记一次拿服务器失败的测试/1.png"><br>但是不能访问啊！好气，看来运气前期用完了啊！！！<br><img src="/2018/12/11/记一次拿服务器失败的测试/2.png"><br>但是，还是学到了好多…</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-火狐浏览器优化" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/12/07/火狐浏览器优化/" class="article-date">
-  	<time datetime="2018-12-06T23:40:01.000Z" itemprop="datePublished">2018-12-07</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/07/火狐浏览器优化/">
-        火狐优化
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>无意间看到一篇博客，是关于渗透测试过程中，火狐浏览器常见插件配置的，所以在闲来无事之际，亲身实践了一波，并记录以下过程，方便以后配置安装。</p>
-<p>在渗透测试过程中，有以下插件比较常用：<br>（1）Wappalyzer<br>（2）Foxyproxy<br>（3）Cookies Manager+<br>（4）HackBar<br>（5）HtppRequester<br>（6）RESTClient<br>（7）User—Agent Swittcher<br>（8）Tampermonkey<br>（9）Tamper Data<br>（10）Tamper Icon Redux</p>
-<p>这些插件的用途如下：</p>
-<p>HackBar:一个非常简单的插件，可以帮助我们尝试不同的输入值，而无需更改或重写完整的URL。在手工检查跨站点脚本编写和注入时，我们将经常使用这种方法。它可以使用F9键激活。<br>cookie Manager+:这个附加组件允许我们查看和修改浏览器从应用程序接收到的cookie的值。<br>User-Agent Switcher:此插件允许我们修改用户代理字符串(浏览器标识符)，该字符串在发送到服务器的所有请求中。应用程序有时使用这个字符串显示或隐藏某些元素，这取决于所使用的浏览器和操作系统。<br>Tamper Data:这个附加组件能够捕获浏览器发送给服务器的任何请求，让我们有机会在应用程序的表单中引入数据并到达服务器之前修改数据。<br>Tamper Data Icon Redux只添加一个图标。<br>FoxyProxy Standard:一个非常有用的插件，允许我们使用用户提供的预设，在一次点击中改变浏览器的代理设置。Wappalyzer:这是一个用来识别网站中使用的平台和开发工具的工具。这对于提取web服务器及其使用的软件非常有用。<br>HttpRequester:使用这个插件，可以处理HTTP请求，包括get、post和put方法，并观察来自服务器的原始响应。<br>RESTClient:这基本上是一个像HTTP请求者一样的请求生成器，但主要关注REST web服务。它包括添加标题、不同的身份验证模式以及get、post、put和delete方法的选项。<br>Tampermonkey:这个插件允许我们在浏览器中安装用户脚本，并在加载之前或之后对web页面内容进行动态更改。从渗透测试的角度来看，这有助于绕过客户端控件和其他客户端代码操作。</p>
-<p>附上图片一张：<br><img src="/2018/12/07/火狐浏览器优化/1.png"></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </div>

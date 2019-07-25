@@ -3,29 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Linex的简单安全配置 | ConqUeroR</title>
+  <title>Linux下添加网卡及静态网络配置 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="关于阻止地址伪装：（基于iptable）IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。步骤如下：（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。iptabl">
+  <meta name="description" content="以只读方式打开文件：  vim -m filename  在底行模式下（按“:”）  !command 执行命令 r!command 读入命令的输出结果  在命令模式下的光标跳转：  在当前页跳转： H页首    M页面中间    L页底 ^ 跳转至行首的第一个非空白字符 0 跳转至行首  $ 跳转至行尾    行间移动： #G 或者扩展命令模式下:#   跳转至由第#行      例如：5G">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linex的简单安全配置">
-<meta property="og:url" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/index.html">
+<meta property="og:title" content="Linux下添加网卡及静态网络配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/07/20/vim常用技巧/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="关于阻止地址伪装：（基于iptable）IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。步骤如下：（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。iptabl">
+<meta property="og:description" content="以只读方式打开文件：  vim -m filename  在底行模式下（按“:”）  !command 执行命令 r!command 读入命令的输出结果  在命令模式下的光标跳转：  在当前页跳转： H页首    M页面中间    L页底 ^ 跳转至行首的第一个非空白字符 0 跳转至行首  $ 跳转至行尾    行间移动： #G 或者扩展命令模式下:#   跳转至由第#行      例如：5G">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/1.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/2.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/3.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/4.png">
-<meta property="og:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/5.png">
-<meta property="og:updated_time" content="2019-07-20T06:24:25.000Z">
+<meta property="og:updated_time" content="2019-07-25T02:14:24.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linex的简单安全配置">
-<meta name="twitter:description" content="关于阻止地址伪装：（基于iptable）IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。步骤如下：（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。iptabl">
-<meta name="twitter:image" content="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/1.png">
+<meta name="twitter:title" content="Linux下添加网卡及静态网络配置">
+<meta name="twitter:description" content="以只读方式打开文件：  vim -m filename  在底行模式下（按“:”）  !command 执行命令 r!command 读入命令的输出结果  在命令模式下的光标跳转：  在当前页跳转： H页首    M页面中间    L页底 ^ 跳转至行首的第一个非空白字符 0 跳转至行首  $ 跳转至行尾    行间移动： #G 或者扩展命令模式下:#   跳转至由第#行      例如：5G">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -195,11 +189,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-Linex的简单安全配置" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2018/09/07/Linex的简单安全配置/" class="article-date">
-  	<time datetime="2018-09-07T11:27:25.000Z" itemprop="datePublished">2018-09-07</time>
+      <a href="/2019/07/20/vim常用技巧/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
 </a>
     </div>
   
@@ -212,7 +206,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Linex的简单安全配置
+      Linux下添加网卡及静态网络配置
       
     </h1>
   
@@ -234,11 +228,105 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><code>关于阻止地址伪装：</code>（基于iptable）<br>IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。<br>首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。<br>步骤如下：<br>（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。<br>iptables -A INPUT -i lo -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/1.png"><br>（2）为本地系统发起的连接创建规则，该规则将允许所有外出流量包通过，包括远程服务器的响应，如web站点的访问：<br>iptables -A INPUT -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/2.png"><br>（3）创建一个新链，用来存放阻止IP伪装的规则。<br>iptables -N blocked_ip<br>（4）将生成的新链插入到INPUT链中；<br>iptables -I INPUT 2 -j blocked_ip<br><img src="/2018/09/07/Linex的简单安全配置/3.png"><br><img src="/2018/09/07/Linex的简单安全配置/4.png"><br>（5）将需要阻止的虚假IP地址规则插入到blocked_ip中,通过该规则可以阻塞该地址的连接。<br>iptables -A blocked_ip -s 192.168.1.2 -j DROP<br><img src="/2018/09/07/Linex的简单安全配置/5.png"><br>其次，通过/etc/host.conf文件阻止IP欺骗。打开该文件在文件中添加一下几行内容：<br>order hosts,bind<br>multi on<br>nospoof on<br>这里 “nospoof on”选项表示开启IP地址的比较操作，本地主机通过主机名查找对应的ip地址，并将查到的IP地址与数据包中的源IP比较，如果不一致，这说明<br>该IP为伪造ip，系统会发出虚假IP地址警告！</p>
-<blockquote>
-<p>关于history的一些简单优化：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HISTSIZE：命令历史记录的条数</span><br><span class="line">HISTFILE：指定历史文件，默认为~/.bash_history</span><br><span class="line">HISTFILESIZE：命令历史文件记录历史的条数</span><br><span class="line">HISTTIMEFORMAT=“%F %T “ 显示时间</span><br></pre></td></tr></table></figure></p>
+        <blockquote>
+<p>以只读方式打开文件：</p>
 </blockquote>
-<p></p>
+<pre><code>vim -m filename
+</code></pre><blockquote>
+<p>在底行模式下（按“:”）</p>
+</blockquote>
+<pre><code>!command 执行命令
+r!command 读入命令的输出结果
+</code></pre><blockquote>
+<p>在命令模式下的光标跳转：</p>
+</blockquote>
+<pre><code>在当前页跳转：
+H页首    M页面中间    L页底
+^ 跳转至行首的第一个非空白字符
+0 跳转至行首 
+$ 跳转至行尾 
+
+
+行间移动：
+#G 或者扩展命令模式下:#   跳转至由第#行 
+    例如：5G 跳转到第5行
+G   最后一行 
+1G, gg 第一行 
+</code></pre><blockquote>
+<p>命令模式下的字符编辑：</p>
+</blockquote>
+<pre><code>~ 转换大小写
+删除命令：
+    x 删除光标处的字符  
+    dd：删除光标所在的行 
+    #dd 多行删除 
+    D：从当前光标位置一直删除到行尾，等同于d$ 
+复制命令(y, yank)：
+    yy：复制行 
+    #yy 复制多行 
+    Y：复制整行 
+
+粘贴命令(p, paste)： 
+    p 缓冲区存的如果为整行，则粘贴当前光标所在行的下方；否则，则粘 贴至当前光标所在处的后面
+    P 缓冲区存的如果为整行，则粘贴当前光标所在行的上方；否则，则粘 贴至当前光标所在处的前面 
+
+查找：
+    /PATTERN：从当前光标所在处向文件尾部查找     
+    ?PATTERN：从当前光标所在处向文件首部查找   
+
+撤销更改：
+    u 撤销最近的更改 
+    #u 撤销之前多次更改 
+</code></pre><blockquote>
+<p>关于vim寄存器：</p>
+</blockquote>
+<pre><code>有26个命名寄存器和1个无命名寄存器，常存放不同的剪贴版内容，可以不同会话间共享
+
+寄存器名称a，b,…,z,格式：“寄存器放在数字和命令之间如：3&quot;tyy 表示复制3行到t寄存器中   &quot;tp  表示将t寄存器内容粘贴 
+
+未指定，将使用无命名寄存器 
+
+有10个数字寄存器，用0，1，…，9表示，0存放最近复制内容，1存放最近删除内容。 当新的文本变更和删除时，1转存到2，2转存到3，以此类推。数字寄存器不能在不 同会话间共享 
+</code></pre><blockquote>
+<p>在底行模式下查找并替换:</p>
+</blockquote>
+<pre><code>查找替换中的分隔符/可替换为其它字符
+    s@/etc@/var@g 
+    s#/boot#/#i 
+i 忽略大小写 
+g 全局替换，默认情况下，每一行只替换第一次出现 
+gc 全局替换，每次替换前询问
+</code></pre><blockquote>
+<p>使用多个窗口</p>
+</blockquote>
+<pre><code>vim -o|-O FILE1 FILE2 ... 
+    -o: 水平分割 
+    -O: 垂直分割 
+在窗口间切换：Ctrl+w r
+</code></pre><blockquote>
+<p>定制vim的工作特性：</p>
+</blockquote>
+<pre><code>配置文件：永久有效
+    全局：/etc/vimrc  
+    个人：~/.vimrc 
+底行模式：当前vim进程有效 
+    (1) 行号 
+        显示：set number，简写 set nu 
+        取消显示：set nonumber, 简写 set nonu 
+    (2) 忽略字符的大小写 
+        启用：set ignorecase，简写 set ic 
+        不忽略：set noic 
+    (3) 自动缩进 
+        启用：set autoindent，简写 set ai 
+        禁用：set noai 
+    (4) 设置光标所在行的标识线 
+        启用：set cursorline，简写 set cul 
+        禁用：set nocursorline 
+    (5) 文件格式 
+        启用windows格式：set  fileformat=dos 
+        启用unix格式：set fileformat=unix 
+        简写 set ff=dos|unix 
+</code></pre>
       
     </div>
     
@@ -247,18 +335,18 @@
     
 <nav id="article-nav">
   
-    <a href="/2018/09/11/python扫描脚本/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/07/20/关于文件系统挂载的一点感悟/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          python扫描脚本
+          Linux下添加网卡及静态网络配置
         
       </div>
     </a>
   
   
-    <a href="/2018/07/14/代码执行/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">代码执行</div>
+    <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Linux下添加网卡及静态网络配置</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -268,7 +356,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="Linex的简单安全配置" data-title="Linex的简单安全配置" data-url="http://gmfdevops.com.com/2018/09/07/Linex的简单安全配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Linex的简单安全配置">
+<div class="ds-share share" data-thread-key="vim常用技巧" data-title="Linux下添加网卡及静态网络配置" data-url="http://gmfdevops.com.com/2019/07/20/vim常用技巧/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Linux下添加网卡及静态网络配置">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
