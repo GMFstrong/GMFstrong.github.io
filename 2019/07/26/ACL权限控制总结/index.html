@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Linux下添加网卡及静态网络配置 | ConqUeroR</title>
+  <title>ACL权限控制总结 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。 所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name">
+  <meta name="description" content="在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux下添加网卡及静态网络配置">
-<meta property="og:url" content="http://gmfdevops.com.com/2019/07/20/Linux下添加网卡及静态网络配置/index.html">
+<meta property="og:title" content="ACL权限控制总结">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/07/26/ACL权限控制总结/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。 所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name">
+<meta property="og:description" content="在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-25T02:21:38.000Z">
+<meta property="og:updated_time" content="2019-07-26T12:41:17.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linux下添加网卡及静态网络配置">
-<meta name="twitter:description" content="无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。 所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name">
+<meta name="twitter:title" content="ACL权限控制总结">
+<meta name="twitter:description" content="在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -189,11 +189,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-ACL权限控制总结" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+      <a href="/2019/07/26/ACL权限控制总结/" class="article-date">
+  	<time datetime="2019-07-26T11:52:33.000Z" itemprop="datePublished">2019-07-26</time>
 </a>
     </div>
   
@@ -206,7 +206,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Linux下添加网卡及静态网络配置
+      ACL权限控制总结
       
     </h1>
   
@@ -217,7 +217,7 @@
         
         
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
+	<a class="article-category-link" href="/categories/linux/">linux</a>
 	</div>
 
 
@@ -228,8 +228,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）<br>添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。</p>
-<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">GATEWAY=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
+        <p>在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。</p>
 
       
     </div>
@@ -239,18 +238,18 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/07/20/vim常用技巧/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/07/27/Linux用户组的添加及属性的更改/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          vim常用技巧
+          Linux用户组的添加及属性的更改
         
       </div>
     </a>
   
   
-    <a href="/2019/07/20/关于文件系统挂载的一点感悟/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">关于文件系统挂载的一点感悟</div>
+    <a href="/2019/07/26/Linux文件权限总结/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Linux文件权限总结</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -260,7 +259,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="Linux下添加网卡及静态网络配置" data-title="Linux下添加网卡及静态网络配置" data-url="http://gmfdevops.com.com/2019/07/20/Linux下添加网卡及静态网络配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Linux下添加网卡及静态网络配置">
+<div class="ds-share share" data-thread-key="ACL权限控制总结" data-title="ACL权限控制总结" data-url="http://gmfdevops.com.com/2019/07/26/ACL权限控制总结/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="ACL权限控制总结">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
