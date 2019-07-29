@@ -190,6 +190,253 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-常用的文本处理工具" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/29/常用的文本处理工具/" class="article-date">
+  	<time datetime="2019-07-29T11:21:47.000Z" itemprop="datePublished">2019-07-29</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/29/常用的文本处理工具/">
+        常用的文本处理工具
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>tr的常用参数：</p>
+</blockquote>
+<pre><code>-s 删除所有重复出现字符序列，只保留第一个；即将重复出现字符串压缩为一个字符串。
+-d 删除字符串1中所有输入字符。
+-s 删除所有重复出现字符序列，只保留第一个；即将重复出现字符串压缩为一个字符串。
+-c 用字符串1中字符集的补集替换此字符集。
+
+例如：
+    [root@localhost ~]# cat /dev/urandom | tr -dc [a-zA-Z0-9[[:punct:]]]|head -c 12
+    6FS}r`M*(~P|
+-dc [a-zA-Z0-9[[:punct:]]]就是删除了标点符号和数字及字母以外的所有字符。
+</code></pre><blockquote>
+<p>cut的常用参数：</p>
+</blockquote>
+<pre><code>-d DELIMITER: 指明分隔符，默认tab 。
+-f FILEDS:       
+#: 第#个字段       
+#,#[,#]：离散的多个字段，例如1,3,6       
+#-#：连续的多个字段, 例如1-6                 
+混合使用：1-3,7 
+-c 按字符切割  --output-delimiter=STRING指定输出分隔符。
+
+例如：
+    [root@localhost ~]# cut -d: -f1,3 /etc/passwd
+        root:0
+        bin:1
+        daemon:2
+        adm:3
+        lp:4
+        sync:5
+        shutdown:6
+        halt:7
+        mail:8
+        operator:11
+        games:12
+        ftp:14
+    就是以：为为分隔符，取出第1列和第3列的数据。
+
+    root@localhost ~]# cut -d: -f1,3 --output-delimiter=+ /etc/passwd
+        root+0
+        bin+1
+        daemon+2
+        adm+3
+    就是将取出的数据以+连接。
+</code></pre><blockquote>
+<p>wc的常用参数：</p>
+</blockquote>
+<pre><code>-l 只计数行数 
+-w 只计数单词总数 
+-c 只计数字节总数 
+-m 只计数字符总数 
+-L 显示文件中最长行的长度 
+
+例如：
+    [root@localhost ~]# cut -d: -f1,3 /etc/passwd | wc -l
+    31
+</code></pre><blockquote>
+<p>sort的常用参数:</p>
+</blockquote>
+<pre><code>-r 执行反方向（由上至下）整理 
+-R 随机排序 
+-n 执行按数字大小整理 
+-f 选项忽略（fold）字符串中的字符大小写 
+-u 选项（独特，unique）删除输出中的重复行 
+-t  c 选项使用c做为字段界定符 
+-k  X 选项按照使用c字符分隔的X列来整理能够使用多次 
+</code></pre><blockquote>
+<p>uniq的常用参数：</p>
+</blockquote>
+<pre><code>-c: 显示每行重复出现的次数  
+-d: 仅显示重复过的行  
+-u: 仅显示不曾重复的行           
+注：连续且完全相同方为重复 
+常和sort 命令一起配合使用：      
+sort  userlist.txt  |  uniq  -c 
+
+例如：[root@localhost ~]# cut -d &quot; &quot; -f 1 access_log|sort |uniq -c|sort -nr|head -n 5
+4870 172.20.116.228
+3429 172.20.116.208
+2834 172.20.0.222
+2613 172.20.112.14
+2267 172.20.0.227
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Linux文件系统的特殊权限设置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/27/Linux文件系统的特殊权限设置/" class="article-date">
+  	<time datetime="2019-07-27T09:09:47.000Z" itemprop="datePublished">2019-07-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/27/Linux文件系统的特殊权限设置/">
+        Linux文件系统的特殊权限设置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="关于SUID，SGID，Sticky的介绍："><a href="#关于SUID，SGID，Sticky的介绍：" class="headerlink" title="关于SUID，SGID，Sticky的介绍："></a>关于SUID，SGID，Sticky的介绍：</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SUID只对二进制可执行程序有效</span><br><span class="line">SUID设置在目录上无意义</span><br><span class="line">权限设定：</span><br><span class="line">chmod u+s FILE</span><br><span class="line">chmod u-s FILE</span><br></pre></td></tr></table></figure>
+<pre><code>[root@localhost ~]# ll /etc/shadow
+----------. 1 root root 1305 Jul 27 10:40 /etc/shadow
+[root@localhost ~]# su - tom
+Last login: Sat Jul 27 16:27:48 CST 2019 on pts/0
+[tom@localhost ~]$ cat /etc/shadow
+cat: /etc/shadow: Permission denied
+</code></pre><blockquote>
+<p>在设置了SUID以后：</p>
+</blockquote>
+<pre><code>[root@localhost ~]# ll /usr/bin/cat
+-rwxr-xr-x. 1 root root 54048 Nov 20  2015 /usr/bin/cat
+[root@localhost ~]# chmod 4755 /usr/bin/cat
+[root@localhost ~]# ll /usr/bin/cat
+-rwsr-xr-x. 1 root root 54048 Nov 20  2015 /usr/bin/cat
+[root@localhost ~]# su - tom
+Last login: Sat Jul 27 17:15:46 CST 2019 on pts/1
+[tom@localhost ~]$ cat /etc/shadow
+root:$6$jKdGQ3pHIKpx.rHy$Z8Vvbme3U29FF36Gi6d6w2U9g1O7V8x3RMzBUv9A.sgL9QzKVfpGVPePMsA8GO7Jk61mfu6MGlO9mEb2njMdQ/::0:99999:7:::
+bin:*:16659:0:99999:7:::
+daemon:*:16659:0:99999:7:::
+adm:*:16659:0:99999:7:::
+</code></pre><p><strong><em>SUID可以让一个程序的发起者临时借用该程序属主的权限。</em></strong></p>
+<blockquote>
+<p>在设置了SGID以后：</p>
+</blockquote>
+<p><strong><em>(1)作用于二进制可执行程序，当用户执行此程序时，将会临时继承此程序所属组的权限</em></strong></p>
+<p><strong><em>(2)作用于目录，当用户在此目录下创建新文件时，文件的所属组会自动继承此目录的所属组</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-xr-x. 2 root  root     6 Jul 27 17:29 dir2</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chown :test dir2</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-xr-x. 2 root  test     6 Jul 27 17:29 dir2</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
+<p>正常情况下在dir2目录下建文件，所建文件的属组是创建文件者的主组。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost dir2]# touch f1</span><br><span class="line">[root@localhost dir2]# ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r--. 1 root root 0 Jul 27 17:33 f1</span><br></pre></td></tr></table></figure>
+<p>在针对dir2目录设置SGID以后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# chmod 2755 dir2</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-sr-x. 2 root  test    15 Jul 27 17:33 dir2</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost dir2]# touch f2</span><br><span class="line">[root@localhost dir2]# ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r--. 1 root root 0 Jul 27 17:33 f1</span><br><span class="line">-rw-r--r--. 1 root test 0 Jul 27 17:36 f2</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>在设置stikcy以后：</p>
+</blockquote>
+<p><strong><em>stikcy:作用于目录，用户只能删除自已的文件,在目录设置Sticky 位，只有文件的所有者或root可以删除该文件</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[jim@localhost dir3]$ ll</span><br><span class="line">total 0</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim1</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim2</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom1</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在正常情况下jim可以删除tom的文件，tom也可以删除jim的文件：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[jim@localhost dir3]$ rm tom1</span><br><span class="line">rm: remove write-protected regular empty file ‘tom1’? y</span><br><span class="line">[jim@localhost dir3]$ ll</span><br><span class="line">total 0</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim1</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim2</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在dir3目录设置stikcy后：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# chmod 1777 dir3</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-sr-x. 2 root  test    24 Jul 27 17:36 dir2</span><br><span class="line">drwxrwxrwt. 2 root  root    39 Jul 27 18:20 dir3</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# cd dir3/</span><br><span class="line">[root@localhost dir3]# ll</span><br><span class="line">total 0</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim1</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim2</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom2</span><br><span class="line">[root@localhost dir3]# su tom</span><br><span class="line">[tom@localhost dir3]$ rm jim1</span><br><span class="line">rm: cannot remove ‘jim1’: Operation not permitted</span><br></pre></td></tr></table></figure>
+<h2 id="设置文件或目录不能被修改："><a href="#设置文件或目录不能被修改：" class="headerlink" title="设置文件或目录不能被修改："></a>设置文件或目录不能被修改：</h2><pre><code>chattr +i 不能删除，改名，更改
+chattr +a 只能追加内容
+lsattr 显示特定属性
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-sr-x. 2 root  test    24 Jul 27 17:36 dir2</span><br><span class="line">drwxrwxrwt. 2 root  root    39 Jul 27 18:20 dir3</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# rm -rf dir1</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-sr-x. 2 root  test    24 Jul 27 17:36 dir2</span><br><span class="line">drwxrwxrwt. 2 root  root    39 Jul 27 18:20 dir3</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chattr +i dir2</span><br><span class="line">[root@localhost date]# rm -rf dir2</span><br><span class="line">rm: cannot remove ‘dir2/f1’: Permission denied</span><br><span class="line">rm: cannot remove ‘dir2/f2’: Permission denied</span><br><span class="line">[root@localhost date]# cd dir2</span><br><span class="line">[root@localhost dir2]# ls</span><br><span class="line">f1  f2</span><br><span class="line">[root@localhost dir2]# touch f3</span><br><span class="line">touch: cannot touch ‘f3’: Permission denied</span><br><span class="line">[root@localhost date]# lsattr </span><br><span class="line">---------------- ./f1.txt</span><br><span class="line">----i----------- ./dir2</span><br><span class="line">---------------- ./dir3</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Linux用户组的添加及属性的更改" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -219,7 +466,50 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <blockquote>
+<p>用户组的创建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">groupadd [OPTION]  组名</span><br><span class="line">    -g GID 指明GID号；[GID_MIN, GID_MAX]</span><br><span class="line">    -r 创建系统组</span><br><span class="line">        CentOS 6: ID&lt;500</span><br><span class="line">        CentOS 7: ID&lt;1000</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>用户组的修改</p>
+</blockquote>
+<pre><code>groupmod [OPTION]  组名
+    -n group_name: 新名字
+    -g GID: 新的GID
+</code></pre><blockquote>
+<p>用户组的删除</p>
+</blockquote>
+<pre><code>groupdel 组名
+</code></pre><blockquote>
+<p>更改和查看组成员：</p>
+</blockquote>
+<pre><code>groupmems [options] [action]
+    options：
+        -g, --group groupname 更改为指定组 (只有root)
+    actions:
+        -a, --add username 指定用户加入组
+        -d, --delete username 从组中删除用户
+        -p, --purge 从组中清除所有成员
+        -l, --list 显示组成员列表
+</code></pre><blockquote>
+<p>首先通过groupadd 组名创建一个新组。并通过groupmems -a 用户名 -g 组名添加一个用户到某个组中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# groupadd test</span><br><span class="line">[root@localhost ~]# getent group test</span><br><span class="line">test:x:1008:</span><br><span class="line">[root@localhost ~]# groupmems -a tom -g test</span><br><span class="line">[root@localhost ~]# groupmems -a jim -g test</span><br><span class="line">[root@localhost ~]# groupmems -a user1 -g test</span><br><span class="line">[root@localhost ~]# groupmems -a user2 -g test</span><br><span class="line">[root@localhost ~]# getent group test</span><br><span class="line">test:x:1008:tom,jack,jim,user1,user2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>添加删除用户到组中的另一种方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# gpasswd -a tom jim</span><br><span class="line">Adding user tom to group jim</span><br><span class="line">[root@localhost ~]# gpasswd -d tom test</span><br><span class="line">Removing user tom from group test</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>通过groupmems -l -g 组名，列出该组的成员。</p>
+</blockquote>
+<pre><code>[root@localhost ~]# groupmems -l -g test
+    tom  jack  jim  user1  user2 
+</code></pre><blockquote>
+<p>groups [OPTION].[USERNAME]  查看用户所属组列表</p>
+</blockquote>
+<pre><code>[root@localhost ~]# groups tom
+tom : tom jim
+[root@localhost ~]# id tom
+uid=1000(tom) gid=1000(tom) groups=1000(tom),1001(jim)
+</code></pre>
       
     </div>
     
@@ -277,8 +567,14 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。</p>
-
+        <p>在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">getfacl file |directory</span><br><span class="line">setfacl -m u:wang:rwx file|directory</span><br><span class="line">setfacl -m g:admins:rw file| directory</span><br><span class="line">setfacl -x u:wang file |directory</span><br><span class="line">setfacl -b file1 清除所有ACL权限</span><br><span class="line">getfacl file1 | setfacl --set-file=- file2 复制file1的acl权限给file2</span><br></pre></td></tr></table></figure></p>
+<p>mask只影响除所有者和other的之外的人和组的最大权限。</p>
+<p>mask需要与用户的权限进行逻辑与运算后，才能变成有限的权限。</p>
+<p>用户或组的设置必须存在于mask权限设定范围内才会生效。</p>
+<pre><code>--set选项会把原有的ACL项都删除，用新的替代，需要注意的是一定要包含
+UGO的设置，不能象-m一样只是添加ACL就可以
+    setfacl --set u::rw,u:wang:rw,g::r,o::- file1
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">主要的文件操作命令cp和mv都支持ACL，只是cp命令需要加上-p 参数。但是</span><br><span class="line">tar等常见的备份工具是不会保留目录和文件的ACL信息</span><br><span class="line">getfacl -R /tmp/dir1 &gt; acl.txt</span><br><span class="line">setfacl -R -b /tmp/dir1</span><br><span class="line">setfacl -R --set-file=acl.txt /tmp/dir1</span><br><span class="line">setfacl --restore acl.txt</span><br><span class="line">getfacl -R /tmp/dir1</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -336,7 +632,64 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <blockquote>
+<p>chown可以用来修改文件的属主和属组：</p>
+</blockquote>
+<pre><code>chown [OPTION]  [OWNER][:[GROUP]] 修改文件的所属主和属组。
+    -R: 递归
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 root root 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chown user1:user1 f1.txt </span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
+<pre><code>[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 root root 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
+[root@localhost dir1]# chown jim f1.txt 
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  root 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
+[root@localhost dir1]# chown :test f1.txt      #冒号后跟组名更改属组
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
+</code></pre><blockquote>
+<p>修改文件的属组：chgrp<br>    chgrp [OPTION]  GROUP FILE…<br>    chgrp [OPTION]  –reference=RFILE FILE<br>        -R 递归</p>
+</blockquote>
+<pre><code>[root@localhost dir1]# chgrp jack f3.txt 
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root jack 0 Jul 27 15:07 f3.txt
+</code></pre><p><strong><em>目录权限中，x执行权限是基本权限，若没有执行权限就无法进入该目录。目录下的文件的创建与删除取决于该目录的w写权限。</em></strong></p>
+<p><strong><em>X（大写） 只给目录x权限，不给文件x权限</em></strong></p>
+<blockquote>
+<p>修改文件权限：chmod [OPTION]  MODE[,MODE]  FILE</p>
+</blockquote>
+<p>-R 递归修改权限</p>
+<pre><code>MODE：
+修改一类用户的所有权限
+    u= g= o= ug= a= u=,g=
+修改一类用户某位或某些位权限
+    u+ u- g+ g- o+ o- a+ a- + -
+chmod [OPTION] --reference=RFILE FILE
+    参考RFILE文件的权限，将FILE的修改为同RFILE
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">-rw-r--r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chmod u=rwx,g=rw,o=r f1.txt </span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
+<pre><code>[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root jack 0 Jul 27 15:07 f3.txt
+[root@localhost dir1]# chmod u+x f3.txt 
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rwxr--r--. 1 root jack 0 Jul 27 15:07 f3.txt
+</code></pre>
       
     </div>
     
@@ -344,6 +697,10 @@
       
       
       
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
 
       
       <div class="clearfix"></div>
@@ -456,7 +813,7 @@
 <pre><code>userdel [OPTION] 用户名
     -r: 删除用户家目录以及邮件目录
 </code></pre><blockquote>
-<p>查看用户相关的id信息：</p>
+<p>查看用户相关的id信息，可以使用 id  用户名  判断用户是否存在。</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id [OPTION]... [USER]  </span><br><span class="line">    -u: 显示UID  </span><br><span class="line">    -g: 显示GID  </span><br><span class="line">    -G: 显示用户所属的组的ID  </span><br><span class="line">    -n: 显示名称，需配合ugG使用</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1),1000(tom),1002(jack),1007(user2)</span><br></pre></td></tr></table></figure>
@@ -534,162 +891,6 @@ ELOTIcFBGE01
 <p>用户家目录被删恢复方法：<br>    1.进入单用户模式<br>    2.复制/etc/skel/到/home/用户名  </p>
 </blockquote>
 
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/20/vim常用技巧/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/20/vim常用技巧/">
-        vim常用技巧
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>以只读方式打开文件：</p>
-</blockquote>
-<pre><code>vim -m filename
-</code></pre><blockquote>
-<p>在底行模式下（按“:”）</p>
-</blockquote>
-<pre><code>!command 执行命令
-r!command 读入命令的输出结果
-</code></pre><blockquote>
-<p>在命令模式下的光标跳转：</p>
-</blockquote>
-<pre><code>在当前页跳转：
-H页首    M页面中间    L页底
-^ 跳转至行首的第一个非空白字符
-0 跳转至行首 
-$ 跳转至行尾 
-
-
-行间移动：
-#G 或者扩展命令模式下:#   跳转至由第#行 
-    例如：5G 跳转到第5行
-G   最后一行 
-1G, gg 第一行 
-</code></pre><blockquote>
-<p>命令模式下的字符编辑：</p>
-</blockquote>
-<pre><code>~ 转换大小写
-删除命令：
-    x 删除光标处的字符  
-    dd：删除光标所在的行 
-    #dd 多行删除 
-    D：从当前光标位置一直删除到行尾，等同于d$ 
-复制命令(y, yank)：
-    yy：复制行 
-    #yy 复制多行 
-    Y：复制整行 
-
-粘贴命令(p, paste)： 
-    p 缓冲区存的如果为整行，则粘贴当前光标所在行的下方；否则，则粘 贴至当前光标所在处的后面
-    P 缓冲区存的如果为整行，则粘贴当前光标所在行的上方；否则，则粘 贴至当前光标所在处的前面 
-
-查找：
-    /PATTERN：从当前光标所在处向文件尾部查找     
-    ?PATTERN：从当前光标所在处向文件首部查找   
-
-撤销更改：
-    u 撤销最近的更改 
-    #u 撤销之前多次更改 
-</code></pre><blockquote>
-<p>关于vim寄存器：</p>
-</blockquote>
-<pre><code>有26个命名寄存器和1个无命名寄存器，常存放不同的剪贴版内容，可以不同会话间共享
-
-寄存器名称a，b,…,z,格式：“寄存器放在数字和命令之间如：3&quot;tyy 表示复制3行到t寄存器中   &quot;tp  表示将t寄存器内容粘贴 
-
-未指定，将使用无命名寄存器 
-
-有10个数字寄存器，用0，1，…，9表示，0存放最近复制内容，1存放最近删除内容。 当新的文本变更和删除时，1转存到2，2转存到3，以此类推。数字寄存器不能在不 同会话间共享 
-</code></pre><blockquote>
-<p>在底行模式下查找并替换:</p>
-</blockquote>
-<pre><code>查找替换中的分隔符/可替换为其它字符
-    s@/etc@/var@g 
-    s#/boot#/#i 
-i 忽略大小写 
-g 全局替换，默认情况下，每一行只替换第一次出现 
-gc 全局替换，每次替换前询问
-</code></pre><blockquote>
-<p>使用多个窗口</p>
-</blockquote>
-<pre><code>vim -o|-O FILE1 FILE2 ... 
-    -o: 水平分割 
-    -O: 垂直分割 
-在窗口间切换：Ctrl+w r
-</code></pre><blockquote>
-<p>定制vim的工作特性：</p>
-</blockquote>
-<pre><code>配置文件：永久有效
-    全局：/etc/vimrc  
-    个人：~/.vimrc 
-底行模式：当前vim进程有效 
-    (1) 行号 
-        显示：set number，简写 set nu 
-        取消显示：set nonumber, 简写 set nonu 
-    (2) 忽略字符的大小写 
-        启用：set ignorecase，简写 set ic 
-        不忽略：set noic 
-    (3) 自动缩进 
-        启用：set autoindent，简写 set ai 
-        禁用：set noai 
-    (4) 设置光标所在行的标识线 
-        启用：set cursorline，简写 set cul 
-        禁用：set nocursorline 
-    (5) 文件格式 
-        启用windows格式：set  fileformat=dos 
-        启用unix格式：set fileformat=unix 
-        简写 set ff=dos|unix 
-</code></pre>
       
     </div>
     
@@ -869,11 +1070,11 @@ gc 全局替换，每次替换前询问
 
 
   
-    <article id="post-shell条件判断" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/shell条件判断/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+      <a href="/2019/07/20/vim常用技巧/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
 </a>
     </div>
   
@@ -886,8 +1087,8 @@ gc 全局替换，每次替换前询问
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/shell条件判断/">
-        shell条件判断
+      <a class="article-title" href="/2019/07/20/vim常用技巧/">
+        vim常用技巧
         
       </a>
     </h1>
@@ -899,98 +1100,103 @@ gc 全局替换，每次替换前询问
     <div class="article-entry" itemprop="articleBody">
       
         <blockquote>
-<p>[[]]表达式与[]和test用法的选项部分是相同的，其与[]和test测试表达式的区别在于，在[[]]中可以使用通配符等进行模式匹配；并且&amp;&amp;、||、&gt;、&lt;等操作符可以应用于[[]]中，但不能应用于[]中，在[]中一般使用-a、-o、-gt（用于整数）、-lt（用于整数）等操作符代替上文提到的用于[[]]中的符号。</p>
+<p>以只读方式打开文件：</p>
 </blockquote>
-<blockquote>
-<p>用[]测试变量时，如果被测试的变量不加双引号，那么测试结果可能会是不正确的，示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# echo $oldgirl   #&lt;==这是一个不存在的变量，如果读者已经定义，则可</span><br><span class="line">                                     以执行unset oldgirl取消。</span><br><span class="line">[root@oldboy ~]# [ -f $oldgirl ] &amp;&amp; echo 1 || echo 0   #&lt;==不加引号测试变量。</span><br><span class="line">1 #&lt;==明明$oldgirl变量不存在内容还返回1，逻辑就不对了</span><br><span class="line">[root@oldboy ~]# [ -f &quot;$oldgirl&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==加引号测试变量。</span><br><span class="line">0 #&lt;==加了双引号就返回0，逻辑就对了。</span><br></pre></td></tr></table></figure></p>
+<pre><code>vim -m filename
+</code></pre><blockquote>
+<p>在底行模式下（按“:”）</p>
 </blockquote>
-<blockquote>
-<p>字符串比较时若等号两端没有空格，则会导致判断出现逻辑错误，即使语法没问题，但是结果依然可能不对。</p>
+<pre><code>!command 执行命令
+r!command 读入命令的输出结果
+</code></pre><blockquote>
+<p>在命令模式下的光标跳转：</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# [ &quot;abc&quot;=&quot;1&quot; ] &amp;&amp; echo 1||echo 0  #&lt;==若等号两端不带空格，则会</span><br><span class="line">                                                         出现明显的逻辑错误。</span><br><span class="line">1  #&lt;==明明表达式不成立，却输出了1。</span><br><span class="line">[root@oldboy ~]# [ &quot;abc&quot; = &quot;1&quot; ] &amp;&amp; echo 1||echo 0 #&lt;==带空格的就是准确的。</span><br><span class="line">0  #&lt;==表达式不成立，输出0。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>字符串不加双引号，可能会导致判断上出现逻辑错误，即使语法没问题，但是结果依然可能不对。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# var=&quot;&quot; #&lt;==将变量内容置为空。</span><br><span class="line">[root@oldboy ~]# [ -n &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0  #&lt;==有双引号。</span><br><span class="line">0 #&lt;==给变量加双引号，返回0，-n不为空时为真，因为变量内容为空，因此输出0是对的。</span><br><span class="line">[root@oldboy ~]# [ -n $var ] &amp;&amp; echo 1 || echo 0     #&lt;==去掉双引号。</span><br><span class="line">1 #&lt;==同样的表达式，不加引号和加双引号后测试的结果相反，可见加双引号的重要性。</span><br><span class="line">[root@oldboy ~]# [ -z &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==如果字符串长度为0，则</span><br><span class="line">                                                           输出1，否则输出0。</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
+<pre><code>在当前页跳转：
+H页首    M页面中间    L页底
+^ 跳转至行首的第一个非空白字符
+0 跳转至行首 
+$ 跳转至行尾 
+
+
+行间移动：
+#G 或者扩展命令模式下:#   跳转至由第#行 
+    例如：5G 跳转到第5行
+G   最后一行 
+1G, gg 第一行 
+</code></pre><blockquote>
+<p>命令模式下的字符编辑：</p>
 </blockquote>
-<p><img src="1.jpg" alt="img"><br><img src="2.jpg" alt="img"></p>
+<pre><code>~ 转换大小写
+删除命令：
+    x 删除光标处的字符  
+    dd：删除光标所在的行 
+    #dd 多行删除 
+    D：从当前光标位置一直删除到行尾，等同于d$ 
+复制命令(y, yank)：
+    yy：复制行 
+    #yy 复制多行 
+    Y：复制整行 
 
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/shell/">shell</a>
-	</div>
+粘贴命令(p, paste)： 
+    p 缓冲区存的如果为整行，则粘贴当前光标所在行的下方；否则，则粘 贴至当前光标所在处的后面
+    P 缓冲区存的如果为整行，则粘贴当前光标所在行的上方；否则，则粘 贴至当前光标所在处的前面 
 
+查找：
+    /PATTERN：从当前光标所在处向文件尾部查找     
+    ?PATTERN：从当前光标所在处向文件首部查找   
 
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
+撤销更改：
+    u 撤销最近的更改 
+    #u 撤销之前多次更改 
+</code></pre><blockquote>
+<p>关于vim寄存器：</p>
+</blockquote>
+<pre><code>有26个命名寄存器和1个无命名寄存器，常存放不同的剪贴版内容，可以不同会话间共享
 
+寄存器名称a，b,…,z,格式：“寄存器放在数字和命令之间如：3&quot;tyy 表示复制3行到t寄存器中   &quot;tp  表示将t寄存器内容粘贴 
 
+未指定，将使用无命名寄存器 
 
-
-
-
-
-  
-    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
-        Linux下的桥接网卡配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br> 也可以通过修改配置文件来配置桥设备：<br>  (1)cd /etc/syscoonfig/network-scripts<br>  (2)cp ifcfg-eth0 ifcfg-br0<br>  (3)vim ifcfg-br0<br>  (4)更改其中的配置项：</p>
-<pre><code>#TYPE=Ethernet                      #改为Bridge
-#BOOTPROTO=dhcp                     #改为none
-#IPV6INIT=yes
-#DEVICE=ens33                       #改为br0
-#ONBOOT=yes
-#NM_CONTROLLED=no                   #添加该选项
-#IPADDR=192.168.1.97
-#NETMASK=255.255.255.0
-#GATEWAY=192.168.1.1
-#DNS1=
-#USERCTL=no
-</code></pre><p>  (5)vim ifcfg-ens33更改其中的配置项</p>
-<pre><code>#DEVICE=ens33
-#BOOTPROTO=none
-#NM_CONTROLLED=no                   #添加该选项
-#ONBOOT=yes
-#TYPE=Ethernet
-#BRIDHE=br0                         #指明将该设备桥接到那个设备上
-#IPV6INIT=yes
-#USERCTL=no
+有10个数字寄存器，用0，1，…，9表示，0存放最近复制内容，1存放最近删除内容。 当新的文本变更和删除时，1转存到2，2转存到3，以此类推。数字寄存器不能在不 同会话间共享 
+</code></pre><blockquote>
+<p>在底行模式下查找并替换:</p>
+</blockquote>
+<pre><code>查找替换中的分隔符/可替换为其它字符
+    s@/etc@/var@g 
+    s#/boot#/#i 
+i 忽略大小写 
+g 全局替换，默认情况下，每一行只替换第一次出现 
+gc 全局替换，每次替换前询问
+</code></pre><blockquote>
+<p>使用多个窗口</p>
+</blockquote>
+<pre><code>vim -o|-O FILE1 FILE2 ... 
+    -o: 水平分割 
+    -O: 垂直分割 
+在窗口间切换：Ctrl+w r
+</code></pre><blockquote>
+<p>定制vim的工作特性：</p>
+</blockquote>
+<pre><code>配置文件：永久有效
+    全局：/etc/vimrc  
+    个人：~/.vimrc 
+底行模式：当前vim进程有效 
+    (1) 行号 
+        显示：set number，简写 set nu 
+        取消显示：set nonumber, 简写 set nonu 
+    (2) 忽略字符的大小写 
+        启用：set ignorecase，简写 set ic 
+        不忽略：set noic 
+    (3) 自动缩进 
+        启用：set autoindent，简写 set ai 
+        禁用：set noai 
+    (4) 设置光标所在行的标识线 
+        启用：set cursorline，简写 set cul 
+        禁用：set nocursorline 
+    (5) 文件格式 
+        启用windows格式：set  fileformat=dos 
+        启用unix格式：set fileformat=unix 
+        简写 set ff=dos|unix 
 </code></pre>
       
     </div>

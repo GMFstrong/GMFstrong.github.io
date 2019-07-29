@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="用户创建（创建用户时，会从默认的/etc/skel/目录下复制目录结构到所创建用户的家目录下。默认的用户创建配置文件在/etc/default/useradd）  123456789[root@localhost home]# cat /etc/default/useradd # useradd defaults fileGROUP=100HOME=/homeINACTIVE=-1EXPIRE=">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-27T02:48:30.000Z">
+<meta property="og:updated_time" content="2019-07-27T05:37:47.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux用户添加及属性修改">
 <meta name="twitter:description" content="用户创建（创建用户时，会从默认的/etc/skel/目录下复制目录结构到所创建用户的家目录下。默认的用户创建配置文件在/etc/default/useradd）  123456789[root@localhost home]# cat /etc/default/useradd # useradd defaults fileGROUP=100HOME=/homeINACTIVE=-1EXPIRE=">
@@ -294,7 +294,7 @@
 <pre><code>userdel [OPTION] 用户名
     -r: 删除用户家目录以及邮件目录
 </code></pre><blockquote>
-<p>查看用户相关的id信息：</p>
+<p>查看用户相关的id信息，可以使用 id  用户名  判断用户是否存在。</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id [OPTION]... [USER]  </span><br><span class="line">    -u: 显示UID  </span><br><span class="line">    -g: 显示GID  </span><br><span class="line">    -G: 显示用户所属的组的ID  </span><br><span class="line">    -n: 显示名称，需配合ugG使用</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1),1000(tom),1002(jack),1007(user2)</span><br></pre></td></tr></table></figure>

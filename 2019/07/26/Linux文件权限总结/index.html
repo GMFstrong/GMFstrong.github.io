@@ -9,17 +9,17 @@
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="From Zero to the DevOps">
+  <meta name="description" content="chown可以用来修改文件的属主和属组：  chown [OPTION]  [OWNER][:[GROUP]] 修改文件的所属主和属组。     -R: 递归 1234567[root@localhost date]# lltotal 4-rw-r--r--. 1 root root 1162 Jul 26 20:46 f1.txt[root@localhost date]# chown use">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux文件权限总结">
 <meta property="og:url" content="http://gmfdevops.com.com/2019/07/26/Linux文件权限总结/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="From Zero to the DevOps">
+<meta property="og:description" content="chown可以用来修改文件的属主和属组：  chown [OPTION]  [OWNER][:[GROUP]] 修改文件的所属主和属组。     -R: 递归 1234567[root@localhost date]# lltotal 4-rw-r--r--. 1 root root 1162 Jul 26 20:46 f1.txt[root@localhost date]# chown use">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-26T11:19:22.065Z">
+<meta property="og:updated_time" content="2019-07-27T09:08:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux文件权限总结">
-<meta name="twitter:description" content="From Zero to the DevOps">
+<meta name="twitter:description" content="chown可以用来修改文件的属主和属组：  chown [OPTION]  [OWNER][:[GROUP]] 修改文件的所属主和属组。     -R: 递归 1234567[root@localhost date]# lltotal 4-rw-r--r--. 1 root root 1162 Jul 26 20:46 f1.txt[root@localhost date]# chown use">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -216,6 +216,10 @@
       <div class="article-info article-info-post">
         
         
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
 
         
         <div class="clearfix"></div>
@@ -224,7 +228,64 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <blockquote>
+<p>chown可以用来修改文件的属主和属组：</p>
+</blockquote>
+<pre><code>chown [OPTION]  [OWNER][:[GROUP]] 修改文件的所属主和属组。
+    -R: 递归
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 root root 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chown user1:user1 f1.txt </span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
+<pre><code>[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 root root 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
+[root@localhost dir1]# chown jim f1.txt 
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  root 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
+[root@localhost dir1]# chown :test f1.txt      #冒号后跟组名更改属组
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
+</code></pre><blockquote>
+<p>修改文件的属组：chgrp<br>    chgrp [OPTION]  GROUP FILE…<br>    chgrp [OPTION]  –reference=RFILE FILE<br>        -R 递归</p>
+</blockquote>
+<pre><code>[root@localhost dir1]# chgrp jack f3.txt 
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root jack 0 Jul 27 15:07 f3.txt
+</code></pre><p><strong><em>目录权限中，x执行权限是基本权限，若没有执行权限就无法进入该目录。目录下的文件的创建与删除取决于该目录的w写权限。</em></strong></p>
+<p><strong><em>X（大写） 只给目录x权限，不给文件x权限</em></strong></p>
+<blockquote>
+<p>修改文件权限：chmod [OPTION]  MODE[,MODE]  FILE</p>
+</blockquote>
+<p>-R 递归修改权限</p>
+<pre><code>MODE：
+修改一类用户的所有权限
+    u= g= o= ug= a= u=,g=
+修改一类用户某位或某些位权限
+    u+ u- g+ g- o+ o- a+ a- + -
+chmod [OPTION] --reference=RFILE FILE
+    参考RFILE文件的权限，将FILE的修改为同RFILE
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">-rw-r--r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chmod u=rwx,g=rw,o=r f1.txt </span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
+<pre><code>[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rw-r--r--. 1 root jack 0 Jul 27 15:07 f3.txt
+[root@localhost dir1]# chmod u+x f3.txt 
+[root@localhost dir1]# ll
+total 4
+-rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
+-rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
+-rwxr--r--. 1 root jack 0 Jul 27 15:07 f3.txt
+</code></pre>
       
     </div>
     

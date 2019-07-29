@@ -9,17 +9,17 @@
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="From Zero to the DevOps">
+  <meta name="description" content="用户组的创建：  12345groupadd [OPTION]  组名    -g GID 指明GID号；[GID_MIN, GID_MAX]    -r 创建系统组        CentOS 6: ID&amp;lt;500        CentOS 7: ID&amp;lt;1000  用户组的修改  groupmod [OPTION]  组名     -n group_name: 新名字     -g">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux用户组的添加及属性的更改">
 <meta property="og:url" content="http://gmfdevops.com.com/2019/07/27/Linux用户组的添加及属性的更改/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="From Zero to the DevOps">
+<meta property="og:description" content="用户组的创建：  12345groupadd [OPTION]  组名    -g GID 指明GID号；[GID_MIN, GID_MAX]    -r 创建系统组        CentOS 6: ID&amp;lt;500        CentOS 7: ID&amp;lt;1000  用户组的修改  groupmod [OPTION]  组名     -n group_name: 新名字     -g">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-27T02:46:54.000Z">
+<meta property="og:updated_time" content="2019-07-27T05:36:10.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux用户组的添加及属性的更改">
-<meta name="twitter:description" content="From Zero to the DevOps">
+<meta name="twitter:description" content="用户组的创建：  12345groupadd [OPTION]  组名    -g GID 指明GID号；[GID_MIN, GID_MAX]    -r 创建系统组        CentOS 6: ID&amp;lt;500        CentOS 7: ID&amp;lt;1000  用户组的修改  groupmod [OPTION]  组名     -n group_name: 新名字     -g">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -228,7 +228,50 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <blockquote>
+<p>用户组的创建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">groupadd [OPTION]  组名</span><br><span class="line">    -g GID 指明GID号；[GID_MIN, GID_MAX]</span><br><span class="line">    -r 创建系统组</span><br><span class="line">        CentOS 6: ID&lt;500</span><br><span class="line">        CentOS 7: ID&lt;1000</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>用户组的修改</p>
+</blockquote>
+<pre><code>groupmod [OPTION]  组名
+    -n group_name: 新名字
+    -g GID: 新的GID
+</code></pre><blockquote>
+<p>用户组的删除</p>
+</blockquote>
+<pre><code>groupdel 组名
+</code></pre><blockquote>
+<p>更改和查看组成员：</p>
+</blockquote>
+<pre><code>groupmems [options] [action]
+    options：
+        -g, --group groupname 更改为指定组 (只有root)
+    actions:
+        -a, --add username 指定用户加入组
+        -d, --delete username 从组中删除用户
+        -p, --purge 从组中清除所有成员
+        -l, --list 显示组成员列表
+</code></pre><blockquote>
+<p>首先通过groupadd 组名创建一个新组。并通过groupmems -a 用户名 -g 组名添加一个用户到某个组中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# groupadd test</span><br><span class="line">[root@localhost ~]# getent group test</span><br><span class="line">test:x:1008:</span><br><span class="line">[root@localhost ~]# groupmems -a tom -g test</span><br><span class="line">[root@localhost ~]# groupmems -a jim -g test</span><br><span class="line">[root@localhost ~]# groupmems -a user1 -g test</span><br><span class="line">[root@localhost ~]# groupmems -a user2 -g test</span><br><span class="line">[root@localhost ~]# getent group test</span><br><span class="line">test:x:1008:tom,jack,jim,user1,user2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>添加删除用户到组中的另一种方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# gpasswd -a tom jim</span><br><span class="line">Adding user tom to group jim</span><br><span class="line">[root@localhost ~]# gpasswd -d tom test</span><br><span class="line">Removing user tom from group test</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>通过groupmems -l -g 组名，列出该组的成员。</p>
+</blockquote>
+<pre><code>[root@localhost ~]# groupmems -l -g test
+    tom  jack  jim  user1  user2 
+</code></pre><blockquote>
+<p>groups [OPTION].[USERNAME]  查看用户所属组列表</p>
+</blockquote>
+<pre><code>[root@localhost ~]# groups tom
+tom : tom jim
+[root@localhost ~]# id tom
+uid=1000(tom) gid=1000(tom) groups=1000(tom),1001(jim)
+</code></pre>
       
     </div>
     
@@ -236,6 +279,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2019/07/27/Linux文件系统的特殊权限设置/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Linux文件系统的特殊权限设置
+        
+      </div>
+    </a>
   
   
     <a href="/2019/07/26/ACL权限控制总结/" id="article-nav-older" class="article-nav-link-wrap">
