@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>文本处理-sed | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="sed作为三剑客之一，在处理文本特别是在更改配置文件时特别方便，它的工作机制和grep类似，都是逐行处理文件，不同的时sed会事先将需要处理的行读入临时缓冲区（模式空间），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕，然后读入下行，执行下一个循环。  sed命令的用法：  sed 选项 &amp;apos;脚本script&amp;apos; 目标文件  常用选项：-n  不输出模式空间">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文本处理-sed">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/07/17/文本处理-sed/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="sed作为三剑客之一，在处理文本特别是在更改配置文件时特别方便，它的工作机制和grep类似，都是逐行处理文件，不同的时sed会事先将需要处理的行读入临时缓冲区（模式空间），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕，然后读入下行，执行下一个循环。  sed命令的用法：  sed 选项 &amp;apos;脚本script&amp;apos; 目标文件  常用选项：-n  不输出模式空间">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-04T05:33:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="文本处理-sed">
+<meta name="twitter:description" content="sed作为三剑客之一，在处理文本特别是在更改配置文件时特别方便，它的工作机制和grep类似，都是逐行处理文件，不同的时sed会事先将需要处理的行读入临时缓冲区（模式空间），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕，然后读入下行，执行下一个循环。  sed命令的用法：  sed 选项 &amp;apos;脚本script&amp;apos; 目标文件  常用选项：-n  不输出模式空间">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux运维</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux运维</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-文本处理-sed" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/17/文本处理-sed/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      文本处理-sed
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>sed作为三剑客之一，在处理文本特别是在更改配置文件时特别方便，它的工作机制和grep类似，都是逐行处理文件，不同的时sed会事先将需要处理的行读入临时缓冲区（模式空间），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕，然后读入下行，执行下一个循环。</em></strong></p>
+<blockquote>
+<p>sed命令的用法：</p>
+</blockquote>
+<pre><code>sed 选项 &apos;脚本script&apos; 目标文件
+</code></pre><blockquote>
+<p>常用选项：-n</p>
+</blockquote>
+<pre><code>不输出模式空间的内容到屏幕上。场合&apos;script&apos;中的“p”命令配合。
+</code></pre><blockquote>
+<p>效果如下:</p>
+</blockquote>
+<pre><code>[root@localhost ~]#sed &apos;p&apos; /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+</code></pre><p><strong><em>在没有-n选项时，会打印两次</em></strong></p>
+<pre><code>[root@localhost ~]#sed -n &apos;p&apos; /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+</code></pre><p><strong><em>因为默认会将模式空间输出的行一次，‘p’命令又会将模式匹配的行输出一次，故而会输出两次。</em></strong></p>
+<pre><code>[root@localhost ~]#sed  &apos;/^root/p&apos; /etc/passwd  
+root:x:0:0:root:/root:/bin/bash
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+</code></pre><blockquote>
+<p>常用选项：-i.bak -i</p>
+</blockquote>
+<pre><code>&quot;-i.bak&quot;会在原文件中更改模式匹配到的行（更改原文件），同时并复制原文件并在原文件名后加上“.bak”的后缀。
+&quot;-i&quot;选项不会备份原文件。
+</code></pre><p>例如：</p>
+<pre><code>[root@localhost date]#sed -i.bak &apos;/^jim/a +++++++++++++++&apos; passwd 
+[root@localhost date]#ls
+access_log  fstab  passwd  passwd.bak  script
+[root@localhost date]#cat passwd
+jim:x:1001:1001::/home/jim:/bin/bash
++++++++++++++++
+jack:x:1002:1002::/home/jack:/bin/bash
+nginx:x:995:993::/home/nginx:/sbin/nologin
+user1:x:1005:1005:This is test!:/home/user1:/sbin/csh
+</code></pre><p><strong><em>在原文件做出修改并备份原文件，其中‘a’命令为在匹配到的模式所在的行后边追加一行+++++++</em></strong></p>
+<blockquote>
+<p>常用选项： -r</p>
+</blockquote>
+<pre><code>支持使用正则表达式。
+</code></pre><p>例如：</p>
+<pre><code>[root@localhost date]#sed -r &apos;s/^(SELINUX=)disabled/\1enforcing/&apos; seconfig 
+
+ # This file controls the state of SELinux on the system.
+ # SELINUX= can take one of these three values:
+ #     enforcing - SELinux security policy is enforced.
+ #     permissive - SELinux prints warnings instead of enforcing.
+ #     disabled - No SELinux policy is loaded.
+ SELINUX=enforcing
+ # SELINUXTYPE= can take one of three two values: 
+</code></pre><p><strong><em>由于没有使用“-i”选项这里并没有对原文件做出修改。”s/1/2/“命令是搜索1处的内容并替换为2处的内容。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">替换标记：</span><br><span class="line">g 行内全局替换</span><br><span class="line">p 显示替换成功的行</span><br><span class="line">w /PATH/FILE 将替换成功的行保存至文件中</span><br></pre></td></tr></table></figure></p>
+<pre><code>[root@localhost date]#sed &apos;s/root/@@@@@@@/g&apos; passwd
+@@@@@@@:x:0:0:@@@@@@@:/@@@@@@@:/bin/bash
+</code></pre><p>其他选项如下：</p>
+<pre><code>-e 多点编辑
+-f /PATH/SCRIPT_FILE 从指定文件中读取编辑脚本
+</code></pre><p>以上是有关选项的介绍下面介绍一下有关’script(命令的介绍)’：</p>
+<blockquote>
+<p>不给地址，默认对全文处理。如下：（由于没有使用-n默认打印两次）</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed &apos;p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>单地址,’#’代表数字，’$’打印最后一行，’/正则表达式/‘打印匹配到到的行。（在不使用-n选项的情况下，会将进入模式空间的行也打印出来，所以结果如下：）</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed  &apos;3p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;$p&apos; passwd  </span><br><span class="line">alice:x:1008:1013::/home/alice:/bin/bash</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>地址范围：’n,m’ 打印第n到第m之间的行，’n,+m’打印第n行开始之后m行之后的内容，’/正则1/,/正则2/‘打印匹配两个正则之间的行，’n，/正则/‘打印第n行到正则匹配到的之间的所有行。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;3,5p&apos; passwd</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;3,+5p&apos; passwd</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br><span class="line">shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown</span><br><span class="line">halt:x:7:0:halt:/sbin:/sbin/halt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^b/,/^o/p&apos; passwd </span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br><span class="line">shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown</span><br><span class="line">halt:x:7:0:halt:/sbin:/sbin/halt</span><br><span class="line">mail:x:8:12:mail:/var/spool/mail:/sbin/nologin</span><br><span class="line">operator:x:11:0:operator:/root:/sbin/nologin</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;2,/^sync/p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>‘~’：步进，’1~2’打印奇数行，’2~2’打印偶数行。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#seq 10 | sed -n &apos;1~2p&apos;</span><br><span class="line">1</span><br><span class="line">3</span><br><span class="line">5</span><br><span class="line">7</span><br><span class="line">9</span><br></pre></td></tr></table></figure>
+<p><strong><em>以上命令是有关地址控制的，下面介绍一下常用的编辑命令</em></strong></p>
+<blockquote>
+<p>p,a命令在此前已经用过，也做过介绍。</p>
+</blockquote>
+<pre><code>p 打印当前模式空间内容，追加到默认输出之后。
+a [\]text 在指定行后面追加文本，支持使用\n实现多行追加
+i [\]text 在行前面插入文本
+= 为模式空间中的行打印行号
+! 模式空间中匹配行取反处理
+c [\]text 替换行为单行或多行文本
+w /path/file 保存模式匹配的行至指定文件
+r /path/file 读取指定文件的文本至模式空间中匹配到的行后
+</code></pre><p>下面对 ‘i’，‘=’，‘!’几个常用命令举例：</p>
+<blockquote>
+<p>在第二行之前追加“=============”</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed &apos;2i=============&apos; passwd </span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">=============</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>显示模式匹配行的行号：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^jim/=&apos; passwd</span><br><span class="line">24</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>打印没有被匹配到的行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/!p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/07/17/Linux下的桥接网卡配置/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Linux下的桥接网卡配置
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/07/17/文件查找_locate-find/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">文件查找_locate-find</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="文本处理-sed" data-title="文本处理-sed" data-url="http://gmfdevops.com.com/2019/07/17/文本处理-sed/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="文本处理-sed">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

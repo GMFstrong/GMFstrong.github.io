@@ -190,6 +190,94 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-关于shell脚本通过相对路径调用其它脚本失败的问题解决" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/04/关于shell脚本通过相对路径调用其它脚本失败的问题解决/" class="article-date">
+  	<time datetime="2019-08-04T05:30:14.000Z" itemprop="datePublished">2019-08-04</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/04/关于shell脚本通过相对路径调用其它脚本失败的问题解决/">
+        关于shell脚本通过相对路径调用其它脚本失败的问题解决
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题"><a href="#解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题" class="headerlink" title="解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题"></a>解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题</h1><blockquote>
+<p>先附上我个人的测试脚本：<br>（1）：在/data/script/目录下创建installmenu.sh主脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">cat &lt;&lt; ENF</span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">ENF</span><br><span class="line">read -p &quot;Please input you want install app:&quot; app</span><br><span class="line">case $app in</span><br><span class="line">1)</span><br><span class="line">    . ./app/apache.sh</span><br><span class="line">    ;;</span><br><span class="line">2)</span><br><span class="line">    . ./app/nginx.sh</span><br><span class="line">    ;;</span><br><span class="line">3)</span><br><span class="line">    . ./app/mysql.sh</span><br><span class="line">    ;;</span><br><span class="line">4)</span><br><span class="line">    . ./app/tomcat.sh</span><br><span class="line">    ;;</span><br><span class="line">5)</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">*)</span><br><span class="line">    echo &quot;Please input 1-5!!!&quot;</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>再在/data/script/app/目录下创建4个子脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Nginx installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Nginx install finished!!!&quot; </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Apache installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Apache install finished!!!&quot; </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Tomcat installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Tomcat install finished!!!&quot; </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Mysql installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Mysql install finished!!!&quot;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>以上是通过相对路径的方法包含子脚本的。</em></strong></p>
+<blockquote>
+<p>会出现如下问题：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost script]#bash installmenu.sh </span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">Please input you want install app:1</span><br><span class="line">Apache installing ...</span><br><span class="line">Apache install finished!!!</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>在installmenu.sh所在目录执行不会出现任何问题。但是如果在其它位置执行该主脚本会出现如下问题：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#bash /data/script/installmenu.sh </span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">Please input you want install app:1</span><br><span class="line">/data/script/installmenu.sh: line 25: ./app/apache.sh: No such file or directory</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>如上所示，报错：No such file or directory。若要深究其原因的话就是主脚本（installmenu.sh）在哪里执行，子脚本中的相对路径就是相对于哪里。本例中话就是在“/root”路径下找“app/apache.sh”文件。因为“/root”下没有该文件夹，故而报错。</em></strong></p>
+<blockquote>
+<p>以上问题有两种常用的解决方法（还有其他方法）这里仅给出两种常用且容易理解的：</p>
+</blockquote>
+<p>（1）将子脚本中的相对路径改为绝对路径。这种方法比较简单，是处理这类问题的常用方法。但是缺陷在于如若将脚本更改了环境（换到另一台文件结构不同与当前环境），就需要更改文件中的绝对路径了。此方法过于无脑此处的详细过程略过。</p>
+<p>（2）这种方法的大体思路如下：</p>
+<p>既然脚本中使用的文件或目录期望基于脚本的所在目录，那么可以在脚本中先进入到这个脚本所在的目录里，后续要使用目录和文件时，都基于此目录，用相对路径描述。</p>
+<p>$0 代标脚本自己的文件名，”dirname $0”代表脚本所在的路径。<br>测试脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;&apos;\$0-----------&gt;&apos; $0&quot;</span><br><span class="line">echo &quot;&apos;dirname \$0---&gt;&apos; `dirname $0`&quot;</span><br><span class="line">path1=`dirname \$0`</span><br><span class="line">path2=`cd $path1;pwd`</span><br><span class="line">echo &quot;`basename $0`的位置是：$path2&quot;</span><br></pre></td></tr></table></figure></p>
+<p>在家目录测试如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#chmod +x /data/script/test1.sh</span><br><span class="line">[root@localhost ~]#test1.sh   # 我将/data/script/加入到了$PATH环境变量中。             </span><br><span class="line">&apos;$0-----------&gt;&apos; /data/script/test1.sh</span><br><span class="line">&apos;dirname $0---&gt;&apos; /data/script</span><br><span class="line">test1.sh的位置是：/data/script</span><br></pre></td></tr></table></figure></p>
+<p>在/etc目录下测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost etc]#bash ../data/script/test1.sh </span><br><span class="line">&apos;$0-----------&gt;&apos; ../data/script/test1.sh</span><br><span class="line">&apos;dirname $0---&gt;&apos; ../data/script</span><br><span class="line">test1.sh的位置是：/data/script</span><br></pre></td></tr></table></figure></p>
+<p>在/data目录下测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#bash script/test1.sh </span><br><span class="line">&apos;$0-----------&gt;&apos; script/test1.sh</span><br><span class="line">&apos;dirname $0---&gt;&apos; script</span><br><span class="line">test1.sh的位置是：/data/script</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>综上所述：无论在何处执行脚本都能通过变量path2进入到脚本自身所在的位置。</em></strong></p>
+<blockquote>
+<p>代码实现如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">cat &lt;&lt; ENF</span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">ENF</span><br><span class="line">path1=`dirname $0` # -------&gt;找到脚本相对于当前位置的路径</span><br><span class="line">path2=`cd $path1;pwd` # --------&gt;取出脚本的绝对路径</span><br><span class="line">cd $path2 # --------&gt;进入脚本所在的目录</span><br><span class="line">read -p &quot;Please input you want install app:&quot; app</span><br><span class="line">case $app in</span><br><span class="line">1)</span><br><span class="line">    . ./app/apache.sh</span><br><span class="line">    ;;</span><br><span class="line">2)</span><br><span class="line">    . ./app/nginx.sh</span><br><span class="line">    ;;</span><br><span class="line">3)</span><br><span class="line">    . ./app/mysql.sh</span><br><span class="line">    ;;</span><br><span class="line">4)</span><br><span class="line">    . ./app/tomcat.sh</span><br><span class="line">    ;;</span><br><span class="line">5)</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">*)</span><br><span class="line">    echo &quot;Please input 1-5!!!&quot;</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br><span class="line">``` </span><br><span class="line">&gt;测试结果：</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>[root@localhost ~]#installmenu.sh<br>1:install Apache<br>2:install Nginx<br>3:install Mysql<br>4:install Tomcat<br>5:exit<br>Please input you want install app:1<br>Apache installing …<br>Apache install finished!!!<br>[root@localhost ~]#cd /etc<br>[root@localhost etc]#installmenu.sh<br>1:install Apache<br>2:install Nginx<br>3:install Mysql<br>4:install Tomcat<br>5:exit<br>Please input you want install app:3<br>mysql installing …<br>mysql install finished!!!<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;在另一台文件结果完全不同的机器上测试(centos6)：</span><br></pre></td></tr></table></figure></p>
+<p>[root@localhost test]# ls<br>app<br>[root@localhost test]# ls<br>app  installmenu.sh<br>[root@localhost test]# cd<br>[root@localhost ~]# sh test/installmenu.sh<br>1:install Apache<br>2:install Nginx<br>3:install Mysql<br>4:install Tomcat<br>5:exit<br>Please input you want install app:2<br>Nginx installing …<br>Nginx install finished!!!<br><code>`</code></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/shell/">shell</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-常用的文本处理工具" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -231,6 +319,20 @@
     [root@localhost ~]# cat /dev/urandom | tr -dc [a-zA-Z0-9[[:punct:]]]|head -c 12
     6FS}r`M*(~P|
 -dc [a-zA-Z0-9[[:punct:]]]就是删除了标点符号和数字及字母以外的所有字符。
+    [root@localhost ~]# df -h 
+        Filesystem      Size  Used Avail Use% Mounted on
+        /dev/sda2       100G  1.1G   99G   2% /
+        devtmpfs        480M     0  480M   0% /dev
+        tmpfs           489M     0  489M   0% /dev/shm
+        tmpfs           489M  6.6M  483M   2% /run
+        tmpfs           489M     0  489M   0% /sys/fs/cgroup
+        /dev/sda5        50G   33M   50G   1% /date
+        /dev/sda1      1014M  124M  891M  13% /boot
+        tmpfs            98M     0   98M   0% /run/user/0
+    [root@localhost ~]# df -h |grep &apos;/dev/sda.&apos;|tr -s &quot; &quot; %|cut -d% -f5
+        2
+        1
+        13
 </code></pre><blockquote>
 <p>cut的常用参数：</p>
 </blockquote>
@@ -979,97 +1081,6 @@ ELOTIcFBGE01
 
 
   
-    <article id="post-关于文件系统挂载的一点感悟" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/20/关于文件系统挂载的一点感悟/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/20/关于文件系统挂载的一点感悟/">
-        关于文件系统挂载的一点感悟
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前两天无意中见朋友在讨论，关于不同分区挂载后，inode号相同的问题。（例如：一个Linux系统在安装时分为：/;/boot;/data;/swap几个分区挂载点）</p>
-<blockquote>
-<p>首先：用stat命令查看各个挂载点的inode号：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat /</span><br><span class="line">  File: ‘/’</span><br><span class="line">  Size: 4096      	Blocks: 8          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 128         Links: 18</span><br><span class="line">Access: (0555/dr-xr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.068000230 +0800</span><br><span class="line">Modify: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line">Change: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line"> Birth: -</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 48        	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 805h/2053d	Inode: 128         Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:etc_runtime_t:s0</span><br><span class="line">Access: 2019-07-24 20:42:41.043900505 +0800</span><br><span class="line">Modify: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line">Change: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
-<p>发现/和/date的inode号都为128。对于新手会一脸懵逼。</p>
-<blockquote>
-<p>于是乎,我们用umount卸载/date:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# umount /date/</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 6         	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 134217856   Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.112000232 +0800</span><br><span class="line">Modify: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line">Change: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
-<p>发现inode号发生了改变。至于其中原委如下：</p>
-<blockquote>
-<p>在这之前大家需要弄清楚一下几点：</p>
-</blockquote>
-<p>(1)在<strong>Linux系统</strong>下，整个 <strong>文件和目录</strong>结构是单根的倒立树状结构，我们成为目录树，而<strong>非Linux系统</strong>下整个文件系统是单根的。</p>
-<p>(2)挂载是动作，是Linux文件系统和目录树结合起来的动作。</p>
-<p>(3)挂载点，是目录非inode,该目录是进入该文件系统的入口。例如：/，/boot</p>
-<p>(4)一个目录只能挂载一个磁盘分区或设备。</p>
-<p>(5)我们在进行分区的时候，无论是ext3,ext4或其它格式的文件系统，我们划分了三个分区，分别挂载到了/;/boot;/data目录下。swap分区就另当别论了。<strong>注意以上三个目录是不同的挂载点</strong>这三个目录在作为挂载点时，是水平等价关系。</p>
-<p>(6)虽然三个分区都是ext4的文件系统，但他们是三个独立的文件系统，仅仅是格式一样而已。它们三个分区也是平行的等价关系。</p>
-<blockquote>
-<p>在弄清楚以上七点后，得出以下结论：</p>
-</blockquote>
-<pre><code>我们有三个文件系统挂载到了三个不同的目录下(挂载点)。
-</code></pre><p>所以就有了我们为啥在开始的时候，/和/data还有/boot三个目录(挂载点)的inode号相同了。不是所一个inode号只能对应一个文件吗？(linux下一切皆文件。)但他们三个确确实实是不同的三个文件。故而，这仅仅是3个相同数值的inode号而已。</p>
-<pre><code>例如：/的inode为128它是sda2分区文件系统最顶层目录的inode号。
-     /boot的inode为128它是sda1分区文件系统最顶层目录的inode号。
-</code></pre><blockquote>
-<p>此时或许你会问：如果寻找/etc/passwd文件，系统会根据/的inode号进入/的数据块寻找etc的inode号，根据etc的inode号再进入etc的数据块寻找passwd的inode号，最终找到passwd的数据内容。但是如果我们要是寻找/boot/grub文件，系统是如何从/进入/boot的呢？以为/和/boot的inode号相同啊？</p>
-</blockquote>
-<pre><code>首先，先纠正一下，系统进入/boot不是从/进入的。不要主观意识的这样认为。因为他们同为不同分区的顶级目录，如前文所诉他们在地位上是平等的。
-    如果进入/etc/passwd，通过查询挂载信息，顶级目录是/(文件系统1)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
-    如果进入/boot/gurb，通过查询挂载信息，顶级目录是/boot(文件系统2)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
     <article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1228,7 +1239,7 @@ gc 全局替换，每次替换前询问
   
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </div>

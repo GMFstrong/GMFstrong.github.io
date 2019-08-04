@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>文件查找_locate-find | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find  其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。  关于locate：  该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件查找_locate-find">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/07/17/文件查找_locate-find/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find  其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。  关于locate：  该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-04T05:34:47.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="文件查找_locate-find">
+<meta name="twitter:description" content="在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find  其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。  关于locate：  该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux运维</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux运维</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-文件查找_locate-find" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/17/文件查找_locate-find/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      文件查找_locate-find
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find</p>
+</blockquote>
+<p><strong><em>其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。</em></strong></p>
+<blockquote>
+<p>关于locate：</p>
+</blockquote>
+<pre><code>该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate/mlocate.db 。然而该索引的的构建是在系统较为空闲时自动进行的。也可手动进行（updatedb）。
+</code></pre><p><strong><em>虽然locate在使用时比较节省资源，但是索引的构建过程是非常消耗资源的，因为需要遍历整个根文件系统。</em></strong></p>
+<blockquote>
+<p>locate有以下工作特点：</p>
+</blockquote>
+<pre><code>• 查找速度快 
+• 模糊查找 
+• 非实时查找 
+• 搜索的是文件的全路径，不仅仅是文件名 
+• 可能只搜索用户具备读取和执行权限的目录 
+</code></pre><blockquote>
+<p>常用选项：</p>
+</blockquote>
+<pre><code>-i不区分大小写。
+-n # 仅仅列出前#匹配到的文件。
+-r 使用正则表达式。
+</code></pre><p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost qqq]#locate -n 5 -ir &quot;\.cONf$&quot;      </span><br><span class="line">/etc/asound.conf</span><br><span class="line">/etc/autofs.conf</span><br><span class="line">/etc/autofs_ldap_auth.conf</span><br><span class="line">/etc/chrony.conf</span><br><span class="line">/etc/dnsmasq.conf</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>关于find的用法介绍：</em></strong></p>
+<blockquote>
+<p>find [选项] [查找路径] [查找条件] [处理动作]</p>
+</blockquote>
+<pre><code>查找路径：指定具体目标路径；默认为当前目录。
+查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件。
+处理动作：对符合条件的文件做操作，默认输出至屏幕
+</code></pre><p><strong><em>以下是关于find的查找条件：</em></strong></p>
+<blockquote>
+<p>指搜索层级</p>
+</blockquote>
+<pre><code>-maxdepth level 最大搜索目录深度,指定目录下的文件为第1级
+-mindepth level 最小搜索目录深度
+</code></pre><blockquote>
+<p>根据文件名和inode查找：</p>
+</blockquote>
+<pre><code>-inum n 按inode号查找
+-iname &quot;文件名称&quot;：不区分字母大小写
+-name &quot;文件名称&quot;：支持使用glob *, ?, [], [^]
+-samefile name 相同inode号的文件
+-links n 链接数为n的文件
+-regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称
+</code></pre><blockquote>
+<p>根据属主、属组查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-user USERNAME：查找属主为指定用户(UID)的文件</span><br><span class="line">-group GRPNAME: 查找属组为指定组(GID)的文件</span><br><span class="line">-uid UserID：查找属主为指定的UID号的文件</span><br><span class="line">-gid GroupID：查找属组为指定的GID号的文件</span><br><span class="line">-nouser：查找没有属主的文件</span><br><span class="line">-nogroup：查找没有属组的文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据文件类型查找<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-type TYPE</span><br><span class="line">• f: 普通文件</span><br><span class="line">• d: 目录文件</span><br><span class="line">• l: 符号链接文件</span><br><span class="line">• s：套接字文件</span><br><span class="line">• b: 块设备文件</span><br><span class="line">• c: 字符设备文件</span><br><span class="line">• p: 管道文件</span><br><span class="line">空文件或目录</span><br><span class="line"> -empty</span><br><span class="line"> 示例：find /app -type d -empty</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据⽂件⼤⼩来查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-size [+|-]#UNIT</span><br><span class="line"> 常用单位：k, M, G，c（byte）</span><br><span class="line">#UNIT: (#-1, #]</span><br><span class="line"> 如：6k 表示(5k,6k]</span><br><span class="line">-#UNIT：[0,#-1]</span><br><span class="line"> 如：-6k 表示[0,5k]</span><br><span class="line">+#UNIT：(#,∞)</span><br><span class="line"> 如：+6k 表示(6k,∞)</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据时间戳：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">以“天”为单位,</span><br><span class="line">-atime [+|-]#,</span><br><span class="line"> #: [#,#+1)</span><br><span class="line"> +#: [#+1,∞]</span><br><span class="line"> -#: [0,#)</span><br><span class="line">-mtime</span><br><span class="line">-ctime</span><br><span class="line">以“分钟”为单位</span><br><span class="line"> -amin</span><br><span class="line"> -mmin</span><br><span class="line"> -cmin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据权限查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-perm [/|-]MODE</span><br><span class="line"> MODE: 精确权限匹配</span><br><span class="line"> /MODE：任何一类(u,g,o)对象的权限中只要能一位匹配即可，或关系，+ 从centos7开始淘汰</span><br><span class="line"> -MODE：每一类对象都必须同时拥有指定权限，与关系 0 表示不关注</span><br><span class="line">find -perm 755 会匹配权限模式恰好是755的文件</span><br><span class="line">只要当任意人有写权限时，find -perm +222就会匹配</span><br><span class="line">只有当每个人都有写权限时，find -perm -222才会匹配</span><br><span class="line">只有当其它人（other）有写权限时，find -perm -002才会匹配</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>处理动作<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-print：默认的处理动作，显示至屏幕</span><br><span class="line">-ls：类似于对查找到的文件执行“ls -l”命令</span><br><span class="line">-delete：删除查找到的文件</span><br><span class="line">-fls file：查找到的所有文件的长格式信息保存至指定文件中</span><br><span class="line">-ok COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式</span><br><span class="line">要求用户确认</span><br><span class="line">-exec COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令</span><br><span class="line">&#123;&#125;: 用于引用查找到的文件名称自身</span><br><span class="line">find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>参数替换xargs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">由于很多命令不支持管道|来传递参数，而日常工作中有这个必要，所以就有了xargs命令</span><br><span class="line">xargs用于产生某个命令的参数，xargs 可以读入 stdin 的数据，并且以空格符或回车符将 stdin 的数据分隔</span><br><span class="line">成为arguments</span><br><span class="line">注意：文件名或者是其他意义的名词内含有空格符的情况</span><br><span class="line">有些命令不能接受过多参数，命令执行可能会失败，xargs可以解决</span><br><span class="line">示例：</span><br><span class="line"> ls f* |xargs rm</span><br><span class="line"> find /sbin/ -perm +700 |ls -l 这个命令是错误的</span><br><span class="line"> find /bin/ -perm /7000 | xargs ls -l 查找有特殊权限的文件</span><br><span class="line"> find /bin/ -perm -7000 | xargs ls -l 此命令和上面有何区别？</span><br><span class="line">find和xargs格式：find | xargs COMMAND</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/07/17/文本处理-sed/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          文本处理-sed
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/07/17/shell条件判断/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">shell条件判断</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="文件查找_locate-find" data-title="文件查找_locate-find" data-url="http://gmfdevops.com.com/2019/07/17/文件查找_locate-find/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="文件查找_locate-find">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
