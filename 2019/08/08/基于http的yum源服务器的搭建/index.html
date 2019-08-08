@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>基于http的yum源服务器的搭建 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="首先介绍yum命令的常用选项  显示yum仓库的列表：  yum repolist  例如：123456789101112[root@localhost yum.repos.d]#yum repolistLoaded plugins: fastestmirrorRepository base is listed more than once in the configurationLoading">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于http的yum源服务器的搭建">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/08/08/基于http的yum源服务器的搭建/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="首先介绍yum命令的常用选项  显示yum仓库的列表：  yum repolist  例如：123456789101112[root@localhost yum.repos.d]#yum repolistLoaded plugins: fastestmirrorRepository base is listed more than once in the configurationLoading">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-08-08T07:45:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于http的yum源服务器的搭建">
+<meta name="twitter:description" content="首先介绍yum命令的常用选项  显示yum仓库的列表：  yum repolist  例如：123456789101112[root@localhost yum.repos.d]#yum repolistLoaded plugins: fastestmirrorRepository base is listed more than once in the configurationLoading">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux运维</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux运维</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-基于http的yum源服务器的搭建" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/08/基于http的yum源服务器的搭建/" class="article-date">
+  	<time datetime="2019-08-08T06:00:47.000Z" itemprop="datePublished">2019-08-08</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      基于http的yum源服务器的搭建
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>首先介绍yum命令的常用选项</em></strong></p>
+<blockquote>
+<p>显示yum仓库的列表：</p>
+</blockquote>
+<pre><code>yum repolist 
+</code></pre><p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost yum.repos.d]#yum repolist</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Repository base is listed more than once in the configuration</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirror-hk.koddos.net</span><br><span class="line"> * updates: mirror.lzu.edu.cn</span><br><span class="line"> repo id                                                                   repo name                                                                    status</span><br><span class="line">base/7/x86_64                                                             CentOS-7 - Base                                                              4,021</span><br><span class="line">extras/7/x86_64                                                           CentOS-7 - Extras                                                              435</span><br><span class="line">updates/7/x86_64                                                          CentOS-7 - Updates                                                           2,500</span><br><span class="line">repolist: 6,956</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>显示程序包：</p>
+</blockquote>
+<pre><code>yum list
+</code></pre><p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost yum.repos.d]#yum list | tail</span><br><span class="line">Repository base is listed more than once in the configuration</span><br><span class="line">yum-langpacks.noarch                     0.4.2-7.el7                   base     </span><br><span class="line">yum-plugin-aliases.noarch                1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-changelog.noarch              1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-tmprepo.noarch                1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-verify.noarch                 1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-versionlock.noarch            1.1.31-50.el7                 base     </span><br><span class="line">yum-utils.noarch                         1.1.31-50.el7                 base     </span><br><span class="line">zenity.x86_64                            3.28.1-1.el7                  base     </span><br><span class="line">zsh.x86_64                               5.0.2-31.el7                  base     </span><br><span class="line">zziplib.x86_64                           0.13.62-9.el7                 base</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>安装程序包：</p>
+</blockquote>
+<pre><code>yum install 
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-q：静默模式</span><br><span class="line">-y: 自动回答为“yes”</span><br><span class="line">--nogpgcheck：禁止进行gpg check</span><br></pre></td></tr></table></figure>
+<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum install -q -y wget</span><br><span class="line">[root@localhost ~]#</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>重新安装<br>    yum reinstall</p>
+</blockquote>
+<p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum reinstall wget</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.neusoft.edu.cn</span><br><span class="line"> * extras: mirrors.neusoft.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">Resolving Dependencies</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package wget.x86_64 0:1.14-18.el7_6.1 will be reinstalled</span><br><span class="line">--&gt; Finished Dependency Resolution</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>卸载程序包：</p>
+</blockquote>
+<pre><code>yum remove
+</code></pre><p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum remove wget</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Resolving Dependencies</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package wget.x86_64 0:1.14-18.el7_6.1 will be erased</span><br><span class="line">--&gt; Finished Dependency Resolution</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>查看程序包信息:</p>
+</blockquote>
+<pre><code>yum info
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum info wget</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.neusoft.edu.cn</span><br><span class="line"> * extras: mirrors.neusoft.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">Available Packages</span><br><span class="line">Name        : wget</span><br><span class="line">Arch        : x86_64</span><br><span class="line">Version     : 1.14</span><br><span class="line">Release     : 18.el7_6.1</span><br><span class="line">Size        : 547 k</span><br><span class="line">Repo        : updates/7/x86_64</span><br><span class="line">Summary     : A utility for retrieving files using the HTTP or FTP protocols</span><br><span class="line">URL         : http://www.gnu.org/software/wget/</span><br><span class="line">License     : GPLv3+</span><br><span class="line">Description : GNU Wget is a file retrieval utility which can use either the HTTP or</span><br><span class="line">            : FTP protocols. Wget features include the ability to work in the</span><br><span class="line">            : background while you are logged out, recursive retrieval of</span><br><span class="line">            : directories, file name wildcard matching, remote file timestamp</span><br><span class="line">            : storage and comparison, use of Rest with FTP servers and Range with</span><br><span class="line">            : HTTP servers to retrieve files over slow or unstable connections,</span><br><span class="line">            : support for Proxy servers, and configurability.</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查看指定的特性(可以是某文件)是由哪个程序包所提供：</p>
+</blockquote>
+<pre><code>yum provides
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum provides /usr/share/locale/eu/LC_MESSAGES/wget.mo</span><br><span class="line">wget-1.14-18.el7.x86_64 : A utility for retrieving files using the HTTP or FTP protocols</span><br><span class="line">Repo        : base</span><br><span class="line">Matched from:</span><br><span class="line">Filename    : /usr/share/locale/eu/LC_MESSAGES/wget.mo</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>清理本地缓存：</p>
+</blockquote>
+<pre><code>yum clean all [ packages | metadata | expire-cache | rpmdb | plugins ]
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum clean all</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Cleaning repos: base extras updates</span><br><span class="line">Cleaning up everything</span><br><span class="line">Cleaning up list of fastest mirrors</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>构建缓存：</p>
+</blockquote>
+<pre><code>yum makecache
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum makecache</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">base                                                                                                                                  | 3.6 kB  00:00:00     </span><br><span class="line">extras                                                                                                                                | 3.4 kB  00:00:00     </span><br><span class="line">updates                                                                                                                               | 3.4 kB  00:00:00     </span><br><span class="line">(1/8): extras/7/x86_64/prestodelta                                                                                                    |  73 kB  00:00:00     </span><br><span class="line">(2/8): extras/7/x86_64/other_db                                                                                                       | 131 kB  00:00:00     </span><br><span class="line">(3/8): updates/7/x86_64/prestodelta                                                                                                   | 945 kB  00:00:00     </span><br><span class="line">(4/8): updates/7/x86_64/filelists_db                                                                                                  | 5.2 MB  00:00:01     </span><br><span class="line">(5/8): base/7/x86_64/other_db                                                                                                         | 2.6 MB  00:00:01     </span><br><span class="line">(6/8): updates/7/x86_64/other_db                                                                                                      | 764 kB  00:00:00     </span><br><span class="line">(7/8): extras/7/x86_64/filelists_db                                                                                                   | 249 kB  00:00:02     </span><br><span class="line">(8/8): base/7/x86_64/filelists_db                                                                                                     | 7.1 MB  00:00:07     </span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">Metadata Cache Created</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>搜索（以指定的关键字搜索程序包名及summary信息）</p>
+</blockquote>
+<pre><code>yum search
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum search mysql</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">==================================================================== N/S matched: mysql =====================================================================</span><br><span class="line">MySQL-python.x86_64 : An interface to MySQL</span><br><span class="line">akonadi-mysql.x86_64 : Akonadi MySQL backend support</span><br><span class="line">apr-util-mysql.x86_64 : APR utility library MySQL DBD driver</span><br><span class="line">dovecot-mysql.x86_64 : MySQL back end for dovecot</span><br><span class="line">freeradius-mysql.x86_64 : MySQL support for freeradius</span><br><span class="line">libdbi-dbd-mysql.x86_64 : MySQL plugin for libdbi</span><br><span class="line">mysql-connector-java.noarch : Official JDBC driver for MySQL</span><br><span class="line">mysql-connector-odbc.x86_64 : ODBC driver for MySQL</span><br><span class="line">pcp-pmda-mysql.x86_64 : Performance Co-Pilot (PCP) metrics for MySQL</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查看指定包所依赖的capabilities：</p>
+</blockquote>
+<pre><code>yum deplist
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum deplist httpd</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">package: httpd.x86_64 2.4.6-89.el7.centos.1</span><br><span class="line">  dependency: /bin/sh</span><br><span class="line">   provider: bash.x86_64 4.2.46-31.el7</span><br><span class="line">  dependency: /etc/mime.types</span><br><span class="line">   provider: mailcap.noarch 2.1.41-2.el7</span><br><span class="line">  dependency: /usr/sbin/groupadd</span><br><span class="line">   provider: shadow-utils.x86_64 2:4.1.5.1-25.el7_6.1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查看yum事务历史：</p>
+</blockquote>
+<pre><code>yum history [redo|undo|info|list|packages-list|packages-info|summary|addon-info]
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum history</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">ID     | Login user               | Date and time    | Action(s)      | Altered</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">     8 | root &lt;root&gt;              | 2019-08-08 23:54 | I, U           |   11 EE</span><br><span class="line">     7 | root &lt;root&gt;              | 2019-08-08 23:38 | Install        |    1   </span><br><span class="line">     6 | root &lt;root&gt;              | 2019-08-08 23:33 | Erase          |    1   </span><br><span class="line">     5 | root &lt;root&gt;              | 2019-08-08 23:27 | Reinstall      |    1   </span><br><span class="line">     4 | root &lt;root&gt;              | 2019-08-08 23:24 | Install        |    1   </span><br><span class="line">     3 | root &lt;root&gt;              | 2019-08-08 22:54 | Install        |    1   </span><br><span class="line">     2 | root &lt;root&gt;              | 2019-08-08 22:35 | Install        |   31   </span><br><span class="line">     1 | System &lt;unset&gt;           | 2019-07-18 04:34 | Install        |  279   </span><br><span class="line">history list</span><br><span class="line">[root@localhost ~]#yum history info 8</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Transaction ID : 8</span><br><span class="line">Begin time     : Thu Aug  8 23:54:00 2019</span><br><span class="line">Begin rpmdb    : 312:7e4bbf6cb5316d8b59796ab2493c12e8c4bf7aca</span><br><span class="line">End time       :            23:54:23 2019 (23 seconds)</span><br><span class="line">End rpmdb      : 319:4f1b22d936cae2c01881c331147218195e37e7c3</span><br><span class="line">User           : root &lt;root&gt;</span><br><span class="line">Return-Code    : Success</span><br><span class="line">Command Line   : install -y gcc</span><br><span class="line">Transaction performed with:</span><br><span class="line">    Installed     rpm-4.11.3-17.el7.x86_64                      @anaconda</span><br><span class="line">    Installed     yum-3.4.3-132.el7.centos.0.1.noarch           @anaconda</span><br><span class="line">    Installed     yum-plugin-fastestmirror-1.1.31-34.el7.noarch @anaconda</span><br><span class="line">Packages Altered:</span><br><span class="line">    Dep-Install cpp-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Install     gcc-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Updated     glibc-2.17-105.el7.x86_64                 @anaconda</span><br><span class="line">    Update            2.17-260.el7_6.6.x86_64             @updates</span><br><span class="line">    Updated     glibc-common-2.17-105.el7.x86_64          @anaconda</span><br><span class="line">    Update                   2.17-260.el7_6.6.x86_64      @updates</span><br><span class="line">    Dep-Install glibc-devel-2.17-260.el7_6.6.x86_64       @updates</span><br><span class="line">    Dep-Install glibc-headers-2.17-260.el7_6.6.x86_64     @updates</span><br><span class="line">    Dep-Install kernel-headers-3.10.0-957.27.2.el7.x86_64 @updates</span><br><span class="line">    Updated     libgcc-4.8.5-4.el7.x86_64                 @anaconda</span><br><span class="line">    Update             4.8.5-36.el7_6.2.x86_64            @updates</span><br><span class="line">    Updated     libgomp-4.8.5-4.el7.x86_64                @anaconda</span><br><span class="line">    Update              4.8.5-36.el7_6.2.x86_64           @updates</span><br><span class="line">    Dep-Install libmpc-1.0.1-3.el7.x86_64                 @base</span><br><span class="line">    Dep-Install mpfr-3.1.1-4.el7.x86_64                   @base</span><br><span class="line">Scriptlet output:</span><br><span class="line">   1 warning: /etc/nsswitch.conf created as /etc/nsswitch.conf.rpmnew</span><br><span class="line">history info</span><br><span class="line">[root@localhost ~]#yum history undo 8</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Undoing transaction 8, from Thu Aug  8 23:54:00 2019</span><br><span class="line">    Dep-Install cpp-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Install     gcc-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Updated     glibc-2.17-105.el7.x86_64                 @anaconda</span><br><span class="line">    Update            2.17-260.el7_6.6.x86_64             @updates</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">  Verifying  : glibc-devel-2.17-260.el7_6.6.x86_64                                                                                                       2/7 </span><br><span class="line">  Verifying  : kernel-headers-3.10.0-957.27.2.el7.x86_64                                                                                                 3/7 </span><br><span class="line">  Verifying  : cpp-4.8.5-36.el7_6.2.x86_64                                                                                                               4/7 </span><br><span class="line">  Verifying  : gcc-4.8.5-36.el7_6.2.x86_64                                                                                                               5/7 </span><br><span class="line">  Verifying  : glibc-headers-2.17-260.el7_6.6.x86_64                                                                                                     6/7 </span><br><span class="line">  Verifying  : libmpc-1.0.1-3.el7.x86_64                                                                                                                 7/7 </span><br><span class="line"></span><br><span class="line">Removed:</span><br><span class="line">  cpp.x86_64 0:4.8.5-36.el7_6.2                gcc.x86_64 0:4.8.5-36.el7_6.2  glibc-devel.x86_64 0:2.17-260.el7_6.6  glibc-headers.x86_64 0:2.17-260.el7_6.6 </span><br><span class="line">  kernel-headers.x86_64 0:3.10.0-957.27.2.el7  libmpc.x86_64 0:1.0.1-3.el7    mpfr.x86_64 0:3.1.1-4.el7             </span><br><span class="line"></span><br><span class="line">Complete!</span><br></pre></td></tr></table></figure>
+<p><strong><em>在对yum命令有了一定的了解以后，下面通过挂载光盘，或者基于光盘和http服务搭建yum仓库：</em></strong></p>
+<blockquote>
+<p>首先是用光盘作为yum源：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">（1）挂载光盘到一个指定目录：</span><br><span class="line">    mount /dev/cdrom /mnt</span><br><span class="line">（2）创建配置文件(若有其他yum源先移动到其他目录)：</span><br><span class="line">    cd /etc/yum.repos.d</span><br><span class="line">    vim base.repo</span><br><span class="line">▽</span><br><span class="line">   [centos7]</span><br><span class="line">   name=ISO</span><br><span class="line">   baseurl=file:///mnt/</span><br><span class="line">   gpgcheck=0</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>基于http服务搭建yum服务器（适用于不能访问互联网的企业）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">（1）先通过本地yum源（如上所述：）yum install -y httpd</span><br><span class="line">（2）cd /var/www/html/</span><br><span class="line">（3）mkdir centos&#123;6,7&#125;</span><br><span class="line">（4）mount /dev/cdrom /var/www/html/centos7</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>将已有的rpm包制作成yum仓库：</p>
+</blockquote>
+<pre><code>createrepo [options] &lt;directory&gt;
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">（1）mkdir /tmp/rpm</span><br><span class="line">（2）mv rpm文件 /tmp/rpm</span><br><span class="line">（3）createrepo /tmp/rpm/</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/08/04/关于shell脚本通过相对路径调用其它脚本失败的问题解决/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">关于shell脚本通过相对路径调用其它脚本失败的问题解决</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="基于http的yum源服务器的搭建" data-title="基于http的yum源服务器的搭建" data-url="http://gmfdevops.com.com/2019/08/08/基于http的yum源服务器的搭建/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="基于http的yum源服务器的搭建">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

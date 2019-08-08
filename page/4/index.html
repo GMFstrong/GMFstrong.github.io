@@ -190,6 +190,65 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-XSS" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/04/18/XSS/" class="article-date">
+  	<time datetime="2018-04-18T04:57:37.000Z" itemprop="datePublished">2018-04-18</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/18/XSS/">
+        XSS
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于XSS漏洞</code>：<br>（1）反射型：通过外部输入直接在在浏览器端触发。<br>（2）储存型：先把利用代码保存在数据库或文件中，当web程序读取利用代码并输出时触发漏洞。<br><code>危害</code>：盗取cookies，修改页面钓鱼等，凡是前端页面能做的，XSS都能做。<br><code>XSS出现的地方</code>：<br>XSS漏洞经常出现在文章发表，评论回复，留言以及资料设置等地方。特别是在文章发表的时候，由于大都是富文本，<br>各种图片的引用，文字格式的设置等，故而经常出现过滤不严造成的XSS，同样，留言评论也是如此。而在资料设置的<br>地方，比如用户昵称，签名等，有的应用不止一处设置资料的地方，在注册的地方，修改资料的地方都可以，不一定都<br>进行了严格的过滤。这几个地方通常都是储存型XSS。<br><code>关于反射型</code>：<br>这种漏洞比较容易，通过黑盒扫描器直接发现，只需要将尖括号，单双引号等直接提交到web服务器，再检查返回的HTML页面<br>有没有保留原来的特殊字符即可，在白盒测试中，需要寻找带有参数输出的函数，然后根据输出函数对输出内容回溯输入参数，<br>观察有没有过滤。<br><code>关于储存型XSS</code>：<br>储存型XSS比反射型容易利用的多，不用考虑绕过浏览器的过滤，隐蔽性也比较好，特别在社交网络中，储存型XSS蠕虫病毒易造成<br>大面积传播，影响巨大。要挖掘储存型XSS也要挖掘未过滤的输入点和未过滤的输出点，然而这个最终的输出点可能跟输入点完全不<br>在一个业务上。在白盒审计时可以根据当前代码去猜，或者去追查哪里右操作过这些数据，使用表名，字段名在代码里搜索。<br><code>漏洞防范</code>：<br>XSS漏洞在不同的浏览器有不同的利用方式，特别是业务上使用富文本编辑器的时候，防御起来更为复杂。<br>（1）特殊字符HTML实体转码<br>需要过滤的字符有单引号，双引号，尖括号，反斜杠，冒号，&amp;，#等。为了保持数据的原始性，最好的的过滤方式是在输出和二次调<br>用的时候进行HTML实体转码。<br>（2）标签事件属性黑名单或者白名单<br>通过过滤特殊字符防止XSS漏洞，实际中过滤了也可能被绕过，比如通过宽字节注入合并掉反斜杠，再利用标签事件来执行js代码，故<br>而还要通过标签事件的黑白名单的方式，推荐使用白名单的方式。可通过正则匹配的方式，若匹配不在白名单列表直接拦掉。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-CSRF" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
