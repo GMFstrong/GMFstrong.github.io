@@ -190,6 +190,90 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Bonding的网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/20/Bonding的网卡配置/" class="article-date">
+  	<time datetime="2019-08-20T02:32:20.000Z" itemprop="datePublished">2019-08-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/20/Bonding的网卡配置/">
+        Bonding的网卡配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>Bonding就是一种将多块网卡绑定同一IP地址对外提供服务可以实现高可用和负载均衡的技术。</em></strong></p>
+<p>直接给两块网卡配置同一IP地址是不可以的。通过bonding虚拟一块网卡对外提供链接，并且所有的物理网卡被修改为相同的MAC地址。</p>
+<blockquote>
+<p>bonding 的7种工作模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  （1）Mode 0 (balance-rr)： 轮询（Round-robin）策略，从头到尾顺序的在每</span><br><span class="line">一个slave接口上面发送数据包。本模式提供负载均衡和容错的能力。</span><br><span class="line">  （2）Mode 1 (active-backup)：活动-备份（主备）策略，只有一个slave被激活，当且仅当活动的slave接口失败时才会激活其他slave.为了避免交换机发生混</span><br><span class="line">乱此时绑定的MAC地址只有一个外部端口上可见。</span><br><span class="line">  （3）Mode 3 (broadcast)：广播策略，在所有的slave接口上传送所有的报文,提</span><br><span class="line">供容错能力。</span><br><span class="line">  （4）active-backup、balance-tlb 和 balance-alb 模式不需要交换机的任何特</span><br><span class="line">殊配置。其他绑定模式需要配置交换机以便整合链接。如：Cisco 交换机需</span><br><span class="line">要在模式 0、2 和 3 中使用 EtherChannel，但在模式4中需要 LACP和</span><br><span class="line">EtherChannel。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>在Centos6上用两块网卡实现bonding的配置：</p>
+</blockquote>
+<p>  （1）在/etc/sysconfig/network-scripts/目录下创建ifcfg-bond0文件，文件内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-bond0 </span><br><span class="line">DEVICE=bond0</span><br><span class="line">BONDING_OPTS=&apos;miimon=100 mode=1&apos;   #miimon 是用来进行链路监测的。如果miimon=100，那么系统每100ms 监测一次链路连接状态，如果有一条线路不通就转入另一条线路，mode为bonding的工作模式。</span><br><span class="line">IPADDR=192.168.38.100</span><br><span class="line">NETMASK=255.255.255.0</span><br><span class="line">GATEWAY=192.168.38.2</span><br><span class="line">DNS1=192.168.38.2</span><br><span class="line">DNS2=180.76.76.76</span><br><span class="line">BOOTPROTO=static</span><br></pre></td></tr></table></figure></p>
+<p>  （2）修改网卡配置文件（/etc/sysconfig/network-scripts/ifcfg-eth[0|1]）为以下内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0             #仅需要修改这里的设备名就行</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">MASTER=bond0            #加入的bonding的设备名</span><br><span class="line">SLAVE=yes               </span><br><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">MASTER=bond0</span><br><span class="line">SLAVE=yes</span><br></pre></td></tr></table></figure></p>
+<p>  （3）在以上文件修改完成以后，重启网络服务：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#!ser</span><br><span class="line">service network restart</span><br><span class="line">Shutting down interface bond0:                             [  OK  ]</span><br><span class="line">Shutting down loopback interface:                          [  OK  ]</span><br><span class="line">Bringing up loopback interface:                            [  OK  ]</span><br><span class="line">Bringing up interface bond0:  Determining if ip address 192.168.38.100 is already in use for device bond0...</span><br><span class="line">                                                           [  OK  ]</span><br></pre></td></tr></table></figure></p>
+<p>  （4）查看bonding的信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat /proc/net/bonding/bond0 </span><br><span class="line">Ethernet Channel Bonding Driver: v3.7.1 (April 27, 2011)</span><br><span class="line"></span><br><span class="line">Bonding Mode: fault-tolerance (active-backup)</span><br><span class="line">Primary Slave: None</span><br><span class="line">Currently Active Slave: eth0</span><br><span class="line">MII Status: up</span><br><span class="line">MII Polling Interval (ms): 100</span><br><span class="line">Up Delay (ms): 0</span><br><span class="line">Down Delay (ms): 0</span><br><span class="line"></span><br><span class="line">Slave Interface: eth0</span><br><span class="line">MII Status: up</span><br><span class="line">Speed: 1000 Mbps</span><br><span class="line">Duplex: full</span><br><span class="line">Link Failure Count: 1</span><br><span class="line">Permanent HW addr: 00:0c:29:0a:74:24</span><br><span class="line">Slave queue ID: 0</span><br><span class="line"></span><br><span class="line">Slave Interface: eth1</span><br><span class="line">MII Status: up</span><br><span class="line">Speed: 1000 Mbps</span><br><span class="line">Duplex: full</span><br><span class="line">Link Failure Count: 2</span><br><span class="line">Permanent HW addr: 00:0c:29:0a:74:2e</span><br><span class="line">Slave queue ID: 0</span><br></pre></td></tr></table></figure></p>
+<p>  （5）查看bonding的工作模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat /sys/class/net/bond0/bonding/mode</span><br><span class="line">active-backup 1</span><br></pre></td></tr></table></figure></p>
+<p>  （6）通过ip a命令可以查看到两块网卡对外的MAC地址是相同的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN </span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">    inet6 ::1/128 scope host </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,SLAVE,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast master bond0 state UP qlen 1000</span><br><span class="line">    link/ether 00:0c:29:0a:74:24 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">3: eth1: &lt;BROADCAST,MULTICAST,SLAVE,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast master bond0 state UP qlen 1000</span><br><span class="line">    link/ether 00:0c:29:0a:74:24 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">4: bond0: &lt;BROADCAST,MULTICAST,MASTER,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP </span><br><span class="line">    link/ether 00:0c:29:0a:74:24 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.38.100/24 brd 192.168.38.255 scope global bond0</span><br><span class="line">    inet6 fe80::20c:29ff:fe0a:7424/64 scope link </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>下面是关于bonding的卸载：</p>
+</blockquote>
+<p>  （1）先把bonding网卡down了。</p>
+<pre><code>ifconfig bond0 down
+</code></pre><p>  （2）卸载bonding驱动。</p>
+<pre><code>rmmod bonding
+</code></pre><p> <strong><em>注意：如若没有删除ifcfg-bond0网卡的配置文件，再次启动网络服务bonding会重新安装。</em></strong></p>
+<h2 id="在一些场景中，可以用Network-Teaming实现与Bonding类似的功能。"><a href="#在一些场景中，可以用Network-Teaming实现与Bonding类似的功能。" class="headerlink" title="在一些场景中，可以用Network Teaming实现与Bonding类似的功能。"></a>在一些场景中，可以用Network Teaming实现与Bonding类似的功能。</h2><blockquote>
+<p>网络组：是将多个网卡聚合在一起方法，从而实现冗错和提高吞吐量。</p>
+</blockquote>
+<pre><code>特点：网络组不同于旧版中bonding技术，提供更好的性能和扩展性，网络组由内核驱动和teamd守护进程实现。
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/network/">network</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-LVM的常用配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1097,138 +1181,6 @@ total 4
 -rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
 -rwxr--r--. 1 root jack 0 Jul 27 15:07 f3.txt
 </code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linux用户添加及属性修改" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/26/Linux用户添加及属性修改/" class="article-date">
-  	<time datetime="2019-07-26T11:18:25.000Z" itemprop="datePublished">2019-07-26</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/26/Linux用户添加及属性修改/">
-        Linux用户添加及属性修改
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>用户创建（创建用户时，会从默认的/etc/skel/目录下复制目录结构到所创建用户的家目录下。默认的用户创建配置文件在/etc/default/useradd）</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost home]# cat /etc/default/useradd </span><br><span class="line"># useradd defaults file</span><br><span class="line">GROUP=100</span><br><span class="line">HOME=/home</span><br><span class="line">INACTIVE=-1</span><br><span class="line">EXPIRE=</span><br><span class="line">SHELL=/bin/bash</span><br><span class="line">SKEL=/etc/skel</span><br><span class="line">CREATE_MAIL_SPOOL=yes</span><br></pre></td></tr></table></figure>
-<pre><code>useradd [options] 用户名
-    -u 指定UID。
-    -o 配合-u 选项，不检查UID的唯一性，若想要两个用户UID相同可以强制指定UID。
-    -g GID 指明用户所属基本组（主组），可为组名，也可以GID。
-    -c &quot;COMMENT“ 用户的注释信息。
-    -d HOME_DIR 以指定的路径(不存在)为家目录。
-    -s SHELL 指明用户的默认shell程序，可用列表在/etc/shells文件中。
-    -G GROUP1[,GROUP2,...] 为用户指明附加组，组须事先存在可以是组名亦可是UID。
-    -N 不创建私用组做主组，使用users组（gid=100）做主组。
-    -r 创建系统用户 CentOS 6: ID&lt;500，CentOS 7: ID&lt;1000（默认不创建家目录，可以使用-m创建）。
-    -m 创建家目录，用于系统用户。
-    -M 不创建家目录，用于非系统用户。
-</code></pre><blockquote>
-<p>创建一个登陆后就要求更改密码的用户：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost home]# useradd jack;echo testroot | passwd --stdin jack;passwd -e jack</span><br><span class="line">Changing password for user jack.</span><br><span class="line">passwd: all authentication tokens updated successfully.</span><br><span class="line">Expiring password for user jack.</span><br><span class="line">passwd: Success</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>创建系统用户（Apache,MySQL，Nginx等）</p>
-</blockquote>
-<pre><code>useradd -r 用户名 -s /sbin/nologin
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost home]# useradd -r nginx -s /sbin/nologin</span><br><span class="line">[root@localhost home]# ls</span><br><span class="line">jack  jim  tom</span><br><span class="line">[root@localhost home]# getent passwd nginx</span><br><span class="line">nginx:x:995:993::/home/nginx:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>根据文件批量创建用户，并根据文件批量为用户添加密码：</p>
-</blockquote>
-<pre><code>newusers passwd格式文件            批量创建用户
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat passwd.txt </span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/bash</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br><span class="line">[root@localhost ~]# newusers passwd.txt </span><br><span class="line">[root@localhost ~]# cat /etc/passwd</span><br><span class="line">postfix:x:89:89::/var/spool/postfix:/sbin/nologin</span><br><span class="line">sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin</span><br><span class="line">chrony:x:996:994::/var/lib/chrony:/sbin/nologin</span><br><span class="line">tom:x:1000:1000::/home/tom:/bin/bash</span><br><span class="line">jim:x:1001:1001::/home/jim:/bin/bash</span><br><span class="line">jack:x:1002:1002::/home/jack:/bin/bash</span><br><span class="line">nginx:x:995:993::/home/nginx:/sbin/nologin</span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/bash</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>根据文件批量修改用户名密码：</p>
-</blockquote>
-<pre><code>cat shadow格式文件 | chpasswd      批量更改用户密码
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat pass.txt </span><br><span class="line">user1:testroot</span><br><span class="line">user2:testroot</span><br><span class="line">[root@localhost ~]# cat pass.txt | chpasswd </span><br><span class="line">[root@localhost ~]# cat /etc/shadow</span><br><span class="line">user1:$6$XrEnzKv1yN/5$/p9/R/.4MzvzMbjsIPK1NM39mLW6hK4klP6IluSU7NJfSL2Dci4uxVoHkUfYRPqTx79o4Nqtb1NoF5w1N1lfP0:18104:0:99999:7:::</span><br><span class="line">user2:$6$Npauj/s4aeC/pGK$nLpC6QWIsXXjtDeIf5u0hbbNaesU/yTyObXoJtIluD.OFZf0MLVwmzsdfeI/hbQpyG7zufy.fbPWN2BQ3meDH1:18104:0:99999:7:::</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>更改用户属性</p>
-</blockquote>
-<pre><code>usermod [OPTION] 用户名  
--u UID: 新UID
--g GID: 新主组  
--G GROUP1[,GROUP2,...[,GROUPN]]]：新附加组，原来的附加组将会被 覆盖；若保留原有，则要同时使用-a选项  
--s SHELL：新的默认SHELL  
--c &apos;COMMENT&apos;：新的注释信息  
--d HOME: 新家目录不会自动创建；若要创建新家目录并移动原家数据， 同时使用-m选项  
--l login_name: 新的名字  
--L: lock指定用户,在/etc/shadow 密码栏的增加 !   
--U: unlock指定用户,将 /etc/shadow 密码栏的 ! 拿掉  
--e YYYY-MM-DD: 指明用户账号过期日期  
--f INACTIVE: 设定非活动期限
-</code></pre><blockquote>
-<p>为用户追加新的附加组：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1)</span><br><span class="line">[root@localhost ~]# usermod -aG user2,tom,jack user1</span><br><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1),1000(tom),1002(jack),1007(user2)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>锁定指定用户：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat /etc/shadow</span><br><span class="line">user1:$6$XrEnzKv1yN/5$/p9/R/.4MzvzMbjsIPK1NM39mLW6hK4klP6IluSU7NJfSL2Dci4uxVoHkUfYRPqTx79o4Nqtb1NoF5w1N1lfP0:18104:0:99999:7:::</span><br><span class="line">user2:$6$Npauj/s4aeC/pGK$nLpC6QWIsXXjtDeIf5u0hbbNaesU/yTyObXoJtIluD.OFZf0MLVwmzsdfeI/hbQpyG7zufy.fbPWN2BQ3meDH1:18104:0:99999:7:::</span><br><span class="line">[root@localhost ~]# usermod -L user1</span><br><span class="line">[root@localhost ~]# cat /etc/shadow</span><br><span class="line">user1:!$6$XrEnzKv1yN/5$/p9/R/.4MzvzMbjsIPK1NM39mLW6hK4klP6IluSU7NJfSL2Dci4uxVoHkUfYRPqTx79o4Nqtb1NoF5w1N1lfP0:18104:0:99999:7:::</span><br><span class="line">user2:$6$Npauj/s4aeC/pGK$nLpC6QWIsXXjtDeIf5u0hbbNaesU/yTyObXoJtIluD.OFZf0MLVwmzsdfeI/hbQpyG7zufy.fbPWN2BQ3meDH1:18104:0:99999:7:::</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>更改用户的shell:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat /etc/passwd</span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/bash</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br><span class="line">[root@localhost ~]# usermod -s /sbin/csh user1</span><br><span class="line">[root@localhost ~]# cat /etc/passwd</span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/csh</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>删除用户</p>
-</blockquote>
-<pre><code>userdel [OPTION] 用户名
-    -r: 删除用户家目录以及邮件目录
-</code></pre><blockquote>
-<p>查看用户相关的id信息，可以使用 id  用户名  判断用户是否存在。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id [OPTION]... [USER]  </span><br><span class="line">    -u: 显示UID  </span><br><span class="line">    -g: 显示GID  </span><br><span class="line">    -G: 显示用户所属的组的ID  </span><br><span class="line">    -n: 显示名称，需配合ugG使用</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1),1000(tom),1002(jack),1007(user2)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>用户密码的相关修改</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">passwd [OPTIONS] UserName: 修改指定用户的密码 </span><br><span class="line">         -d：删除指定用户密码      </span><br><span class="line">         -l：锁定指定用户      </span><br><span class="line">         -u：解锁指定用户      </span><br><span class="line">         -e：强制用户下次登录修改密码    </span><br><span class="line">         -f：强制操作      </span><br><span class="line">         -n mindays：指定最短使用期限      </span><br><span class="line">         -x maxdays：最大使用期限     </span><br><span class="line">         -w warndays：提前多少天开始警告      </span><br><span class="line">         -i inactivedays：非活动期限      </span><br><span class="line">         --stdin：从标准输入接收用户密码 </span><br><span class="line">            示例：echo &quot;PASSWORD&quot; | passwd --stdin USERNAME </span><br><span class="line">[root@localhost ~]# echo 1234567 | passwd --stdin user1 &amp;&gt;/dev/null</span><br></pre></td></tr></table></figure>
-
       
     </div>
     

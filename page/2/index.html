@@ -190,6 +190,138 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Linux用户添加及属性修改" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/26/Linux用户添加及属性修改/" class="article-date">
+  	<time datetime="2019-07-26T11:18:25.000Z" itemprop="datePublished">2019-07-26</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/26/Linux用户添加及属性修改/">
+        Linux用户添加及属性修改
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>用户创建（创建用户时，会从默认的/etc/skel/目录下复制目录结构到所创建用户的家目录下。默认的用户创建配置文件在/etc/default/useradd）</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost home]# cat /etc/default/useradd </span><br><span class="line"># useradd defaults file</span><br><span class="line">GROUP=100</span><br><span class="line">HOME=/home</span><br><span class="line">INACTIVE=-1</span><br><span class="line">EXPIRE=</span><br><span class="line">SHELL=/bin/bash</span><br><span class="line">SKEL=/etc/skel</span><br><span class="line">CREATE_MAIL_SPOOL=yes</span><br></pre></td></tr></table></figure>
+<pre><code>useradd [options] 用户名
+    -u 指定UID。
+    -o 配合-u 选项，不检查UID的唯一性，若想要两个用户UID相同可以强制指定UID。
+    -g GID 指明用户所属基本组（主组），可为组名，也可以GID。
+    -c &quot;COMMENT“ 用户的注释信息。
+    -d HOME_DIR 以指定的路径(不存在)为家目录。
+    -s SHELL 指明用户的默认shell程序，可用列表在/etc/shells文件中。
+    -G GROUP1[,GROUP2,...] 为用户指明附加组，组须事先存在可以是组名亦可是UID。
+    -N 不创建私用组做主组，使用users组（gid=100）做主组。
+    -r 创建系统用户 CentOS 6: ID&lt;500，CentOS 7: ID&lt;1000（默认不创建家目录，可以使用-m创建）。
+    -m 创建家目录，用于系统用户。
+    -M 不创建家目录，用于非系统用户。
+</code></pre><blockquote>
+<p>创建一个登陆后就要求更改密码的用户：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost home]# useradd jack;echo testroot | passwd --stdin jack;passwd -e jack</span><br><span class="line">Changing password for user jack.</span><br><span class="line">passwd: all authentication tokens updated successfully.</span><br><span class="line">Expiring password for user jack.</span><br><span class="line">passwd: Success</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>创建系统用户（Apache,MySQL，Nginx等）</p>
+</blockquote>
+<pre><code>useradd -r 用户名 -s /sbin/nologin
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost home]# useradd -r nginx -s /sbin/nologin</span><br><span class="line">[root@localhost home]# ls</span><br><span class="line">jack  jim  tom</span><br><span class="line">[root@localhost home]# getent passwd nginx</span><br><span class="line">nginx:x:995:993::/home/nginx:/sbin/nologin</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>根据文件批量创建用户，并根据文件批量为用户添加密码：</p>
+</blockquote>
+<pre><code>newusers passwd格式文件            批量创建用户
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat passwd.txt </span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/bash</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br><span class="line">[root@localhost ~]# newusers passwd.txt </span><br><span class="line">[root@localhost ~]# cat /etc/passwd</span><br><span class="line">postfix:x:89:89::/var/spool/postfix:/sbin/nologin</span><br><span class="line">sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin</span><br><span class="line">chrony:x:996:994::/var/lib/chrony:/sbin/nologin</span><br><span class="line">tom:x:1000:1000::/home/tom:/bin/bash</span><br><span class="line">jim:x:1001:1001::/home/jim:/bin/bash</span><br><span class="line">jack:x:1002:1002::/home/jack:/bin/bash</span><br><span class="line">nginx:x:995:993::/home/nginx:/sbin/nologin</span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/bash</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>根据文件批量修改用户名密码：</p>
+</blockquote>
+<pre><code>cat shadow格式文件 | chpasswd      批量更改用户密码
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat pass.txt </span><br><span class="line">user1:testroot</span><br><span class="line">user2:testroot</span><br><span class="line">[root@localhost ~]# cat pass.txt | chpasswd </span><br><span class="line">[root@localhost ~]# cat /etc/shadow</span><br><span class="line">user1:$6$XrEnzKv1yN/5$/p9/R/.4MzvzMbjsIPK1NM39mLW6hK4klP6IluSU7NJfSL2Dci4uxVoHkUfYRPqTx79o4Nqtb1NoF5w1N1lfP0:18104:0:99999:7:::</span><br><span class="line">user2:$6$Npauj/s4aeC/pGK$nLpC6QWIsXXjtDeIf5u0hbbNaesU/yTyObXoJtIluD.OFZf0MLVwmzsdfeI/hbQpyG7zufy.fbPWN2BQ3meDH1:18104:0:99999:7:::</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>更改用户属性</p>
+</blockquote>
+<pre><code>usermod [OPTION] 用户名  
+-u UID: 新UID
+-g GID: 新主组  
+-G GROUP1[,GROUP2,...[,GROUPN]]]：新附加组，原来的附加组将会被 覆盖；若保留原有，则要同时使用-a选项  
+-s SHELL：新的默认SHELL  
+-c &apos;COMMENT&apos;：新的注释信息  
+-d HOME: 新家目录不会自动创建；若要创建新家目录并移动原家数据， 同时使用-m选项  
+-l login_name: 新的名字  
+-L: lock指定用户,在/etc/shadow 密码栏的增加 !   
+-U: unlock指定用户,将 /etc/shadow 密码栏的 ! 拿掉  
+-e YYYY-MM-DD: 指明用户账号过期日期  
+-f INACTIVE: 设定非活动期限
+</code></pre><blockquote>
+<p>为用户追加新的附加组：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1)</span><br><span class="line">[root@localhost ~]# usermod -aG user2,tom,jack user1</span><br><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1),1000(tom),1002(jack),1007(user2)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>锁定指定用户：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat /etc/shadow</span><br><span class="line">user1:$6$XrEnzKv1yN/5$/p9/R/.4MzvzMbjsIPK1NM39mLW6hK4klP6IluSU7NJfSL2Dci4uxVoHkUfYRPqTx79o4Nqtb1NoF5w1N1lfP0:18104:0:99999:7:::</span><br><span class="line">user2:$6$Npauj/s4aeC/pGK$nLpC6QWIsXXjtDeIf5u0hbbNaesU/yTyObXoJtIluD.OFZf0MLVwmzsdfeI/hbQpyG7zufy.fbPWN2BQ3meDH1:18104:0:99999:7:::</span><br><span class="line">[root@localhost ~]# usermod -L user1</span><br><span class="line">[root@localhost ~]# cat /etc/shadow</span><br><span class="line">user1:!$6$XrEnzKv1yN/5$/p9/R/.4MzvzMbjsIPK1NM39mLW6hK4klP6IluSU7NJfSL2Dci4uxVoHkUfYRPqTx79o4Nqtb1NoF5w1N1lfP0:18104:0:99999:7:::</span><br><span class="line">user2:$6$Npauj/s4aeC/pGK$nLpC6QWIsXXjtDeIf5u0hbbNaesU/yTyObXoJtIluD.OFZf0MLVwmzsdfeI/hbQpyG7zufy.fbPWN2BQ3meDH1:18104:0:99999:7:::</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>更改用户的shell:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat /etc/passwd</span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/bash</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br><span class="line">[root@localhost ~]# usermod -s /sbin/csh user1</span><br><span class="line">[root@localhost ~]# cat /etc/passwd</span><br><span class="line">user1:x:1005:1005:This is test!:/home/user1:/sbin/csh</span><br><span class="line">user2:x:1006:1007:This is test!:/home/user2:/sbin/bash</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>删除用户</p>
+</blockquote>
+<pre><code>userdel [OPTION] 用户名
+    -r: 删除用户家目录以及邮件目录
+</code></pre><blockquote>
+<p>查看用户相关的id信息，可以使用 id  用户名  判断用户是否存在。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id [OPTION]... [USER]  </span><br><span class="line">    -u: 显示UID  </span><br><span class="line">    -g: 显示GID  </span><br><span class="line">    -G: 显示用户所属的组的ID  </span><br><span class="line">    -n: 显示名称，需配合ugG使用</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# id user1</span><br><span class="line">uid=1005(user1) gid=1005(user1) groups=1005(user1),1000(tom),1002(jack),1007(user2)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>用户密码的相关修改</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">passwd [OPTIONS] UserName: 修改指定用户的密码 </span><br><span class="line">         -d：删除指定用户密码      </span><br><span class="line">         -l：锁定指定用户      </span><br><span class="line">         -u：解锁指定用户      </span><br><span class="line">         -e：强制用户下次登录修改密码    </span><br><span class="line">         -f：强制操作      </span><br><span class="line">         -n mindays：指定最短使用期限      </span><br><span class="line">         -x maxdays：最大使用期限     </span><br><span class="line">         -w warndays：提前多少天开始警告      </span><br><span class="line">         -i inactivedays：非活动期限      </span><br><span class="line">         --stdin：从标准输入接收用户密码 </span><br><span class="line">            示例：echo &quot;PASSWORD&quot; | passwd --stdin USERNAME </span><br><span class="line">[root@localhost ~]# echo 1234567 | passwd --stdin user1 &amp;&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Linux小技巧" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -240,66 +372,6 @@ ELOTIcFBGE01
       
 	<div class="article-category tagcloud">
 	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/20/Linux下添加网卡及静态网络配置/">
-        Linux下添加网卡及静态网络配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）<br>添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。</p>
-<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">GATEWAY=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
 	</div>
 
 
@@ -391,6 +463,66 @@ ELOTIcFBGE01
       
 	<div class="article-category tagcloud">
 	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/20/Linux下添加网卡及静态网络配置/">
+        Linux下添加网卡及静态网络配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）<br>添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。</p>
+<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">GATEWAY=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/network/">network</a>
 	</div>
 
 
@@ -566,6 +698,131 @@ gc 全局替换，每次替换前询问
 
 
   
+    <article id="post-文件查找_locate-find" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/17/文件查找_locate-find/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/17/文件查找_locate-find/">
+        文件查找_locate-find
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find</p>
+</blockquote>
+<p><strong><em>其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。</em></strong></p>
+<blockquote>
+<p>关于locate：</p>
+</blockquote>
+<pre><code>该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate/mlocate.db 。然而该索引的的构建是在系统较为空闲时自动进行的。也可手动进行（updatedb）。
+</code></pre><p><strong><em>虽然locate在使用时比较节省资源，但是索引的构建过程是非常消耗资源的，因为需要遍历整个根文件系统。</em></strong></p>
+<blockquote>
+<p>locate有以下工作特点：</p>
+</blockquote>
+<pre><code>• 查找速度快 
+• 模糊查找 
+• 非实时查找 
+• 搜索的是文件的全路径，不仅仅是文件名 
+• 可能只搜索用户具备读取和执行权限的目录 
+</code></pre><blockquote>
+<p>常用选项：</p>
+</blockquote>
+<pre><code>-i不区分大小写。
+-n # 仅仅列出前#匹配到的文件。
+-r 使用正则表达式。
+</code></pre><p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost qqq]#locate -n 5 -ir &quot;\.cONf$&quot;      </span><br><span class="line">/etc/asound.conf</span><br><span class="line">/etc/autofs.conf</span><br><span class="line">/etc/autofs_ldap_auth.conf</span><br><span class="line">/etc/chrony.conf</span><br><span class="line">/etc/dnsmasq.conf</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>关于find的用法介绍：</em></strong></p>
+<blockquote>
+<p>find [选项] [查找路径] [查找条件] [处理动作]</p>
+</blockquote>
+<pre><code>查找路径：指定具体目标路径；默认为当前目录。
+查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件。
+处理动作：对符合条件的文件做操作，默认输出至屏幕
+</code></pre><p><strong><em>以下是关于find的查找条件：</em></strong></p>
+<blockquote>
+<p>指搜索层级</p>
+</blockquote>
+<pre><code>-maxdepth level 最大搜索目录深度,指定目录下的文件为第1级
+-mindepth level 最小搜索目录深度
+</code></pre><blockquote>
+<p>根据文件名和inode查找：</p>
+</blockquote>
+<pre><code>-inum n 按inode号查找
+-iname &quot;文件名称&quot;：不区分字母大小写
+-name &quot;文件名称&quot;：支持使用glob *, ?, [], [^]
+-samefile name 相同inode号的文件
+-links n 链接数为n的文件
+-regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称
+</code></pre><blockquote>
+<p>根据属主、属组查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-user USERNAME：查找属主为指定用户(UID)的文件</span><br><span class="line">-group GRPNAME: 查找属组为指定组(GID)的文件</span><br><span class="line">-uid UserID：查找属主为指定的UID号的文件</span><br><span class="line">-gid GroupID：查找属组为指定的GID号的文件</span><br><span class="line">-nouser：查找没有属主的文件</span><br><span class="line">-nogroup：查找没有属组的文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据文件类型查找<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-type TYPE</span><br><span class="line">• f: 普通文件</span><br><span class="line">• d: 目录文件</span><br><span class="line">• l: 符号链接文件</span><br><span class="line">• s：套接字文件</span><br><span class="line">• b: 块设备文件</span><br><span class="line">• c: 字符设备文件</span><br><span class="line">• p: 管道文件</span><br><span class="line">空文件或目录</span><br><span class="line"> -empty</span><br><span class="line"> 示例：find /app -type d -empty</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据⽂件⼤⼩来查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-size [+|-]#UNIT</span><br><span class="line"> 常用单位：k, M, G，c（byte）</span><br><span class="line">#UNIT: (#-1, #]</span><br><span class="line"> 如：6k 表示(5k,6k]</span><br><span class="line">-#UNIT：[0,#-1]</span><br><span class="line"> 如：-6k 表示[0,5k]</span><br><span class="line">+#UNIT：(#,∞)</span><br><span class="line"> 如：+6k 表示(6k,∞)</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据时间戳：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">以“天”为单位,</span><br><span class="line">-atime [+|-]#,</span><br><span class="line"> #: [#,#+1)</span><br><span class="line"> +#: [#+1,∞]</span><br><span class="line"> -#: [0,#)</span><br><span class="line">-mtime</span><br><span class="line">-ctime</span><br><span class="line">以“分钟”为单位</span><br><span class="line"> -amin</span><br><span class="line"> -mmin</span><br><span class="line"> -cmin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据权限查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-perm [/|-]MODE</span><br><span class="line"> MODE: 精确权限匹配</span><br><span class="line"> /MODE：任何一类(u,g,o)对象的权限中只要能一位匹配即可，或关系，+ 从centos7开始淘汰</span><br><span class="line"> -MODE：每一类对象都必须同时拥有指定权限，与关系 0 表示不关注</span><br><span class="line">find -perm 755 会匹配权限模式恰好是755的文件</span><br><span class="line">只要当任意人有写权限时，find -perm +222就会匹配</span><br><span class="line">只有当每个人都有写权限时，find -perm -222才会匹配</span><br><span class="line">只有当其它人（other）有写权限时，find -perm -002才会匹配</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>处理动作<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-print：默认的处理动作，显示至屏幕</span><br><span class="line">-ls：类似于对查找到的文件执行“ls -l”命令</span><br><span class="line">-delete：删除查找到的文件</span><br><span class="line">-fls file：查找到的所有文件的长格式信息保存至指定文件中</span><br><span class="line">-ok COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式</span><br><span class="line">要求用户确认</span><br><span class="line">-exec COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令</span><br><span class="line">&#123;&#125;: 用于引用查找到的文件名称自身</span><br><span class="line">find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>参数替换xargs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">由于很多命令不支持管道|来传递参数，而日常工作中有这个必要，所以就有了xargs命令</span><br><span class="line">xargs用于产生某个命令的参数，xargs 可以读入 stdin 的数据，并且以空格符或回车符将 stdin 的数据分隔</span><br><span class="line">成为arguments</span><br><span class="line">注意：文件名或者是其他意义的名词内含有空格符的情况</span><br><span class="line">有些命令不能接受过多参数，命令执行可能会失败，xargs可以解决</span><br><span class="line">示例：</span><br><span class="line"> ls f* |xargs rm</span><br><span class="line"> find /sbin/ -perm +700 |ls -l 这个命令是错误的</span><br><span class="line"> find /bin/ -perm /7000 | xargs ls -l 查找有特殊权限的文件</span><br><span class="line"> find /bin/ -perm -7000 | xargs ls -l 此命令和上面有何区别？</span><br><span class="line">find和xargs格式：find | xargs COMMAND</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -625,117 +882,7 @@ gc 全局替换，每次替换前询问
       
       
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-shell基本语法" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/17/shell基本语法/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/shell基本语法/">
-        shell基本语法
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>通过正则表达式获取地址ip:</p>
-</blockquote>
-<pre><code>^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
-</code></pre><blockquote>
-<p>test,”[ ]”,”[[ ]]”的区别：</p>
-</blockquote>
-<pre><code>其中test等价于&quot;[ ]&quot;，而&quot;[[ ]]&quot;中的&quot;==&quot;后跟通配符，&quot;=~&quot;后面可以跟正则表达式，并且在&quot;[[ ]]&quot;中的变量一般加双引号，通配符和正则表达式可以不加双引号,-a（并且）
--o(或者)，这两个在&quot;[[ ]]&quot;中不支持。
-</code></pre><blockquote>
-<p>只读变量</p>
-</blockquote>
-<pre><code>只读变量：只能声明，但不能修改和删除 
-readonly name  
-declare   -r name 
-查看只读变量： 
-readonly  -p
-</code></pre><blockquote>
-<p>关于位置变量</p>
-</blockquote>
-<pre><code>$1, $2, ... 对应第1、第2等参数，shift [n]换位置 
-$0 命令本身  
-$*  传递给脚本的所有参数，全部参数合为一个字符串  
-$@  传递给脚本的所有参数，每个参数为独立字符串  
-$# 传递给脚本的参数的个数
-set --  清空所有位置变量        
-</code></pre><p><strong><em>注意：$@ $\</em> 只在被双引号包起来的时候才会有差异*</strong></p>
-<blockquote>
-<p>在shell中( )和{ }的区别：</p>
-</blockquote>
-<pre><code>( )会在当前bash下开启一个新的进程，( )中的命令运行完毕后在退出子进程返回父进程。但是父进程中定义的局部变量也会继承到( )创建的子进程中（有时候计算机真TM是个玄学问题。）
-[root@centos7 ~]#(umask 066;touch /data/test.txt);touch /data/test2.txt
-[root@centos7 ~]#ll /data/test.txt 
--rw------- 1 root root 0 Jul 31 16:11 /data/test.txt
-[root@centos7 ~]#ll /data/test2.txt 
--rw-r--r-- 1 root root 0 Jul 31 16:11 /data/test2.txt
-[root@centos7 ~]#NAME=mage;( NAME=wang;echo $NAME);echo $NAME
-wang
-mage
-[root@centos7 ~]#NAME=mage;( echo $NAME;NAME=wang;echo $NAME);echo $NAME
-mage
-wang
-mage
-
-{ }则是在当前进程下运行命令。
-</code></pre><blockquote>
-<p>通过^（亦或）可以实现两个变量的互换：</p>
-</blockquote>
-<pre><code>[root@centos7 script38]#x=12;y=8;tmp=$x;x=$y;y=$tmp;echo x=$x,y=$y
-x=12,y=8
-[root@centos7 script38]#x=12;y=8;x=$[x^y];y=$[x^y];x=$[x^y];echo x=$x,y=$y
-x=8,y=12
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/shell/">shell</a>
+	<a class="article-category-link" href="/categories/network/">network</a>
 	</div>
 
 
@@ -932,131 +1079,6 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
 
 
   
-    <article id="post-文件查找_locate-find" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/17/文件查找_locate-find/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/文件查找_locate-find/">
-        文件查找_locate-find
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find</p>
-</blockquote>
-<p><strong><em>其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。</em></strong></p>
-<blockquote>
-<p>关于locate：</p>
-</blockquote>
-<pre><code>该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate/mlocate.db 。然而该索引的的构建是在系统较为空闲时自动进行的。也可手动进行（updatedb）。
-</code></pre><p><strong><em>虽然locate在使用时比较节省资源，但是索引的构建过程是非常消耗资源的，因为需要遍历整个根文件系统。</em></strong></p>
-<blockquote>
-<p>locate有以下工作特点：</p>
-</blockquote>
-<pre><code>• 查找速度快 
-• 模糊查找 
-• 非实时查找 
-• 搜索的是文件的全路径，不仅仅是文件名 
-• 可能只搜索用户具备读取和执行权限的目录 
-</code></pre><blockquote>
-<p>常用选项：</p>
-</blockquote>
-<pre><code>-i不区分大小写。
--n # 仅仅列出前#匹配到的文件。
--r 使用正则表达式。
-</code></pre><p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost qqq]#locate -n 5 -ir &quot;\.cONf$&quot;      </span><br><span class="line">/etc/asound.conf</span><br><span class="line">/etc/autofs.conf</span><br><span class="line">/etc/autofs_ldap_auth.conf</span><br><span class="line">/etc/chrony.conf</span><br><span class="line">/etc/dnsmasq.conf</span><br></pre></td></tr></table></figure></p>
-<p><strong><em>关于find的用法介绍：</em></strong></p>
-<blockquote>
-<p>find [选项] [查找路径] [查找条件] [处理动作]</p>
-</blockquote>
-<pre><code>查找路径：指定具体目标路径；默认为当前目录。
-查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件。
-处理动作：对符合条件的文件做操作，默认输出至屏幕
-</code></pre><p><strong><em>以下是关于find的查找条件：</em></strong></p>
-<blockquote>
-<p>指搜索层级</p>
-</blockquote>
-<pre><code>-maxdepth level 最大搜索目录深度,指定目录下的文件为第1级
--mindepth level 最小搜索目录深度
-</code></pre><blockquote>
-<p>根据文件名和inode查找：</p>
-</blockquote>
-<pre><code>-inum n 按inode号查找
--iname &quot;文件名称&quot;：不区分字母大小写
--name &quot;文件名称&quot;：支持使用glob *, ?, [], [^]
--samefile name 相同inode号的文件
--links n 链接数为n的文件
--regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称
-</code></pre><blockquote>
-<p>根据属主、属组查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-user USERNAME：查找属主为指定用户(UID)的文件</span><br><span class="line">-group GRPNAME: 查找属组为指定组(GID)的文件</span><br><span class="line">-uid UserID：查找属主为指定的UID号的文件</span><br><span class="line">-gid GroupID：查找属组为指定的GID号的文件</span><br><span class="line">-nouser：查找没有属主的文件</span><br><span class="line">-nogroup：查找没有属组的文件</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>根据文件类型查找<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-type TYPE</span><br><span class="line">• f: 普通文件</span><br><span class="line">• d: 目录文件</span><br><span class="line">• l: 符号链接文件</span><br><span class="line">• s：套接字文件</span><br><span class="line">• b: 块设备文件</span><br><span class="line">• c: 字符设备文件</span><br><span class="line">• p: 管道文件</span><br><span class="line">空文件或目录</span><br><span class="line"> -empty</span><br><span class="line"> 示例：find /app -type d -empty</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>根据⽂件⼤⼩来查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-size [+|-]#UNIT</span><br><span class="line"> 常用单位：k, M, G，c（byte）</span><br><span class="line">#UNIT: (#-1, #]</span><br><span class="line"> 如：6k 表示(5k,6k]</span><br><span class="line">-#UNIT：[0,#-1]</span><br><span class="line"> 如：-6k 表示[0,5k]</span><br><span class="line">+#UNIT：(#,∞)</span><br><span class="line"> 如：+6k 表示(6k,∞)</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>根据时间戳：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">以“天”为单位,</span><br><span class="line">-atime [+|-]#,</span><br><span class="line"> #: [#,#+1)</span><br><span class="line"> +#: [#+1,∞]</span><br><span class="line"> -#: [0,#)</span><br><span class="line">-mtime</span><br><span class="line">-ctime</span><br><span class="line">以“分钟”为单位</span><br><span class="line"> -amin</span><br><span class="line"> -mmin</span><br><span class="line"> -cmin</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>根据权限查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-perm [/|-]MODE</span><br><span class="line"> MODE: 精确权限匹配</span><br><span class="line"> /MODE：任何一类(u,g,o)对象的权限中只要能一位匹配即可，或关系，+ 从centos7开始淘汰</span><br><span class="line"> -MODE：每一类对象都必须同时拥有指定权限，与关系 0 表示不关注</span><br><span class="line">find -perm 755 会匹配权限模式恰好是755的文件</span><br><span class="line">只要当任意人有写权限时，find -perm +222就会匹配</span><br><span class="line">只有当每个人都有写权限时，find -perm -222才会匹配</span><br><span class="line">只有当其它人（other）有写权限时，find -perm -002才会匹配</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>处理动作<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-print：默认的处理动作，显示至屏幕</span><br><span class="line">-ls：类似于对查找到的文件执行“ls -l”命令</span><br><span class="line">-delete：删除查找到的文件</span><br><span class="line">-fls file：查找到的所有文件的长格式信息保存至指定文件中</span><br><span class="line">-ok COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式</span><br><span class="line">要求用户确认</span><br><span class="line">-exec COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令</span><br><span class="line">&#123;&#125;: 用于引用查找到的文件名称自身</span><br><span class="line">find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>参数替换xargs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">由于很多命令不支持管道|来传递参数，而日常工作中有这个必要，所以就有了xargs命令</span><br><span class="line">xargs用于产生某个命令的参数，xargs 可以读入 stdin 的数据，并且以空格符或回车符将 stdin 的数据分隔</span><br><span class="line">成为arguments</span><br><span class="line">注意：文件名或者是其他意义的名词内含有空格符的情况</span><br><span class="line">有些命令不能接受过多参数，命令执行可能会失败，xargs可以解决</span><br><span class="line">示例：</span><br><span class="line"> ls f* |xargs rm</span><br><span class="line"> find /sbin/ -perm +700 |ls -l 这个命令是错误的</span><br><span class="line"> find /bin/ -perm /7000 | xargs ls -l 查找有特殊权限的文件</span><br><span class="line"> find /bin/ -perm -7000 | xargs ls -l 此命令和上面有何区别？</span><br><span class="line">find和xargs格式：find | xargs COMMAND</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
     <article id="post-shell条件判断" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1129,11 +1151,11 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
 
 
   
-    <article id="post-web安全-逻辑攻击类-逻辑攻击类测试" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-shell基本语法" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2018/12/27/web安全-逻辑攻击类-逻辑攻击类测试/" class="article-date">
-  	<time datetime="2018-12-26T23:07:41.000Z" itemprop="datePublished">2018-12-27</time>
+      <a href="/2019/07/17/shell基本语法/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
 </a>
     </div>
   
@@ -1146,8 +1168,8 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/27/web安全-逻辑攻击类-逻辑攻击类测试/">
-        web安全##逻辑攻击类#逻辑攻击类测试
+      <a class="article-title" href="/2019/07/17/shell基本语法/">
+        shell基本语法
         
       </a>
     </h1>
@@ -1158,8 +1180,59 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
     
     <div class="article-entry" itemprop="articleBody">
       
-        <img src="/2018/12/27/web安全-逻辑攻击类-逻辑攻击类测试/3.jpg">
+        <blockquote>
+<p>通过正则表达式获取地址ip:</p>
+</blockquote>
+<pre><code>^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
+</code></pre><blockquote>
+<p>test,”[ ]”,”[[ ]]”的区别：</p>
+</blockquote>
+<pre><code>其中test等价于&quot;[ ]&quot;，而&quot;[[ ]]&quot;中的&quot;==&quot;后跟通配符，&quot;=~&quot;后面可以跟正则表达式，并且在&quot;[[ ]]&quot;中的变量一般加双引号，通配符和正则表达式可以不加双引号,-a（并且）
+-o(或者)，这两个在&quot;[[ ]]&quot;中不支持。
+</code></pre><blockquote>
+<p>只读变量</p>
+</blockquote>
+<pre><code>只读变量：只能声明，但不能修改和删除 
+readonly name  
+declare   -r name 
+查看只读变量： 
+readonly  -p
+</code></pre><blockquote>
+<p>关于位置变量</p>
+</blockquote>
+<pre><code>$1, $2, ... 对应第1、第2等参数，shift [n]换位置 
+$0 命令本身  
+$*  传递给脚本的所有参数，全部参数合为一个字符串  
+$@  传递给脚本的所有参数，每个参数为独立字符串  
+$# 传递给脚本的参数的个数
+set --  清空所有位置变量        
+</code></pre><p><strong><em>注意：$@ $\</em> 只在被双引号包起来的时候才会有差异*</strong></p>
+<blockquote>
+<p>在shell中( )和{ }的区别：</p>
+</blockquote>
+<pre><code>( )会在当前bash下开启一个新的进程，( )中的命令运行完毕后在退出子进程返回父进程。但是父进程中定义的局部变量也会继承到( )创建的子进程中（有时候计算机真TM是个玄学问题。）
+[root@centos7 ~]#(umask 066;touch /data/test.txt);touch /data/test2.txt
+[root@centos7 ~]#ll /data/test.txt 
+-rw------- 1 root root 0 Jul 31 16:11 /data/test.txt
+[root@centos7 ~]#ll /data/test2.txt 
+-rw-r--r-- 1 root root 0 Jul 31 16:11 /data/test2.txt
+[root@centos7 ~]#NAME=mage;( NAME=wang;echo $NAME);echo $NAME
+wang
+mage
+[root@centos7 ~]#NAME=mage;( echo $NAME;NAME=wang;echo $NAME);echo $NAME
+mage
+wang
+mage
 
+{ }则是在当前进程下运行命令。
+</code></pre><blockquote>
+<p>通过^（亦或）可以实现两个变量的互换：</p>
+</blockquote>
+<pre><code>[root@centos7 script38]#x=12;y=8;tmp=$x;x=$y;y=$tmp;echo x=$x,y=$y
+x=12,y=8
+[root@centos7 script38]#x=12;y=8;x=$[x^y];y=$[x^y];x=$[x^y];echo x=$x,y=$y
+x=8,y=12
+</code></pre>
       
     </div>
     
@@ -1168,7 +1241,7 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
       
       
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	<a class="article-category-link" href="/categories/shell/">shell</a>
 	</div>
 
 
