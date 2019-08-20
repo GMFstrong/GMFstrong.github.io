@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>shell基本语法 | ConqUeroR</title>
+  <title>Linux主机名管理 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="通过正则表达式获取地址ip:  ^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$  test,”[ ]”,”[[ ]]”的区别：  其中test等价于&amp;quot;[ ]&amp;quot;，而&amp;quot;[[ ]]&amp;quot;中的&amp;quot;==&amp;quot;后跟通">
+  <meta name="description" content="关于Linux主机名的修改：hostname 主机名         再执行exec bash可以临时生效。123[root@centos6 ~]#hostname node1[root@centos6 ~]#exec bash[root@node1 ~]#  若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/e">
 <meta property="og:type" content="article">
-<meta property="og:title" content="shell基本语法">
-<meta property="og:url" content="http://gmfdevops.com.com/2019/07/17/shell基本语法/index.html">
+<meta property="og:title" content="Linux主机名管理">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/08/20/Linux主机名管理/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="通过正则表达式获取地址ip:  ^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$  test,”[ ]”,”[[ ]]”的区别：  其中test等价于&amp;quot;[ ]&amp;quot;，而&amp;quot;[[ ]]&amp;quot;中的&amp;quot;==&amp;quot;后跟通">
+<meta property="og:description" content="关于Linux主机名的修改：hostname 主机名         再执行exec bash可以临时生效。123[root@centos6 ~]#hostname node1[root@centos6 ~]#exec bash[root@node1 ~]#  若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/e">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-04T05:35:37.000Z">
+<meta property="og:updated_time" content="2019-08-20T02:43:45.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="shell基本语法">
-<meta name="twitter:description" content="通过正则表达式获取地址ip:  ^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$  test,”[ ]”,”[[ ]]”的区别：  其中test等价于&amp;quot;[ ]&amp;quot;，而&amp;quot;[[ ]]&amp;quot;中的&amp;quot;==&amp;quot;后跟通">
+<meta name="twitter:title" content="Linux主机名管理">
+<meta name="twitter:description" content="关于Linux主机名的修改：hostname 主机名         再执行exec bash可以临时生效。123[root@centos6 ~]#hostname node1[root@centos6 ~]#exec bash[root@node1 ~]#  若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/e">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -189,11 +189,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-shell基本语法" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-Linux主机名管理" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/shell基本语法/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+      <a href="/2019/08/20/Linux主机名管理/" class="article-date">
+  	<time datetime="2019-08-20T02:41:09.000Z" itemprop="datePublished">2019-08-20</time>
 </a>
     </div>
   
@@ -206,7 +206,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      shell基本语法
+      Linux主机名管理
       
     </h1>
   
@@ -217,7 +217,7 @@
         
         
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/shell/">shell</a>
+	<a class="article-category-link" href="/categories/linux/">linux</a>
 	</div>
 
 
@@ -229,58 +229,20 @@
     <div class="article-entry" itemprop="articleBody">
       
         <blockquote>
-<p>通过正则表达式获取地址ip:</p>
+<p>关于Linux主机名的修改：<br>hostname 主机名         再执行exec bash可以临时生效。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]#hostname node1</span><br><span class="line">[root@centos6 ~]#exec bash</span><br><span class="line">[root@node1 ~]#</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<pre><code>^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
-</code></pre><blockquote>
-<p>test,”[ ]”,”[[ ]]”的区别：</p>
-</blockquote>
-<pre><code>其中test等价于&quot;[ ]&quot;，而&quot;[[ ]]&quot;中的&quot;==&quot;后跟通配符，&quot;=~&quot;后面可以跟正则表达式，并且在&quot;[[ ]]&quot;中的变量一般加双引号，通配符和正则表达式可以不加双引号,-a（并且）
--o(或者)，这两个在&quot;[[ ]]&quot;中不支持。
-</code></pre><blockquote>
-<p>只读变量</p>
-</blockquote>
-<pre><code>只读变量：只能声明，但不能修改和删除 
-readonly name  
-declare   -r name 
-查看只读变量： 
-readonly  -p
-</code></pre><blockquote>
-<p>关于位置变量</p>
-</blockquote>
-<pre><code>$1, $2, ... 对应第1、第2等参数，shift [n]换位置 
-$0 命令本身  
-$*  传递给脚本的所有参数，全部参数合为一个字符串  
-$@  传递给脚本的所有参数，每个参数为独立字符串  
-$# 传递给脚本的参数的个数
-set --  清空所有位置变量        
-</code></pre><p><strong><em>注意：$@ $\</em> 只在被双引号包起来的时候才会有差异*</strong></p>
+<p><strong><em>若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/etc/hostname，更改配置文件不会立即生效。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]#vim /etc/sysconfig/network</span><br><span class="line">  </span><br><span class="line">  1 NETWORKING=yes</span><br><span class="line">  2 HOSTNAME=conqueror</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>如若修改了/etc/sysconfig/network文件，建议在/etc/hosts文件里127.0.0.1后加入自己更改的主机名，便于自己在访问主机名时可以解析。</em></strong></p>
 <blockquote>
-<p>在shell中( )和{ }的区别：</p>
+<p>没有添加以前：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">ping: unknown host conqueror</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<pre><code>( )会在当前bash下开启一个新的进程，( )中的命令运行完毕后在退出子进程返回父进程。但是父进程中定义的局部变量也会继承到( )创建的子进程中（有时候计算机真TM是个玄学问题。）
-[root@centos7 ~]#(umask 066;touch /data/test.txt);touch /data/test2.txt
-[root@centos7 ~]#ll /data/test.txt 
--rw------- 1 root root 0 Jul 31 16:11 /data/test.txt
-[root@centos7 ~]#ll /data/test2.txt 
--rw-r--r-- 1 root root 0 Jul 31 16:11 /data/test2.txt
-[root@centos7 ~]#NAME=mage;( NAME=wang;echo $NAME);echo $NAME
-wang
-mage
-[root@centos7 ~]#NAME=mage;( echo $NAME;NAME=wang;echo $NAME);echo $NAME
-mage
-wang
-mage
+<blockquote>
+<p>添加以后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#vim /etc/hosts</span><br><span class="line">  </span><br><span class="line">  1 127.0.0.1   localhost localhost.localdomain localhost4 localhos</span><br><span class="line">    t4.localdomain4 conqueror                                      </span><br><span class="line">  2 ::1         localhost localhost.localdomain localhost6 localhos</span><br><span class="line">    t6.localdomain6</span><br><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">PING localhost (127.0.0.1) 56(84) bytes of data.</span><br><span class="line">64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.014 ms</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>在Centos7中可以使用如下命令管理主机名：</em></strong><br>hostnamectl set-hostname 主机名</p>
+<pre><code>以上命令用于修改主机名。
+</code></pre><p>默认删除文件/etc/hostname，主机名会恢复至localhost.localdomain。</p>
 
-{ }则是在当前进程下运行命令。
-</code></pre><blockquote>
-<p>通过^（亦或）可以实现两个变量的互换：</p>
-</blockquote>
-<pre><code>[root@centos7 script38]#x=12;y=8;tmp=$x;x=$y;y=$tmp;echo x=$x,y=$y
-x=12,y=8
-[root@centos7 script38]#x=12;y=8;x=$[x^y];y=$[x^y];x=$[x^y];echo x=$x,y=$y
-x=8,y=12
-</code></pre>
       
     </div>
     
@@ -289,18 +251,18 @@ x=8,y=12
     
 <nav id="article-nav">
   
-    <a href="/2019/07/17/文本处理-sed/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/08/20/Ubuntu的网卡配置/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          文本处理-sed
+          Ubuntu的网卡配置
         
       </div>
     </a>
   
   
-    <a href="/2019/07/17/Linux下的桥接网卡配置/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Linux下的桥接网卡配置</div>
+    <a href="/2019/08/20/Bonding的网卡配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Bonding的网卡配置</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -310,7 +272,7 @@ x=8,y=12
 </article>
 
 
-<div class="ds-share share" data-thread-key="shell基本语法" data-title="shell基本语法" data-url="http://gmfdevops.com.com/2019/07/17/shell基本语法/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="shell基本语法">
+<div class="ds-share share" data-thread-key="Linux主机名管理" data-title="Linux主机名管理" data-url="http://gmfdevops.com.com/2019/08/20/Linux主机名管理/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Linux主机名管理">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>

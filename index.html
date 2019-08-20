@@ -190,6 +190,132 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Ubuntu的网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/20/Ubuntu的网卡配置/" class="article-date">
+  	<time datetime="2019-08-20T02:41:39.000Z" itemprop="datePublished">2019-08-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/20/Ubuntu的网卡配置/">
+        Ubuntu的网卡配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Linux主机名管理" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/20/Linux主机名管理/" class="article-date">
+  	<time datetime="2019-08-20T02:41:09.000Z" itemprop="datePublished">2019-08-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/20/Linux主机名管理/">
+        Linux主机名管理
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>关于Linux主机名的修改：<br>hostname 主机名         再执行exec bash可以临时生效。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]#hostname node1</span><br><span class="line">[root@centos6 ~]#exec bash</span><br><span class="line">[root@node1 ~]#</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/etc/hostname，更改配置文件不会立即生效。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]#vim /etc/sysconfig/network</span><br><span class="line">  </span><br><span class="line">  1 NETWORKING=yes</span><br><span class="line">  2 HOSTNAME=conqueror</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>如若修改了/etc/sysconfig/network文件，建议在/etc/hosts文件里127.0.0.1后加入自己更改的主机名，便于自己在访问主机名时可以解析。</em></strong></p>
+<blockquote>
+<p>没有添加以前：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">ping: unknown host conqueror</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>添加以后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#vim /etc/hosts</span><br><span class="line">  </span><br><span class="line">  1 127.0.0.1   localhost localhost.localdomain localhost4 localhos</span><br><span class="line">    t4.localdomain4 conqueror                                      </span><br><span class="line">  2 ::1         localhost localhost.localdomain localhost6 localhos</span><br><span class="line">    t6.localdomain6</span><br><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">PING localhost (127.0.0.1) 56(84) bytes of data.</span><br><span class="line">64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.014 ms</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>在Centos7中可以使用如下命令管理主机名：</em></strong><br>hostnamectl set-hostname 主机名</p>
+<pre><code>以上命令用于修改主机名。
+</code></pre><p>默认删除文件/etc/hostname，主机名会恢复至localhost.localdomain。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Bonding的网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1000,186 +1126,6 @@ lsattr 显示特定属性
 tom : tom jim
 [root@localhost ~]# id tom
 uid=1000(tom) gid=1000(tom) groups=1000(tom),1001(jim)
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-ACL权限控制总结" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/26/ACL权限控制总结/" class="article-date">
-  	<time datetime="2019-07-26T11:52:33.000Z" itemprop="datePublished">2019-07-26</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/26/ACL权限控制总结/">
-        ACL权限控制总结
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">getfacl file |directory</span><br><span class="line">setfacl -m u:wang:rwx file|directory</span><br><span class="line">setfacl -m g:admins:rw file| directory</span><br><span class="line">setfacl -x u:wang file |directory</span><br><span class="line">setfacl -b file1 清除所有ACL权限</span><br><span class="line">getfacl file1 | setfacl --set-file=- file2 复制file1的acl权限给file2</span><br></pre></td></tr></table></figure></p>
-<p>mask只影响除所有者和other的之外的人和组的最大权限。</p>
-<p>mask需要与用户的权限进行逻辑与运算后，才能变成有限的权限。</p>
-<p>用户或组的设置必须存在于mask权限设定范围内才会生效。</p>
-<pre><code>--set选项会把原有的ACL项都删除，用新的替代，需要注意的是一定要包含
-UGO的设置，不能象-m一样只是添加ACL就可以
-    setfacl --set u::rw,u:wang:rw,g::r,o::- file1
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">主要的文件操作命令cp和mv都支持ACL，只是cp命令需要加上-p 参数。但是</span><br><span class="line">tar等常见的备份工具是不会保留目录和文件的ACL信息</span><br><span class="line">getfacl -R /tmp/dir1 &gt; acl.txt</span><br><span class="line">setfacl -R -b /tmp/dir1</span><br><span class="line">setfacl -R --set-file=acl.txt /tmp/dir1</span><br><span class="line">setfacl --restore acl.txt</span><br><span class="line">getfacl -R /tmp/dir1</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linux文件权限总结" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/26/Linux文件权限总结/" class="article-date">
-  	<time datetime="2019-07-26T11:19:22.000Z" itemprop="datePublished">2019-07-26</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/26/Linux文件权限总结/">
-        Linux文件权限总结
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>chown可以用来修改文件的属主和属组：</p>
-</blockquote>
-<pre><code>chown [OPTION]  [OWNER][:[GROUP]] 修改文件的所属主和属组。
-    -R: 递归
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 root root 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chown user1:user1 f1.txt </span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
-<pre><code>[root@localhost dir1]# ll
-total 4
--rw-r--r--. 1 root root 5 Jul 27 15:08 f1.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
-[root@localhost dir1]# chown jim f1.txt 
-[root@localhost dir1]# ll
-total 4
--rw-r--r--. 1 jim  root 5 Jul 27 15:08 f1.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
-[root@localhost dir1]# chown :test f1.txt      #冒号后跟组名更改属组
-[root@localhost dir1]# ll
-total 4
--rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f3.txt
-</code></pre><blockquote>
-<p>修改文件的属组：chgrp<br>    chgrp [OPTION]  GROUP FILE…<br>    chgrp [OPTION]  –reference=RFILE FILE<br>        -R 递归</p>
-</blockquote>
-<pre><code>[root@localhost dir1]# chgrp jack f3.txt 
-[root@localhost dir1]# ll
-total 4
--rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
--rw-r--r--. 1 root jack 0 Jul 27 15:07 f3.txt
-</code></pre><p><strong><em>目录权限中，x执行权限是基本权限，若没有执行权限就无法进入该目录。目录下的文件的创建与删除取决于该目录的w写权限。</em></strong></p>
-<p><strong><em>X（大写） 只给目录x权限，不给文件x权限</em></strong></p>
-<blockquote>
-<p>修改文件权限：chmod [OPTION]  MODE[,MODE]  FILE</p>
-</blockquote>
-<p>-R 递归修改权限</p>
-<pre><code>MODE：
-修改一类用户的所有权限
-    u= g= o= ug= a= u=,g=
-修改一类用户某位或某些位权限
-    u+ u- g+ g- o+ o- a+ a- + -
-chmod [OPTION] --reference=RFILE FILE
-    参考RFILE文件的权限，将FILE的修改为同RFILE
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">-rw-r--r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chmod u=rwx,g=rw,o=r f1.txt </span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
-<pre><code>[root@localhost dir1]# ll
-total 4
--rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
--rw-r--r--. 1 root jack 0 Jul 27 15:07 f3.txt
-[root@localhost dir1]# chmod u+x f3.txt 
-[root@localhost dir1]# ll
-total 4
--rw-r--r--. 1 jim  test 5 Jul 27 15:08 f1.txt
--rw-r--r--. 1 root root 0 Jul 27 15:07 f2.txt
--rwxr--r--. 1 root jack 0 Jul 27 15:07 f3.txt
 </code></pre>
       
     </div>
