@@ -190,10 +190,10 @@
 </nav>
       <div class="body-wrap">
   
-    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-shell条件判断" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
+      <a href="/2019/07/17/shell条件判断/" class="article-date">
   	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
 </a>
     </div>
@@ -207,8 +207,8 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
-        Linux下的桥接网卡配置
+      <a class="article-title" href="/2019/07/17/shell条件判断/">
+        shell条件判断
         
       </a>
     </h1>
@@ -219,28 +219,21 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br> 也可以通过修改配置文件来配置桥设备：<br>  (1)cd /etc/syscoonfig/network-scripts<br>  (2)cp ifcfg-eth0 ifcfg-br0<br>  (3)vim ifcfg-br0<br>  (4)更改其中的配置项：</p>
-<pre><code>#TYPE=Ethernet                      #改为Bridge
-#BOOTPROTO=dhcp                     #改为none
-#IPV6INIT=yes
-#DEVICE=ens33                       #改为br0
-#ONBOOT=yes
-#NM_CONTROLLED=no                   #添加该选项
-#IPADDR=192.168.1.97
-#NETMASK=255.255.255.0
-#GATEWAY=192.168.1.1
-#DNS1=
-#USERCTL=no
-</code></pre><p>  (5)vim ifcfg-ens33更改其中的配置项</p>
-<pre><code>#DEVICE=ens33
-#BOOTPROTO=none
-#NM_CONTROLLED=no                   #添加该选项
-#ONBOOT=yes
-#TYPE=Ethernet
-#BRIDHE=br0                         #指明将该设备桥接到那个设备上
-#IPV6INIT=yes
-#USERCTL=no
-</code></pre>
+        <blockquote>
+<p>[[]]表达式与[]和test用法的选项部分是相同的，其与[]和test测试表达式的区别在于，在[[]]中可以使用通配符等进行模式匹配；并且&amp;&amp;、||、&gt;、&lt;等操作符可以应用于[[]]中，但不能应用于[]中，在[]中一般使用-a、-o、-gt（用于整数）、-lt（用于整数）等操作符代替上文提到的用于[[]]中的符号。</p>
+</blockquote>
+<blockquote>
+<p>用[]测试变量时，如果被测试的变量不加双引号，那么测试结果可能会是不正确的，示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# echo $oldgirl   #&lt;==这是一个不存在的变量，如果读者已经定义，则可</span><br><span class="line">                                     以执行unset oldgirl取消。</span><br><span class="line">[root@oldboy ~]# [ -f $oldgirl ] &amp;&amp; echo 1 || echo 0   #&lt;==不加引号测试变量。</span><br><span class="line">1 #&lt;==明明$oldgirl变量不存在内容还返回1，逻辑就不对了</span><br><span class="line">[root@oldboy ~]# [ -f &quot;$oldgirl&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==加引号测试变量。</span><br><span class="line">0 #&lt;==加了双引号就返回0，逻辑就对了。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>字符串比较时若等号两端没有空格，则会导致判断出现逻辑错误，即使语法没问题，但是结果依然可能不对。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# [ &quot;abc&quot;=&quot;1&quot; ] &amp;&amp; echo 1||echo 0  #&lt;==若等号两端不带空格，则会</span><br><span class="line">                                                         出现明显的逻辑错误。</span><br><span class="line">1  #&lt;==明明表达式不成立，却输出了1。</span><br><span class="line">[root@oldboy ~]# [ &quot;abc&quot; = &quot;1&quot; ] &amp;&amp; echo 1||echo 0 #&lt;==带空格的就是准确的。</span><br><span class="line">0  #&lt;==表达式不成立，输出0。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>字符串不加双引号，可能会导致判断上出现逻辑错误，即使语法没问题，但是结果依然可能不对。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# var=&quot;&quot; #&lt;==将变量内容置为空。</span><br><span class="line">[root@oldboy ~]# [ -n &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0  #&lt;==有双引号。</span><br><span class="line">0 #&lt;==给变量加双引号，返回0，-n不为空时为真，因为变量内容为空，因此输出0是对的。</span><br><span class="line">[root@oldboy ~]# [ -n $var ] &amp;&amp; echo 1 || echo 0     #&lt;==去掉双引号。</span><br><span class="line">1 #&lt;==同样的表达式，不加引号和加双引号后测试的结果相反，可见加双引号的重要性。</span><br><span class="line">[root@oldboy ~]# [ -z &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==如果字符串长度为0，则</span><br><span class="line">                                                           输出1，否则输出0。</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><img src="1.jpg" alt="img"><br><img src="2.jpg" alt="img"></p>
+
       
     </div>
     
@@ -249,7 +242,7 @@
       
       
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
+	<a class="article-category-link" href="/categories/shell/">shell</a>
 	</div>
 
 
