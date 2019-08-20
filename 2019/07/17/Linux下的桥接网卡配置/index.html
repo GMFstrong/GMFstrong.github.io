@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="（1）桥设备不支持NetworkManager服务，故必须把该服务关掉。         chkconfig –list NetworkManager （2）改为network服务         chkconfig –list network  (3)安装桥设备管理工具。          yum install bridge-utils          rpm -ql bridge-uti">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T02:34:56.000Z">
+<meta property="og:updated_time" content="2019-08-20T07:40:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux下的桥接网卡配置">
 <meta name="twitter:description" content="（1）桥设备不支持NetworkManager服务，故必须把该服务关掉。         chkconfig –list NetworkManager （2）改为network服务         chkconfig –list network  (3)安装桥设备管理工具。          yum install bridge-utils          rpm -ql bridge-uti">
@@ -228,28 +228,20 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br> 也可以通过修改配置文件来配置桥设备：<br>  (1)cd /etc/syscoonfig/network-scripts<br>  (2)cp ifcfg-eth0 ifcfg-br0<br>  (3)vim ifcfg-br0<br>  (4)更改其中的配置项：</p>
-<pre><code>#TYPE=Ethernet                      #改为Bridge
-#BOOTPROTO=dhcp                     #改为none
-#IPV6INIT=yes
-#DEVICE=ens33                       #改为br0
-#ONBOOT=yes
-#NM_CONTROLLED=no                   #添加该选项
-#IPADDR=192.168.1.97
-#NETMASK=255.255.255.0
-#GATEWAY=192.168.1.1
-#DNS1=
-#USERCTL=no
-</code></pre><p>  (5)vim ifcfg-ens33更改其中的配置项</p>
-<pre><code>#DEVICE=ens33
-#BOOTPROTO=none
-#NM_CONTROLLED=no                   #添加该选项
-#ONBOOT=yes
-#TYPE=Ethernet
-#BRIDHE=br0                         #指明将该设备桥接到那个设备上
-#IPV6INIT=yes
-#USERCTL=no
-</code></pre>
+        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
+<blockquote>
+<p>(1)cd /etc/syscoonfig/network-scripts</p>
+</blockquote>
+<blockquote>
+<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
       
     </div>
     
@@ -258,11 +250,11 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/07/17/shell基本语法/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/07/17/文件查找_locate-find/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          shell基本语法
+          文件查找_locate-find
         
       </div>
     </a>

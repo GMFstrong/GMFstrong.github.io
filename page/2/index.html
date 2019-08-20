@@ -571,97 +571,6 @@ ELOTIcFBGE01
 
 
   
-    <article id="post-关于文件系统挂载的一点感悟" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/20/关于文件系统挂载的一点感悟/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/20/关于文件系统挂载的一点感悟/">
-        关于文件系统挂载的一点感悟
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前两天无意中见朋友在讨论，关于不同分区挂载后，inode号相同的问题。（例如：一个Linux系统在安装时分为：/;/boot;/data;/swap几个分区挂载点）</p>
-<blockquote>
-<p>首先：用stat命令查看各个挂载点的inode号：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat /</span><br><span class="line">  File: ‘/’</span><br><span class="line">  Size: 4096      	Blocks: 8          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 128         Links: 18</span><br><span class="line">Access: (0555/dr-xr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.068000230 +0800</span><br><span class="line">Modify: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line">Change: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line"> Birth: -</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 48        	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 805h/2053d	Inode: 128         Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:etc_runtime_t:s0</span><br><span class="line">Access: 2019-07-24 20:42:41.043900505 +0800</span><br><span class="line">Modify: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line">Change: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
-<p>发现/和/date的inode号都为128。对于新手会一脸懵逼。</p>
-<blockquote>
-<p>于是乎,我们用umount卸载/date:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# umount /date/</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 6         	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 134217856   Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.112000232 +0800</span><br><span class="line">Modify: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line">Change: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
-<p>发现inode号发生了改变。至于其中原委如下：</p>
-<blockquote>
-<p>在这之前大家需要弄清楚一下几点：</p>
-</blockquote>
-<p>(1)在<strong>Linux系统</strong>下，整个 <strong>文件和目录</strong>结构是单根的倒立树状结构，我们成为目录树，而<strong>非Linux系统</strong>下整个文件系统是单根的。</p>
-<p>(2)挂载是动作，是Linux文件系统和目录树结合起来的动作。</p>
-<p>(3)挂载点，是目录非inode,该目录是进入该文件系统的入口。例如：/，/boot</p>
-<p>(4)一个目录只能挂载一个磁盘分区或设备。</p>
-<p>(5)我们在进行分区的时候，无论是ext3,ext4或其它格式的文件系统，我们划分了三个分区，分别挂载到了/;/boot;/data目录下。swap分区就另当别论了。<strong>注意以上三个目录是不同的挂载点</strong>这三个目录在作为挂载点时，是水平等价关系。</p>
-<p>(6)虽然三个分区都是ext4的文件系统，但他们是三个独立的文件系统，仅仅是格式一样而已。它们三个分区也是平行的等价关系。</p>
-<blockquote>
-<p>在弄清楚以上七点后，得出以下结论：</p>
-</blockquote>
-<pre><code>我们有三个文件系统挂载到了三个不同的目录下(挂载点)。
-</code></pre><p>所以就有了我们为啥在开始的时候，/和/data还有/boot三个目录(挂载点)的inode号相同了。不是所一个inode号只能对应一个文件吗？(linux下一切皆文件。)但他们三个确确实实是不同的三个文件。故而，这仅仅是3个相同数值的inode号而已。</p>
-<pre><code>例如：/的inode为128它是sda2分区文件系统最顶层目录的inode号。
-     /boot的inode为128它是sda1分区文件系统最顶层目录的inode号。
-</code></pre><blockquote>
-<p>此时或许你会问：如果寻找/etc/passwd文件，系统会根据/的inode号进入/的数据块寻找etc的inode号，根据etc的inode号再进入etc的数据块寻找passwd的inode号，最终找到passwd的数据内容。但是如果我们要是寻找/boot/grub文件，系统是如何从/进入/boot的呢？以为/和/boot的inode号相同啊？</p>
-</blockquote>
-<pre><code>首先，先纠正一下，系统进入/boot不是从/进入的。不要主观意识的这样认为。因为他们同为不同分区的顶级目录，如前文所诉他们在地位上是平等的。
-    如果进入/etc/passwd，通过查询挂载信息，顶级目录是/(文件系统1)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
-    如果进入/boot/gurb，通过查询挂载信息，顶级目录是/boot(文件系统2)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
     <article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -884,11 +793,11 @@ gc 全局替换，每次替换前询问
 
 
   
-    <article id="post-文本处理-sed" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-关于文件系统挂载的一点感悟" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/文本处理-sed/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+      <a href="/2019/07/20/关于文件系统挂载的一点感悟/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
 </a>
     </div>
   
@@ -901,8 +810,8 @@ gc 全局替换，每次替换前询问
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/文本处理-sed/">
-        文本处理-sed
+      <a class="article-title" href="/2019/07/20/关于文件系统挂载的一点感悟/">
+        关于文件系统挂载的一点感悟
         
       </a>
     </h1>
@@ -913,126 +822,40 @@ gc 全局替换，每次替换前询问
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><strong><em>sed作为三剑客之一，在处理文本特别是在更改配置文件时特别方便，它的工作机制和grep类似，都是逐行处理文件，不同的时sed会事先将需要处理的行读入临时缓冲区（模式空间），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕，然后读入下行，执行下一个循环。</em></strong></p>
+        <p>前两天无意中见朋友在讨论，关于不同分区挂载后，inode号相同的问题。（例如：一个Linux系统在安装时分为：/;/boot;/data;/swap几个分区挂载点）</p>
 <blockquote>
-<p>sed命令的用法：</p>
+<p>首先：用stat命令查看各个挂载点的inode号：</p>
 </blockquote>
-<pre><code>sed 选项 &apos;脚本script&apos; 目标文件
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat /</span><br><span class="line">  File: ‘/’</span><br><span class="line">  Size: 4096      	Blocks: 8          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 128         Links: 18</span><br><span class="line">Access: (0555/dr-xr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.068000230 +0800</span><br><span class="line">Modify: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line">Change: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line"> Birth: -</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 48        	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 805h/2053d	Inode: 128         Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:etc_runtime_t:s0</span><br><span class="line">Access: 2019-07-24 20:42:41.043900505 +0800</span><br><span class="line">Modify: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line">Change: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
+<p>发现/和/date的inode号都为128。对于新手会一脸懵逼。</p>
+<blockquote>
+<p>于是乎,我们用umount卸载/date:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# umount /date/</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 6         	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 134217856   Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.112000232 +0800</span><br><span class="line">Modify: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line">Change: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
+<p>发现inode号发生了改变。至于其中原委如下：</p>
+<blockquote>
+<p>在这之前大家需要弄清楚一下几点：</p>
+</blockquote>
+<p>(1)在<strong>Linux系统</strong>下，整个 <strong>文件和目录</strong>结构是单根的倒立树状结构，我们成为目录树，而<strong>非Linux系统</strong>下整个文件系统是单根的。</p>
+<p>(2)挂载是动作，是Linux文件系统和目录树结合起来的动作。</p>
+<p>(3)挂载点，是目录非inode,该目录是进入该文件系统的入口。例如：/，/boot</p>
+<p>(4)一个目录只能挂载一个磁盘分区或设备。</p>
+<p>(5)我们在进行分区的时候，无论是ext3,ext4或其它格式的文件系统，我们划分了三个分区，分别挂载到了/;/boot;/data目录下。swap分区就另当别论了。<strong>注意以上三个目录是不同的挂载点</strong>这三个目录在作为挂载点时，是水平等价关系。</p>
+<p>(6)虽然三个分区都是ext4的文件系统，但他们是三个独立的文件系统，仅仅是格式一样而已。它们三个分区也是平行的等价关系。</p>
+<blockquote>
+<p>在弄清楚以上七点后，得出以下结论：</p>
+</blockquote>
+<pre><code>我们有三个文件系统挂载到了三个不同的目录下(挂载点)。
+</code></pre><p>所以就有了我们为啥在开始的时候，/和/data还有/boot三个目录(挂载点)的inode号相同了。不是所一个inode号只能对应一个文件吗？(linux下一切皆文件。)但他们三个确确实实是不同的三个文件。故而，这仅仅是3个相同数值的inode号而已。</p>
+<pre><code>例如：/的inode为128它是sda2分区文件系统最顶层目录的inode号。
+     /boot的inode为128它是sda1分区文件系统最顶层目录的inode号。
 </code></pre><blockquote>
-<p>常用选项：-n</p>
+<p>此时或许你会问：如果寻找/etc/passwd文件，系统会根据/的inode号进入/的数据块寻找etc的inode号，根据etc的inode号再进入etc的数据块寻找passwd的inode号，最终找到passwd的数据内容。但是如果我们要是寻找/boot/grub文件，系统是如何从/进入/boot的呢？以为/和/boot的inode号相同啊？</p>
 </blockquote>
-<pre><code>不输出模式空间的内容到屏幕上。场合&apos;script&apos;中的“p”命令配合。
-</code></pre><blockquote>
-<p>效果如下:</p>
-</blockquote>
-<pre><code>[root@localhost ~]#sed &apos;p&apos; /etc/passwd
-root:x:0:0:root:/root:/bin/bash
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/sbin/nologin
-bin:x:1:1:bin:/bin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-</code></pre><p><strong><em>在没有-n选项时，会打印两次</em></strong></p>
-<pre><code>[root@localhost ~]#sed -n &apos;p&apos; /etc/passwd
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-</code></pre><p><strong><em>因为默认会将模式空间输出的行一次，‘p’命令又会将模式匹配的行输出一次，故而会输出两次。</em></strong></p>
-<pre><code>[root@localhost ~]#sed  &apos;/^root/p&apos; /etc/passwd  
-root:x:0:0:root:/root:/bin/bash
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-</code></pre><blockquote>
-<p>常用选项：-i.bak -i</p>
-</blockquote>
-<pre><code>&quot;-i.bak&quot;会在原文件中更改模式匹配到的行（更改原文件），同时并复制原文件并在原文件名后加上“.bak”的后缀。
-&quot;-i&quot;选项不会备份原文件。
-</code></pre><p>例如：</p>
-<pre><code>[root@localhost date]#sed -i.bak &apos;/^jim/a +++++++++++++++&apos; passwd 
-[root@localhost date]#ls
-access_log  fstab  passwd  passwd.bak  script
-[root@localhost date]#cat passwd
-jim:x:1001:1001::/home/jim:/bin/bash
-+++++++++++++++
-jack:x:1002:1002::/home/jack:/bin/bash
-nginx:x:995:993::/home/nginx:/sbin/nologin
-user1:x:1005:1005:This is test!:/home/user1:/sbin/csh
-</code></pre><p><strong><em>在原文件做出修改并备份原文件，其中‘a’命令为在匹配到的模式所在的行后边追加一行+++++++</em></strong></p>
-<blockquote>
-<p>常用选项： -r</p>
-</blockquote>
-<pre><code>支持使用正则表达式。
-</code></pre><p>例如：</p>
-<pre><code>[root@localhost date]#sed -r &apos;s/^(SELINUX=)disabled/\1enforcing/&apos; seconfig 
-
- # This file controls the state of SELinux on the system.
- # SELINUX= can take one of these three values:
- #     enforcing - SELinux security policy is enforced.
- #     permissive - SELinux prints warnings instead of enforcing.
- #     disabled - No SELinux policy is loaded.
- SELINUX=enforcing
- # SELINUXTYPE= can take one of three two values: 
-</code></pre><p><strong><em>由于没有使用“-i”选项这里并没有对原文件做出修改。”s/1/2/“命令是搜索1处的内容并替换为2处的内容。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">替换标记：</span><br><span class="line">g 行内全局替换</span><br><span class="line">p 显示替换成功的行</span><br><span class="line">w /PATH/FILE 将替换成功的行保存至文件中</span><br></pre></td></tr></table></figure></p>
-<pre><code>[root@localhost date]#sed &apos;s/root/@@@@@@@/g&apos; passwd
-@@@@@@@:x:0:0:@@@@@@@:/@@@@@@@:/bin/bash
-</code></pre><p>其他选项如下：</p>
-<pre><code>-e 多点编辑
--f /PATH/SCRIPT_FILE 从指定文件中读取编辑脚本
-</code></pre><p>以上是有关选项的介绍下面介绍一下有关’script(命令的介绍)’：</p>
-<blockquote>
-<p>不给地址，默认对全文处理。如下：（由于没有使用-n默认打印两次）</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed &apos;p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>单地址,’#’代表数字，’$’打印最后一行，’/正则表达式/‘打印匹配到到的行。（在不使用-n选项的情况下，会将进入模式空间的行也打印出来，所以结果如下：）</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed  &apos;3p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;$p&apos; passwd  </span><br><span class="line">alice:x:1008:1013::/home/alice:/bin/bash</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>地址范围：’n,m’ 打印第n到第m之间的行，’n,+m’打印第n行开始之后m行之后的内容，’/正则1/,/正则2/‘打印匹配两个正则之间的行，’n，/正则/‘打印第n行到正则匹配到的之间的所有行。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;3,5p&apos; passwd</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;3,+5p&apos; passwd</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br><span class="line">shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown</span><br><span class="line">halt:x:7:0:halt:/sbin:/sbin/halt</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^b/,/^o/p&apos; passwd </span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br><span class="line">shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown</span><br><span class="line">halt:x:7:0:halt:/sbin:/sbin/halt</span><br><span class="line">mail:x:8:12:mail:/var/spool/mail:/sbin/nologin</span><br><span class="line">operator:x:11:0:operator:/root:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;2,/^sync/p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>‘~’：步进，’1~2’打印奇数行，’2~2’打印偶数行。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#seq 10 | sed -n &apos;1~2p&apos;</span><br><span class="line">1</span><br><span class="line">3</span><br><span class="line">5</span><br><span class="line">7</span><br><span class="line">9</span><br></pre></td></tr></table></figure>
-<p><strong><em>以上命令是有关地址控制的，下面介绍一下常用的编辑命令</em></strong></p>
-<blockquote>
-<p>p,a命令在此前已经用过，也做过介绍。</p>
-</blockquote>
-<pre><code>p 打印当前模式空间内容，追加到默认输出之后。
-a [\]text 在指定行后面追加文本，支持使用\n实现多行追加
-i [\]text 在行前面插入文本
-= 为模式空间中的行打印行号
-! 模式空间中匹配行取反处理
-c [\]text 替换行为单行或多行文本
-w /path/file 保存模式匹配的行至指定文件
-r /path/file 读取指定文件的文本至模式空间中匹配到的行后
-</code></pre><p>下面对 ‘i’，‘=’，‘!’几个常用命令举例：</p>
-<blockquote>
-<p>在第二行之前追加“=============”</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed &apos;2i=============&apos; passwd </span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">=============</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>显示模式匹配行的行号：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^jim/=&apos; passwd</span><br><span class="line">24</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>打印没有被匹配到的行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/!p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
+<pre><code>首先，先纠正一下，系统进入/boot不是从/进入的。不要主观意识的这样认为。因为他们同为不同分区的顶级目录，如前文所诉他们在地位上是平等的。
+    如果进入/etc/passwd，通过查询挂载信息，顶级目录是/(文件系统1)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
+    如果进入/boot/gurb，通过查询挂载信息，顶级目录是/boot(文件系统2)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
+</code></pre>
       
     </div>
     
@@ -1171,6 +994,131 @@ x=8,y=12
 
 
   
+    <article id="post-文件查找_locate-find" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/17/文件查找_locate-find/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/17/文件查找_locate-find/">
+        文件查找_locate-find
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find</p>
+</blockquote>
+<p><strong><em>其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。</em></strong></p>
+<blockquote>
+<p>关于locate：</p>
+</blockquote>
+<pre><code>该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate/mlocate.db 。然而该索引的的构建是在系统较为空闲时自动进行的。也可手动进行（updatedb）。
+</code></pre><p><strong><em>虽然locate在使用时比较节省资源，但是索引的构建过程是非常消耗资源的，因为需要遍历整个根文件系统。</em></strong></p>
+<blockquote>
+<p>locate有以下工作特点：</p>
+</blockquote>
+<pre><code>• 查找速度快 
+• 模糊查找 
+• 非实时查找 
+• 搜索的是文件的全路径，不仅仅是文件名 
+• 可能只搜索用户具备读取和执行权限的目录 
+</code></pre><blockquote>
+<p>常用选项：</p>
+</blockquote>
+<pre><code>-i不区分大小写。
+-n # 仅仅列出前#匹配到的文件。
+-r 使用正则表达式。
+</code></pre><p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost qqq]#locate -n 5 -ir &quot;\.cONf$&quot;      </span><br><span class="line">/etc/asound.conf</span><br><span class="line">/etc/autofs.conf</span><br><span class="line">/etc/autofs_ldap_auth.conf</span><br><span class="line">/etc/chrony.conf</span><br><span class="line">/etc/dnsmasq.conf</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>关于find的用法介绍：</em></strong></p>
+<blockquote>
+<p>find [选项] [查找路径] [查找条件] [处理动作]</p>
+</blockquote>
+<pre><code>查找路径：指定具体目标路径；默认为当前目录。
+查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件。
+处理动作：对符合条件的文件做操作，默认输出至屏幕
+</code></pre><p><strong><em>以下是关于find的查找条件：</em></strong></p>
+<blockquote>
+<p>指搜索层级</p>
+</blockquote>
+<pre><code>-maxdepth level 最大搜索目录深度,指定目录下的文件为第1级
+-mindepth level 最小搜索目录深度
+</code></pre><blockquote>
+<p>根据文件名和inode查找：</p>
+</blockquote>
+<pre><code>-inum n 按inode号查找
+-iname &quot;文件名称&quot;：不区分字母大小写
+-name &quot;文件名称&quot;：支持使用glob *, ?, [], [^]
+-samefile name 相同inode号的文件
+-links n 链接数为n的文件
+-regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称
+</code></pre><blockquote>
+<p>根据属主、属组查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-user USERNAME：查找属主为指定用户(UID)的文件</span><br><span class="line">-group GRPNAME: 查找属组为指定组(GID)的文件</span><br><span class="line">-uid UserID：查找属主为指定的UID号的文件</span><br><span class="line">-gid GroupID：查找属组为指定的GID号的文件</span><br><span class="line">-nouser：查找没有属主的文件</span><br><span class="line">-nogroup：查找没有属组的文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据文件类型查找<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-type TYPE</span><br><span class="line">• f: 普通文件</span><br><span class="line">• d: 目录文件</span><br><span class="line">• l: 符号链接文件</span><br><span class="line">• s：套接字文件</span><br><span class="line">• b: 块设备文件</span><br><span class="line">• c: 字符设备文件</span><br><span class="line">• p: 管道文件</span><br><span class="line">空文件或目录</span><br><span class="line"> -empty</span><br><span class="line"> 示例：find /app -type d -empty</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据⽂件⼤⼩来查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-size [+|-]#UNIT</span><br><span class="line"> 常用单位：k, M, G，c（byte）</span><br><span class="line">#UNIT: (#-1, #]</span><br><span class="line"> 如：6k 表示(5k,6k]</span><br><span class="line">-#UNIT：[0,#-1]</span><br><span class="line"> 如：-6k 表示[0,5k]</span><br><span class="line">+#UNIT：(#,∞)</span><br><span class="line"> 如：+6k 表示(6k,∞)</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据时间戳：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">以“天”为单位,</span><br><span class="line">-atime [+|-]#,</span><br><span class="line"> #: [#,#+1)</span><br><span class="line"> +#: [#+1,∞]</span><br><span class="line"> -#: [0,#)</span><br><span class="line">-mtime</span><br><span class="line">-ctime</span><br><span class="line">以“分钟”为单位</span><br><span class="line"> -amin</span><br><span class="line"> -mmin</span><br><span class="line"> -cmin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据权限查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-perm [/|-]MODE</span><br><span class="line"> MODE: 精确权限匹配</span><br><span class="line"> /MODE：任何一类(u,g,o)对象的权限中只要能一位匹配即可，或关系，+ 从centos7开始淘汰</span><br><span class="line"> -MODE：每一类对象都必须同时拥有指定权限，与关系 0 表示不关注</span><br><span class="line">find -perm 755 会匹配权限模式恰好是755的文件</span><br><span class="line">只要当任意人有写权限时，find -perm +222就会匹配</span><br><span class="line">只有当每个人都有写权限时，find -perm -222才会匹配</span><br><span class="line">只有当其它人（other）有写权限时，find -perm -002才会匹配</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>处理动作<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-print：默认的处理动作，显示至屏幕</span><br><span class="line">-ls：类似于对查找到的文件执行“ls -l”命令</span><br><span class="line">-delete：删除查找到的文件</span><br><span class="line">-fls file：查找到的所有文件的长格式信息保存至指定文件中</span><br><span class="line">-ok COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式</span><br><span class="line">要求用户确认</span><br><span class="line">-exec COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令</span><br><span class="line">&#123;&#125;: 用于引用查找到的文件名称自身</span><br><span class="line">find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>参数替换xargs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">由于很多命令不支持管道|来传递参数，而日常工作中有这个必要，所以就有了xargs命令</span><br><span class="line">xargs用于产生某个命令的参数，xargs 可以读入 stdin 的数据，并且以空格符或回车符将 stdin 的数据分隔</span><br><span class="line">成为arguments</span><br><span class="line">注意：文件名或者是其他意义的名词内含有空格符的情况</span><br><span class="line">有些命令不能接受过多参数，命令执行可能会失败，xargs可以解决</span><br><span class="line">示例：</span><br><span class="line"> ls f* |xargs rm</span><br><span class="line"> find /sbin/ -perm +700 |ls -l 这个命令是错误的</span><br><span class="line"> find /bin/ -perm /7000 | xargs ls -l 查找有特殊权限的文件</span><br><span class="line"> find /bin/ -perm -7000 | xargs ls -l 此命令和上面有何区别？</span><br><span class="line">find和xargs格式：find | xargs COMMAND</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1200,28 +1148,20 @@ x=8,y=12
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br> 也可以通过修改配置文件来配置桥设备：<br>  (1)cd /etc/syscoonfig/network-scripts<br>  (2)cp ifcfg-eth0 ifcfg-br0<br>  (3)vim ifcfg-br0<br>  (4)更改其中的配置项：</p>
-<pre><code>#TYPE=Ethernet                      #改为Bridge
-#BOOTPROTO=dhcp                     #改为none
-#IPV6INIT=yes
-#DEVICE=ens33                       #改为br0
-#ONBOOT=yes
-#NM_CONTROLLED=no                   #添加该选项
-#IPADDR=192.168.1.97
-#NETMASK=255.255.255.0
-#GATEWAY=192.168.1.1
-#DNS1=
-#USERCTL=no
-</code></pre><p>  (5)vim ifcfg-ens33更改其中的配置项</p>
-<pre><code>#DEVICE=ens33
-#BOOTPROTO=none
-#NM_CONTROLLED=no                   #添加该选项
-#ONBOOT=yes
-#TYPE=Ethernet
-#BRIDHE=br0                         #指明将该设备桥接到那个设备上
-#IPV6INIT=yes
-#USERCTL=no
-</code></pre>
+        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
+<blockquote>
+<p>(1)cd /etc/syscoonfig/network-scripts</p>
+</blockquote>
+<blockquote>
+<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
       
     </div>
     
