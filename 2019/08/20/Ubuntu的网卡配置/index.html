@@ -9,17 +9,17 @@
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="From Zero to the DevOps">
+  <meta name="description" content="首先可以参考Ubuntu官方文档的详细介绍：  https://help.ubuntu.com/lts/serverguide/network-configuration.html.zh-CN  ubuntu是通过yaml格式文件来管理网卡配置的：  打开/etc/netplan/01-netcfg.yaml（yaml格式注意缩进）  配置为自动获取IP:123456network:    ve">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Ubuntu的网卡配置">
 <meta property="og:url" content="http://gmfdevops.com.com/2019/08/20/Ubuntu的网卡配置/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="From Zero to the DevOps">
+<meta property="og:description" content="首先可以参考Ubuntu官方文档的详细介绍：  https://help.ubuntu.com/lts/serverguide/network-configuration.html.zh-CN  ubuntu是通过yaml格式文件来管理网卡配置的：  打开/etc/netplan/01-netcfg.yaml（yaml格式注意缩进）  配置为自动获取IP:123456network:    ve">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T02:41:39.222Z">
+<meta property="og:updated_time" content="2019-08-20T06:18:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Ubuntu的网卡配置">
-<meta name="twitter:description" content="From Zero to the DevOps">
+<meta name="twitter:description" content="首先可以参考Ubuntu官方文档的详细介绍：  https://help.ubuntu.com/lts/serverguide/network-configuration.html.zh-CN  ubuntu是通过yaml格式文件来管理网卡配置的：  打开/etc/netplan/01-netcfg.yaml（yaml格式注意缩进）  配置为自动获取IP:123456network:    ve">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -216,6 +216,10 @@
       <div class="article-info article-info-post">
         
         
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
 
         
         <div class="clearfix"></div>
@@ -224,7 +228,28 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <blockquote>
+<p>首先可以参考Ubuntu官方文档的详细介绍：</p>
+</blockquote>
+<pre><code>https://help.ubuntu.com/lts/serverguide/network-configuration.html.zh-CN
+</code></pre><blockquote>
+<p>ubuntu是通过yaml格式文件来管理网卡配置的：</p>
+</blockquote>
+<p>打开/etc/netplan/01-netcfg.yaml（yaml格式注意缩进）</p>
+<blockquote>
+<p>配置为自动获取IP:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">    version: 2</span><br><span class="line">    renderer: networkd</span><br><span class="line">    ethernets:</span><br><span class="line">        ens33:</span><br><span class="line">            dhcp4: yes</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>配置静态IP地址：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">    version: 2</span><br><span class="line">    renderer: networkd</span><br><span class="line">    ethernets:</span><br><span class="line">        eth0:</span><br><span class="line">            addresses:</span><br><span class="line">                - xxx.xxx.xxx.xxx/mask</span><br><span class="line">                - xxx.xxx.xxx.xxx/mask </span><br><span class="line">            gateway4:</span><br><span class="line">                xxx.xxx.xxx.xxx</span><br><span class="line">            nameservers:</span><br><span class="line">                addresses:[8.8.8.8,1.1.1.1]</span><br><span class="line">                search:[*****,******]</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>最后重启网络服务：</p>
+</blockquote>
+<pre><code>netplan apply
+</code></pre><p><strong><em>Ubuntu在最近的版本中网卡名默认不是eth0，eth1这种形式，为了便于将来自动化管理，有时需要将网卡名更改为传统的命名方式。</em></strong><br>（1）vim  /etc/default/grub<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRUB_CMDLINE_LINUX=&quot;net.ifnames=0&quot;</span><br></pre></td></tr></table></figure></p>
+<p>（2）生成有效的grub.cfg文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub-mkconfig -o /boot/grub/grub.cfg</span><br></pre></td></tr></table></figure></p>
+<p>（3）重启计算机<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+
       
     </div>
     
