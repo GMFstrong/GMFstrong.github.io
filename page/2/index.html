@@ -542,6 +542,9 @@ ELOTIcFBGE01
 </code></pre><blockquote>
 <p>用户家目录被删恢复方法：<br>    1.进入单用户模式<br>    2.复制/etc/skel/到/home/用户名  </p>
 </blockquote>
+<blockquote>
+<p>正在打开的文件被误删除的恢复：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lsof |grep /var/log/messages</span><br><span class="line">rm -f /var/log/messages</span><br><span class="line">lsof |grep /var/log/messages</span><br><span class="line">cat /proc/653/fd/6</span><br><span class="line">cat /proc/653/fd/6 &gt; /var/log/messages</span><br></pre></td></tr></table></figure></p>
+</blockquote>
 
       
     </div>
@@ -618,6 +621,97 @@ ELOTIcFBGE01
       
 	<div class="article-category tagcloud">
 	<a class="article-category-link" href="/categories/network/">network</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-关于文件系统挂载的一点感悟" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/20/关于文件系统挂载的一点感悟/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/20/关于文件系统挂载的一点感悟/">
+        关于文件系统挂载的一点感悟
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前两天无意中见朋友在讨论，关于不同分区挂载后，inode号相同的问题。（例如：一个Linux系统在安装时分为：/;/boot;/data;/swap几个分区挂载点）</p>
+<blockquote>
+<p>首先：用stat命令查看各个挂载点的inode号：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat /</span><br><span class="line">  File: ‘/’</span><br><span class="line">  Size: 4096      	Blocks: 8          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 128         Links: 18</span><br><span class="line">Access: (0555/dr-xr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.068000230 +0800</span><br><span class="line">Modify: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line">Change: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line"> Birth: -</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 48        	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 805h/2053d	Inode: 128         Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:etc_runtime_t:s0</span><br><span class="line">Access: 2019-07-24 20:42:41.043900505 +0800</span><br><span class="line">Modify: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line">Change: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
+<p>发现/和/date的inode号都为128。对于新手会一脸懵逼。</p>
+<blockquote>
+<p>于是乎,我们用umount卸载/date:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# umount /date/</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 6         	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 134217856   Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.112000232 +0800</span><br><span class="line">Modify: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line">Change: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
+<p>发现inode号发生了改变。至于其中原委如下：</p>
+<blockquote>
+<p>在这之前大家需要弄清楚一下几点：</p>
+</blockquote>
+<p>(1)在<strong>Linux系统</strong>下，整个 <strong>文件和目录</strong>结构是单根的倒立树状结构，我们成为目录树，而<strong>非Linux系统</strong>下整个文件系统是单根的。</p>
+<p>(2)挂载是动作，是Linux文件系统和目录树结合起来的动作。</p>
+<p>(3)挂载点，是目录非inode,该目录是进入该文件系统的入口。例如：/，/boot</p>
+<p>(4)一个目录只能挂载一个磁盘分区或设备。</p>
+<p>(5)我们在进行分区的时候，无论是ext3,ext4或其它格式的文件系统，我们划分了三个分区，分别挂载到了/;/boot;/data目录下。swap分区就另当别论了。<strong>注意以上三个目录是不同的挂载点</strong>这三个目录在作为挂载点时，是水平等价关系。</p>
+<p>(6)虽然三个分区都是ext4的文件系统，但他们是三个独立的文件系统，仅仅是格式一样而已。它们三个分区也是平行的等价关系。</p>
+<blockquote>
+<p>在弄清楚以上七点后，得出以下结论：</p>
+</blockquote>
+<pre><code>我们有三个文件系统挂载到了三个不同的目录下(挂载点)。
+</code></pre><p>所以就有了我们为啥在开始的时候，/和/data还有/boot三个目录(挂载点)的inode号相同了。不是所一个inode号只能对应一个文件吗？(linux下一切皆文件。)但他们三个确确实实是不同的三个文件。故而，这仅仅是3个相同数值的inode号而已。</p>
+<pre><code>例如：/的inode为128它是sda2分区文件系统最顶层目录的inode号。
+     /boot的inode为128它是sda1分区文件系统最顶层目录的inode号。
+</code></pre><blockquote>
+<p>此时或许你会问：如果寻找/etc/passwd文件，系统会根据/的inode号进入/的数据块寻找etc的inode号，根据etc的inode号再进入etc的数据块寻找passwd的inode号，最终找到passwd的数据内容。但是如果我们要是寻找/boot/grub文件，系统是如何从/进入/boot的呢？以为/和/boot的inode号相同啊？</p>
+</blockquote>
+<pre><code>首先，先纠正一下，系统进入/boot不是从/进入的。不要主观意识的这样认为。因为他们同为不同分区的顶级目录，如前文所诉他们在地位上是平等的。
+    如果进入/etc/passwd，通过查询挂载信息，顶级目录是/(文件系统1)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
+    如果进入/boot/gurb，通过查询挂载信息，顶级目录是/boot(文件系统2)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
 	</div>
 
 
@@ -793,11 +887,11 @@ gc 全局替换，每次替换前询问
 
 
   
-    <article id="post-关于文件系统挂载的一点感悟" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/20/关于文件系统挂载的一点感悟/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
 </a>
     </div>
   
@@ -810,8 +904,8 @@ gc 全局替换，每次替换前询问
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/20/关于文件系统挂载的一点感悟/">
-        关于文件系统挂载的一点感悟
+      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
+        Linux下的桥接网卡配置
         
       </a>
     </h1>
@@ -822,40 +916,20 @@ gc 全局替换，每次替换前询问
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>前两天无意中见朋友在讨论，关于不同分区挂载后，inode号相同的问题。（例如：一个Linux系统在安装时分为：/;/boot;/data;/swap几个分区挂载点）</p>
+        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
 <blockquote>
-<p>首先：用stat命令查看各个挂载点的inode号：</p>
+<p>(1)cd /etc/syscoonfig/network-scripts</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat /</span><br><span class="line">  File: ‘/’</span><br><span class="line">  Size: 4096      	Blocks: 8          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 128         Links: 18</span><br><span class="line">Access: (0555/dr-xr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.068000230 +0800</span><br><span class="line">Modify: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line">Change: 2019-07-18 04:37:19.491984636 +0800</span><br><span class="line"> Birth: -</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 48        	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 805h/2053d	Inode: 128         Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:etc_runtime_t:s0</span><br><span class="line">Access: 2019-07-24 20:42:41.043900505 +0800</span><br><span class="line">Modify: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line">Change: 2019-07-24 20:42:30.711971133 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
-<p>发现/和/date的inode号都为128。对于新手会一脸懵逼。</p>
 <blockquote>
-<p>于是乎,我们用umount卸载/date:</p>
+<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# umount /date/</span><br><span class="line">[root@localhost ~]# stat /date/</span><br><span class="line">  File: ‘/date/’</span><br><span class="line">  Size: 6         	Blocks: 0          IO Block: 4096   directory</span><br><span class="line">Device: 802h/2050d	Inode: 134217856   Links: 2</span><br><span class="line">Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: system_u:object_r:root_t:s0</span><br><span class="line">Access: 2019-07-24 19:19:12.112000232 +0800</span><br><span class="line">Modify: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line">Change: 2019-07-18 04:33:59.208991767 +0800</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure>
-<p>发现inode号发生了改变。至于其中原委如下：</p>
 <blockquote>
-<p>在这之前大家需要弄清楚一下几点：</p>
+<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<p>(1)在<strong>Linux系统</strong>下，整个 <strong>文件和目录</strong>结构是单根的倒立树状结构，我们成为目录树，而<strong>非Linux系统</strong>下整个文件系统是单根的。</p>
-<p>(2)挂载是动作，是Linux文件系统和目录树结合起来的动作。</p>
-<p>(3)挂载点，是目录非inode,该目录是进入该文件系统的入口。例如：/，/boot</p>
-<p>(4)一个目录只能挂载一个磁盘分区或设备。</p>
-<p>(5)我们在进行分区的时候，无论是ext3,ext4或其它格式的文件系统，我们划分了三个分区，分别挂载到了/;/boot;/data目录下。swap分区就另当别论了。<strong>注意以上三个目录是不同的挂载点</strong>这三个目录在作为挂载点时，是水平等价关系。</p>
-<p>(6)虽然三个分区都是ext4的文件系统，但他们是三个独立的文件系统，仅仅是格式一样而已。它们三个分区也是平行的等价关系。</p>
 <blockquote>
-<p>在弄清楚以上七点后，得出以下结论：</p>
+<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<pre><code>我们有三个文件系统挂载到了三个不同的目录下(挂载点)。
-</code></pre><p>所以就有了我们为啥在开始的时候，/和/data还有/boot三个目录(挂载点)的inode号相同了。不是所一个inode号只能对应一个文件吗？(linux下一切皆文件。)但他们三个确确实实是不同的三个文件。故而，这仅仅是3个相同数值的inode号而已。</p>
-<pre><code>例如：/的inode为128它是sda2分区文件系统最顶层目录的inode号。
-     /boot的inode为128它是sda1分区文件系统最顶层目录的inode号。
-</code></pre><blockquote>
-<p>此时或许你会问：如果寻找/etc/passwd文件，系统会根据/的inode号进入/的数据块寻找etc的inode号，根据etc的inode号再进入etc的数据块寻找passwd的inode号，最终找到passwd的数据内容。但是如果我们要是寻找/boot/grub文件，系统是如何从/进入/boot的呢？以为/和/boot的inode号相同啊？</p>
-</blockquote>
-<pre><code>首先，先纠正一下，系统进入/boot不是从/进入的。不要主观意识的这样认为。因为他们同为不同分区的顶级目录，如前文所诉他们在地位上是平等的。
-    如果进入/etc/passwd，通过查询挂载信息，顶级目录是/(文件系统1)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
-    如果进入/boot/gurb，通过查询挂载信息，顶级目录是/boot(文件系统2)直接进入文件系统，通过该文件系统的inode号128向下依次查询。
-</code></pre>
+
       
     </div>
     
@@ -864,7 +938,7 @@ gc 全局替换，每次替换前询问
       
       
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
+	<a class="article-category-link" href="/categories/network/">network</a>
 	</div>
 
 
@@ -1100,77 +1174,6 @@ x=8,y=12
       
 	<div class="article-category tagcloud">
 	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
-        Linux下的桥接网卡配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
-<blockquote>
-<p>(1)cd /etc/syscoonfig/network-scripts</p>
-</blockquote>
-<blockquote>
-<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
 	</div>
 
 

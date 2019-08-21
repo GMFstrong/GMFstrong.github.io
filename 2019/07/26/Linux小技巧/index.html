@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="生成随机密码:  [root@localhost ~]# cat /dev/urandom |tr -dc &amp;apos;a-zA-Z0-9&amp;apos;|head -c 12 ELOTIcFBGE01  -d --delete：删除所有属于第一字符集的字符  -c –C --complement：取字符集的补集      #tr的选项,-dc删除第一字符集以外的所有字符  -c 取前多少位的字符">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-26T11:53:08.000Z">
+<meta property="og:updated_time" content="2019-08-21T12:40:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux小技巧">
 <meta name="twitter:description" content="生成随机密码:  [root@localhost ~]# cat /dev/urandom |tr -dc &amp;apos;a-zA-Z0-9&amp;apos;|head -c 12 ELOTIcFBGE01  -d --delete：删除所有属于第一字符集的字符  -c –C --complement：取字符集的补集      #tr的选项,-dc删除第一字符集以外的所有字符  -c 取前多少位的字符">
@@ -238,6 +238,9 @@ ELOTIcFBGE01
  -c 取前多少位的字符                     #head的选项
 </code></pre><blockquote>
 <p>用户家目录被删恢复方法：<br>    1.进入单用户模式<br>    2.复制/etc/skel/到/home/用户名  </p>
+</blockquote>
+<blockquote>
+<p>正在打开的文件被误删除的恢复：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lsof |grep /var/log/messages</span><br><span class="line">rm -f /var/log/messages</span><br><span class="line">lsof |grep /var/log/messages</span><br><span class="line">cat /proc/653/fd/6</span><br><span class="line">cat /proc/653/fd/6 &gt; /var/log/messages</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 
       
