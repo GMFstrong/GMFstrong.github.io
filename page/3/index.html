@@ -190,10 +190,10 @@
 </nav>
       <div class="body-wrap">
   
-    <article id="post-shell条件判断" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/shell条件判断/" class="article-date">
+      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
   	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
 </a>
     </div>
@@ -207,8 +207,8 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/shell条件判断/">
-        shell条件判断
+      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
+        Linux下的桥接网卡配置
         
       </a>
     </h1>
@@ -219,20 +219,19 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>[[]]表达式与[]和test用法的选项部分是相同的，其与[]和test测试表达式的区别在于，在[[]]中可以使用通配符等进行模式匹配；并且&amp;&amp;、||、&gt;、&lt;等操作符可以应用于[[]]中，但不能应用于[]中，在[]中一般使用-a、-o、-gt（用于整数）、-lt（用于整数）等操作符代替上文提到的用于[[]]中的符号。</p>
+        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
+<blockquote>
+<p>(1)cd /etc/syscoonfig/network-scripts</p>
 </blockquote>
 <blockquote>
-<p>用[]测试变量时，如果被测试的变量不加双引号，那么测试结果可能会是不正确的，示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# echo $oldgirl   #&lt;==这是一个不存在的变量，如果读者已经定义，则可</span><br><span class="line">                                     以执行unset oldgirl取消。</span><br><span class="line">[root@oldboy ~]# [ -f $oldgirl ] &amp;&amp; echo 1 || echo 0   #&lt;==不加引号测试变量。</span><br><span class="line">1 #&lt;==明明$oldgirl变量不存在内容还返回1，逻辑就不对了</span><br><span class="line">[root@oldboy ~]# [ -f &quot;$oldgirl&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==加引号测试变量。</span><br><span class="line">0 #&lt;==加了双引号就返回0，逻辑就对了。</span><br></pre></td></tr></table></figure></p>
+<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 <blockquote>
-<p>字符串比较时若等号两端没有空格，则会导致判断出现逻辑错误，即使语法没问题，但是结果依然可能不对。</p>
+<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# [ &quot;abc&quot;=&quot;1&quot; ] &amp;&amp; echo 1||echo 0  #&lt;==若等号两端不带空格，则会</span><br><span class="line">                                                         出现明显的逻辑错误。</span><br><span class="line">1  #&lt;==明明表达式不成立，却输出了1。</span><br><span class="line">[root@oldboy ~]# [ &quot;abc&quot; = &quot;1&quot; ] &amp;&amp; echo 1||echo 0 #&lt;==带空格的就是准确的。</span><br><span class="line">0  #&lt;==表达式不成立，输出0。</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>字符串不加双引号，可能会导致判断上出现逻辑错误，即使语法没问题，但是结果依然可能不对。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@oldboy ~]# var=&quot;&quot; #&lt;==将变量内容置为空。</span><br><span class="line">[root@oldboy ~]# [ -n &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0  #&lt;==有双引号。</span><br><span class="line">0 #&lt;==给变量加双引号，返回0，-n不为空时为真，因为变量内容为空，因此输出0是对的。</span><br><span class="line">[root@oldboy ~]# [ -n $var ] &amp;&amp; echo 1 || echo 0     #&lt;==去掉双引号。</span><br><span class="line">1 #&lt;==同样的表达式，不加引号和加双引号后测试的结果相反，可见加双引号的重要性。</span><br><span class="line">[root@oldboy ~]# [ -z &quot;$var&quot; ] &amp;&amp; echo 1 || echo 0 #&lt;==如果字符串长度为0，则</span><br><span class="line">                                                           输出1，否则输出0。</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
+<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<p><img src="1.jpg" alt="img"><br><img src="2.jpg" alt="img"></p>
 
       
     </div>
@@ -242,7 +241,7 @@
       
       
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/shell/">shell</a>
+	<a class="article-category-link" href="/categories/network/">network</a>
 	</div>
 
 
@@ -409,6 +408,131 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
 </blockquote>
 <blockquote>
 <p>打印没有被匹配到的行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/!p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-文件查找_locate-find" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/17/文件查找_locate-find/" class="article-date">
+  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/17/文件查找_locate-find/">
+        文件查找_locate-find
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在Linux的文件系统中查找文件通常使用两个命令：（1）locate（2）find</p>
+</blockquote>
+<p><strong><em>其中的locate为非实时性查找，它是基于系统上预建的文件索引数据库查找所以不会对计算机的磁盘IO造成太大的影响。而fand问实时性查找，通过遍历指定路径完成文件查找，故而对计算机的磁盘IO影响是比较大的。</em></strong></p>
+<blockquote>
+<p>关于locate：</p>
+</blockquote>
+<pre><code>该程序是通过查看系统上的预建的文件索引数据库： /var/lib/mlocate/mlocate.db 。然而该索引的的构建是在系统较为空闲时自动进行的。也可手动进行（updatedb）。
+</code></pre><p><strong><em>虽然locate在使用时比较节省资源，但是索引的构建过程是非常消耗资源的，因为需要遍历整个根文件系统。</em></strong></p>
+<blockquote>
+<p>locate有以下工作特点：</p>
+</blockquote>
+<pre><code>• 查找速度快 
+• 模糊查找 
+• 非实时查找 
+• 搜索的是文件的全路径，不仅仅是文件名 
+• 可能只搜索用户具备读取和执行权限的目录 
+</code></pre><blockquote>
+<p>常用选项：</p>
+</blockquote>
+<pre><code>-i不区分大小写。
+-n # 仅仅列出前#匹配到的文件。
+-r 使用正则表达式。
+</code></pre><p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost qqq]#locate -n 5 -ir &quot;\.cONf$&quot;      </span><br><span class="line">/etc/asound.conf</span><br><span class="line">/etc/autofs.conf</span><br><span class="line">/etc/autofs_ldap_auth.conf</span><br><span class="line">/etc/chrony.conf</span><br><span class="line">/etc/dnsmasq.conf</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>关于find的用法介绍：</em></strong></p>
+<blockquote>
+<p>find [选项] [查找路径] [查找条件] [处理动作]</p>
+</blockquote>
+<pre><code>查找路径：指定具体目标路径；默认为当前目录。
+查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件。
+处理动作：对符合条件的文件做操作，默认输出至屏幕
+</code></pre><p><strong><em>以下是关于find的查找条件：</em></strong></p>
+<blockquote>
+<p>指搜索层级</p>
+</blockquote>
+<pre><code>-maxdepth level 最大搜索目录深度,指定目录下的文件为第1级
+-mindepth level 最小搜索目录深度
+</code></pre><blockquote>
+<p>根据文件名和inode查找：</p>
+</blockquote>
+<pre><code>-inum n 按inode号查找
+-iname &quot;文件名称&quot;：不区分字母大小写
+-name &quot;文件名称&quot;：支持使用glob *, ?, [], [^]
+-samefile name 相同inode号的文件
+-links n 链接数为n的文件
+-regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称
+</code></pre><blockquote>
+<p>根据属主、属组查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-user USERNAME：查找属主为指定用户(UID)的文件</span><br><span class="line">-group GRPNAME: 查找属组为指定组(GID)的文件</span><br><span class="line">-uid UserID：查找属主为指定的UID号的文件</span><br><span class="line">-gid GroupID：查找属组为指定的GID号的文件</span><br><span class="line">-nouser：查找没有属主的文件</span><br><span class="line">-nogroup：查找没有属组的文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据文件类型查找<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-type TYPE</span><br><span class="line">• f: 普通文件</span><br><span class="line">• d: 目录文件</span><br><span class="line">• l: 符号链接文件</span><br><span class="line">• s：套接字文件</span><br><span class="line">• b: 块设备文件</span><br><span class="line">• c: 字符设备文件</span><br><span class="line">• p: 管道文件</span><br><span class="line">空文件或目录</span><br><span class="line"> -empty</span><br><span class="line"> 示例：find /app -type d -empty</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据⽂件⼤⼩来查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-size [+|-]#UNIT</span><br><span class="line"> 常用单位：k, M, G，c（byte）</span><br><span class="line">#UNIT: (#-1, #]</span><br><span class="line"> 如：6k 表示(5k,6k]</span><br><span class="line">-#UNIT：[0,#-1]</span><br><span class="line"> 如：-6k 表示[0,5k]</span><br><span class="line">+#UNIT：(#,∞)</span><br><span class="line"> 如：+6k 表示(6k,∞)</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据时间戳：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">以“天”为单位,</span><br><span class="line">-atime [+|-]#,</span><br><span class="line"> #: [#,#+1)</span><br><span class="line"> +#: [#+1,∞]</span><br><span class="line"> -#: [0,#)</span><br><span class="line">-mtime</span><br><span class="line">-ctime</span><br><span class="line">以“分钟”为单位</span><br><span class="line"> -amin</span><br><span class="line"> -mmin</span><br><span class="line"> -cmin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>根据权限查找：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-perm [/|-]MODE</span><br><span class="line"> MODE: 精确权限匹配</span><br><span class="line"> /MODE：任何一类(u,g,o)对象的权限中只要能一位匹配即可，或关系，+ 从centos7开始淘汰</span><br><span class="line"> -MODE：每一类对象都必须同时拥有指定权限，与关系 0 表示不关注</span><br><span class="line">find -perm 755 会匹配权限模式恰好是755的文件</span><br><span class="line">只要当任意人有写权限时，find -perm +222就会匹配</span><br><span class="line">只有当每个人都有写权限时，find -perm -222才会匹配</span><br><span class="line">只有当其它人（other）有写权限时，find -perm -002才会匹配</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>处理动作<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-print：默认的处理动作，显示至屏幕</span><br><span class="line">-ls：类似于对查找到的文件执行“ls -l”命令</span><br><span class="line">-delete：删除查找到的文件</span><br><span class="line">-fls file：查找到的所有文件的长格式信息保存至指定文件中</span><br><span class="line">-ok COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式</span><br><span class="line">要求用户确认</span><br><span class="line">-exec COMMAND &#123;&#125; \; 对查找到的每个文件执行由COMMAND指定的命令</span><br><span class="line">&#123;&#125;: 用于引用查找到的文件名称自身</span><br><span class="line">find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>参数替换xargs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">由于很多命令不支持管道|来传递参数，而日常工作中有这个必要，所以就有了xargs命令</span><br><span class="line">xargs用于产生某个命令的参数，xargs 可以读入 stdin 的数据，并且以空格符或回车符将 stdin 的数据分隔</span><br><span class="line">成为arguments</span><br><span class="line">注意：文件名或者是其他意义的名词内含有空格符的情况</span><br><span class="line">有些命令不能接受过多参数，命令执行可能会失败，xargs可以解决</span><br><span class="line">示例：</span><br><span class="line"> ls f* |xargs rm</span><br><span class="line"> find /sbin/ -perm +700 |ls -l 这个命令是错误的</span><br><span class="line"> find /bin/ -perm /7000 | xargs ls -l 查找有特殊权限的文件</span><br><span class="line"> find /bin/ -perm -7000 | xargs ls -l 此命令和上面有何区别？</span><br><span class="line">find和xargs格式：find | xargs COMMAND</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 
       
@@ -846,68 +970,6 @@ r /path/file 读取指定文件的文本至模式空间中匹配到的行后
       
 	<div class="article-category tagcloud">
 	<a class="article-category-link" href="/categories/python/">python</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linex的简单安全配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/09/07/Linex的简单安全配置/" class="article-date">
-  	<time datetime="2018-09-07T11:27:25.000Z" itemprop="datePublished">2018-09-07</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/09/07/Linex的简单安全配置/">
-        Linex的简单安全配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><code>关于阻止地址伪装：</code>（基于iptable）<br>IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。<br>首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。<br>步骤如下：<br>（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。<br>iptables -A INPUT -i lo -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/1.png"><br>（2）为本地系统发起的连接创建规则，该规则将允许所有外出流量包通过，包括远程服务器的响应，如web站点的访问：<br>iptables -A INPUT -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/2.png"><br>（3）创建一个新链，用来存放阻止IP伪装的规则。<br>iptables -N blocked_ip<br>（4）将生成的新链插入到INPUT链中；<br>iptables -I INPUT 2 -j blocked_ip<br><img src="/2018/09/07/Linex的简单安全配置/3.png"><br><img src="/2018/09/07/Linex的简单安全配置/4.png"><br>（5）将需要阻止的虚假IP地址规则插入到blocked_ip中,通过该规则可以阻塞该地址的连接。<br>iptables -A blocked_ip -s 192.168.1.2 -j DROP<br><img src="/2018/09/07/Linex的简单安全配置/5.png"><br>其次，通过/etc/host.conf文件阻止IP欺骗。打开该文件在文件中添加一下几行内容：<br>order hosts,bind<br>multi on<br>nospoof on<br>这里 “nospoof on”选项表示开启IP地址的比较操作，本地主机通过主机名查找对应的ip地址，并将查到的IP地址与数据包中的源IP比较，如果不一致，这说明<br>该IP为伪造ip，系统会发出虚假IP地址警告！</p>
-<blockquote>
-<p>关于history的一些简单优化：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HISTSIZE：命令历史记录的条数</span><br><span class="line">HISTFILE：指定历史文件，默认为~/.bash_history</span><br><span class="line">HISTFILESIZE：命令历史文件记录历史的条数</span><br><span class="line">HISTTIMEFORMAT=“%F %T “ 显示时间</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p></p>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
 	</div>
 
 
