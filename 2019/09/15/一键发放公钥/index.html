@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Linux下的桥接网卡配置 | ConqUeroR</title>
+  <title>一键发放公钥 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="（1）桥设备不支持NetworkManager服务，故必须把该服务关掉。         chkconfig –list NetworkManager （2）改为network服务         chkconfig –list network  (3)安装桥设备管理工具。          yum install bridge-utils          rpm -ql bridge-uti">
+  <meta name="description" content="在使用该脚本前，确保自己拥有ip_pass.txt文件。  形如：12345xxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx pppppp 123456789101112131415rpm -ql expect &amp;amp;&amp;gt;/dev/">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux下的桥接网卡配置">
-<meta property="og:url" content="http://gmfdevops.com.com/2019/07/17/Linux下的桥接网卡配置/index.html">
+<meta property="og:title" content="一键发放公钥">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/09/15/一键发放公钥/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="（1）桥设备不支持NetworkManager服务，故必须把该服务关掉。         chkconfig –list NetworkManager （2）改为network服务         chkconfig –list network  (3)安装桥设备管理工具。          yum install bridge-utils          rpm -ql bridge-uti">
+<meta property="og:description" content="在使用该脚本前，确保自己拥有ip_pass.txt文件。  形如：12345xxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx pppppp 123456789101112131415rpm -ql expect &amp;amp;&amp;gt;/dev/">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T07:40:39.000Z">
+<meta property="og:updated_time" content="2019-09-15T12:08:43.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linux下的桥接网卡配置">
-<meta name="twitter:description" content="（1）桥设备不支持NetworkManager服务，故必须把该服务关掉。         chkconfig –list NetworkManager （2）改为network服务         chkconfig –list network  (3)安装桥设备管理工具。          yum install bridge-utils          rpm -ql bridge-uti">
+<meta name="twitter:title" content="一键发放公钥">
+<meta name="twitter:description" content="在使用该脚本前，确保自己拥有ip_pass.txt文件。  形如：12345xxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx ppppppxxx.xxx.xxx.xxx pppppp 123456789101112131415rpm -ql expect &amp;amp;&amp;gt;/dev/">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -197,11 +197,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-一键发放公钥" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
+      <a href="/2019/09/15/一键发放公钥/" class="article-date">
+  	<time datetime="2019-09-15T12:04:15.000Z" itemprop="datePublished">2019-09-15</time>
 </a>
     </div>
   
@@ -214,7 +214,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Linux下的桥接网卡配置
+      一键发放公钥
       
     </h1>
   
@@ -225,7 +225,7 @@
         
         
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
+	<a class="article-category-link" href="/categories/shell/">shell</a>
 	</div>
 
 
@@ -236,20 +236,11 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
-<blockquote>
-<p>(1)cd /etc/syscoonfig/network-scripts</p>
+        <blockquote>
+<p>在使用该脚本前，确保自己拥有ip_pass.txt文件。</p>
 </blockquote>
-<blockquote>
-<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
+<p>形如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">rpm -ql expect &amp;&gt;/dev/null || yum install -y -q expect</span><br><span class="line">ssh-keygen -P &quot;&quot; -f &quot;/root/.ssh/id_rsa&quot;</span><br><span class="line">while read line;do</span><br><span class="line">        IPADD=`echo $line | cut -d &quot; &quot; -f1`</span><br><span class="line">        PASS=`echo &quot;$line&quot; |cut -d &quot; &quot; -f2`</span><br><span class="line">expect &lt;&lt;EOF</span><br><span class="line">        set timeout 10</span><br><span class="line">        spawn ssh-copy-id $IPADD</span><br><span class="line">        expect &#123;</span><br><span class="line">        &quot;yes/no&quot; &#123;send &quot;yes\n&quot;;exp_continue&#125;</span><br><span class="line">        &quot;password&quot; &#123;send &quot;$PASS\n&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        expect eof</span><br><span class="line">EOF</span><br><span class="line">done &lt; IP_PASS.txt</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -258,18 +249,18 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/07/17/文件查找_locate-find/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/09/15/SSh免密码登录密钥配置/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          文件查找_locate-find
+          SSh免密码登录密钥配置
         
       </div>
     </a>
   
   
-    <a href="/2018/12/27/web安全-逻辑攻击类-逻辑攻击类测试/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">web安全##逻辑攻击类#逻辑攻击类测试</div>
+    <a href="/2019/09/15/rsync配合计划任务实现数据备份/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">rsync配合计划任务实现数据备份</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -279,7 +270,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="Linux下的桥接网卡配置" data-title="Linux下的桥接网卡配置" data-url="http://gmfdevops.com.com/2019/07/17/Linux下的桥接网卡配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Linux下的桥接网卡配置">
+<div class="ds-share share" data-thread-key="一键发放公钥" data-title="一键发放公钥" data-url="http://gmfdevops.com.com/2019/09/15/一键发放公钥/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="一键发放公钥">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
