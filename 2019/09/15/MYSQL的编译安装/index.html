@@ -9,17 +9,17 @@
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="From Zero to the DevOps">
+  <meta name="description" content="源码编译安装 mariadb ：  1) 安装依赖的包和软件：1yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boost-devel gcc gcc-c++ cmake ncurses-devel gnutls-devel libxml2-devel openssl-devel libevent-de">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MYSQL的编译安装">
 <meta property="og:url" content="http://gmfdevops.com.com/2019/09/15/MYSQL的编译安装/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="From Zero to the DevOps">
+<meta property="og:description" content="源码编译安装 mariadb ：  1) 安装依赖的包和软件：1yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boost-devel gcc gcc-c++ cmake ncurses-devel gnutls-devel libxml2-devel openssl-devel libevent-de">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-09-15T12:05:24.558Z">
+<meta property="og:updated_time" content="2019-09-15T12:36:22.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MYSQL的编译安装">
-<meta name="twitter:description" content="From Zero to the DevOps">
+<meta name="twitter:description" content="源码编译安装 mariadb ：  1) 安装依赖的包和软件：1yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boost-devel gcc gcc-c++ cmake ncurses-devel gnutls-devel libxml2-devel openssl-devel libevent-de">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -228,6 +228,10 @@
       <div class="article-info article-info-post">
         
         
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
 
         
           
@@ -246,7 +250,26 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p><strong><em>源码编译安装 mariadb ：</em></strong></p>
+<blockquote>
+<p>1) 安装依赖的包和软件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boost-devel gcc gcc-c++ cmake ncurses-devel gnutls-devel libxml2-devel openssl-devel libevent-devel libaio-devel</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 准备用户，以及数据库文件目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">useradd -r -s /sbin/nologin -d /data/mysql mysql</span><br><span class="line">mkdir -p /data/mysql/</span><br><span class="line">chown -R mysql:mysql /data/mysql/</span><br><span class="line">tar -xvf mariadb-10.2.27.tar.gz -C /tmp/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过 cmake 生成配置选项文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">cd mariadb-10.2.27/</span><br><span class="line">cmake . \</span><br><span class="line">-DCMAKE_INSTALL_PREFIX=/app/mysql \</span><br><span class="line">-DMYSQL_DATADIR=/data/mysql/ \</span><br><span class="line">-DSYSCONFDIR=/etc/ \</span><br><span class="line">-DMYSQL_USER=mysql \</span><br><span class="line">-DWITH_INNOBASE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_ARCHIVE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_PARTITION_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITHOUT_MROONGA_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_DEBUG=0 \</span><br><span class="line">-DWITH_READLINE=1 \</span><br><span class="line">-DWITH_SSL=system \</span><br><span class="line">-DWITH_ZLIB=system \</span><br><span class="line">-DWITH_LIBWRAP=0 \</span><br><span class="line">-DENABLED_LOCAL_INFILE=1 \</span><br><span class="line">-DMYSQL_UNIX_ADDR=/data/mysql/mysql.sock \</span><br><span class="line">-DDEFAULT_CHARSET=utf8 \</span><br><span class="line">-DDEFAULT_COLLATION=utf8_general_ci</span><br><span class="line"></span><br><span class="line">如若以上发生错误，请先执行：</span><br><span class="line">rm -f CMakeCache.txt</span><br><span class="line"></span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 准备配置文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /app/mysql/support-files/my-huge.cnf /etc/my.cnf</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /app/mysql/</span><br><span class="line">scripts/mysql_install_db --datadir=/data/mysql/ --user=mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 准备环境变量，启动脚本，启动服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">echo &apos;PATH=/app/mysql/bin:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">. /etc/profile.d/app.sh</span><br><span class="line"></span><br><span class="line">cp /app/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line"></span><br><span class="line">chkconfig --add mysqld</span><br><span class="line"></span><br><span class="line">service mysqld start</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
       
     </div>
     
