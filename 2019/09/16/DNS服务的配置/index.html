@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>DNS服务的配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="以下操作确保自己的 SElinux , firewall 已关闭，时间已经同步。 确保自己创建的域数据库文件权限与系统保持一致。 并且确保自己已经配置epel源 主DNS服务器：123456vim /etc/yum.repos.d/base.repo[epel]name=EPELbaseurl=https://mirrors.aliyun.com/epel/7/x86_64/gpgcheck=0e">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS服务的配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/09/16/DNS服务的配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="以下操作确保自己的 SElinux , firewall 已关闭，时间已经同步。 确保自己创建的域数据库文件权限与系统保持一致。 并且确保自己已经配置epel源 主DNS服务器：123456vim /etc/yum.repos.d/base.repo[epel]name=EPELbaseurl=https://mirrors.aliyun.com/epel/7/x86_64/gpgcheck=0e">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-09-16T07:42:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DNS服务的配置">
+<meta name="twitter:description" content="以下操作确保自己的 SElinux , firewall 已关闭，时间已经同步。 确保自己创建的域数据库文件权限与系统保持一致。 并且确保自己已经配置epel源 主DNS服务器：123456vim /etc/yum.repos.d/base.repo[epel]name=EPELbaseurl=https://mirrors.aliyun.com/epel/7/x86_64/gpgcheck=0e">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-DNS服务的配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/16/DNS服务的配置/" class="article-date">
+  	<time datetime="2019-09-16T07:41:01.000Z" itemprop="datePublished">2019-09-16</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      DNS服务的配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/09/16/DNS服务的配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="DNS服务的配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>以下操作确保自己的 SElinux , firewall 已关闭，时间已经同步。</em></strong></p>
+<p><strong><em>确保自己创建的域数据库文件权限与系统保持一致。</em></strong></p>
+<p><strong><em>并且确保自己已经配置epel源</em></strong></p>
+<p><strong><em>主DNS服务器：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/yum.repos.d/base.repo</span><br><span class="line">[epel]</span><br><span class="line">name=EPEL</span><br><span class="line">baseurl=https://mirrors.aliyun.com/epel/7/x86_64/</span><br><span class="line">gpgcheck=0</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>1) 安装bind包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bind</span><br><span class="line"></span><br><span class="line">客户端安装：yum install bind-utils -y</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 先配置主DNS服务器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 创建域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vim vim /var/named/test.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN SOA  master  admin.test.com.  (</span><br><span class="line">                    1       ; serial    数据库版本号，用于判断是否同步到从DNS服务器</span><br><span class="line">                    3600    ; refresh   主从服务器同步时间 间隔 （默认单位：秒）</span><br><span class="line">                    600     ; retry     主从同步失败后，多久后重新同步</span><br><span class="line">                    1W      ; expire    从服务器多久没有到主服务器同步数据，就不在提供服务</span><br><span class="line">                    3H )    ; minimum   错误记录的缓存时间</span><br><span class="line">        NS  master</span><br><span class="line"></span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">websrv  A   192.168.38.37</span><br><span class="line"></span><br><span class="line">www    CNAME  websrv</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 在配置文件中引入域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">默认的配置文件是 /etc/named.conf ，但是引入域数据库文件，建议在 /etc/named.rfc1912.zones 中配置。</span><br><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line">zone &quot;test.com&quot;&#123;</span><br><span class="line">type master;</span><br><span class="line">file &quot;test.com.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>从DNS服务的配置：</em></strong></p>
+<blockquote>
+<p>1)同样安装 bind 包。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bind</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 配置从DNS服务器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br><span class="line">allow-transfer &#123;none;&#125;;               为了安全，防止抓取这个DNS库文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 修改配置文件引用域数据库文件，从服务器不用创建域数据库文件。默认会从主服务器同步。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line">zone &quot;test.com&quot;&#123;</span><br><span class="line">type slave;</span><br><span class="line">masters &#123;192.168.38.47;&#125;;</span><br><span class="line">file &quot;slaves/test.com.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 配置主服务器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf</span><br><span class="line">allow-transfer &#123;192.168.38.27;&#125;;</span><br><span class="line"></span><br><span class="line">vim /var/named/test.com.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN SOA  master  admin.test.com.  (</span><br><span class="line">                    1        ; serial </span><br><span class="line">                    3600     ; refresh</span><br><span class="line">                    600      ; retry</span><br><span class="line">                    1W       ; expire</span><br><span class="line">                    3H )     ; minimum</span><br><span class="line">        NS  master</span><br><span class="line">        NS  slave</span><br><span class="line">slave   A   192.168.38.27</span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">websrv  A   192.168.38.37</span><br><span class="line"></span><br><span class="line">www    CNAME  websrv</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>子DNS服务器的配置</em></strong></p>
+<blockquote>
+<p>1) 主DNS服务器的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">vim /var/named/test.com.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN SOA  master  admin.test.com.  (</span><br><span class="line">                    1        ; serial </span><br><span class="line">                    3600     ; refresh</span><br><span class="line">                    600      ; retry</span><br><span class="line">                    1W       ; expire</span><br><span class="line">                    3H )     ; minimum</span><br><span class="line">        NS  master</span><br><span class="line">        NS  slave</span><br><span class="line">beijing NS  son</span><br><span class="line">son     A   192.168.38.36</span><br><span class="line">slave   A   192.168.38.27</span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">websrv  A   192.168.38.37</span><br><span class="line"></span><br><span class="line">www    CNAME  websrv</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 子DNS服务器的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br><span class="line">allow-transfer &#123;none;&#125;;               为了安全，防止抓取这个DNS库文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 在子DNS服务器上创建 域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim /var/named/beijing.test.com.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@       IN      SOA     master  admin.test.com. ( 1</span><br><span class="line">                                                1D</span><br><span class="line">                                                3H</span><br><span class="line">                                                1W</span><br><span class="line">                                                6H )</span><br><span class="line">                NS      master</span><br><span class="line">master          A       192.168.38.36</span><br><span class="line"></span><br><span class="line">app             A       1.1.1.1</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 在子DNS服务器配置文件中引用以上域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.rfc1912.zones </span><br><span class="line">zone &quot;beijing.test.com&quot;&#123;</span><br><span class="line">type master;</span><br><span class="line">file &quot;beijing.test.com.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>转发（缓存）DNS服务器</em></strong></p>
+<blockquote>
+<p>1) DNS服务器的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br><span class="line">allow-transfer &#123;none;&#125;;               为了安全，防止抓取这个DNS库文件</span><br><span class="line">forwarders &#123; 192.168.38.47;&#125;;</span><br><span class="line">forward only;                         only如若转发目标服务器不可用，这解析失败。first则在转发目标不可用时，转发服务器自己去找根服务器解析。</span><br><span class="line">dnssec-enable no;</span><br><span class="line">dnssec-validation no;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>反向域解析服务器</em></strong></p>
+<blockquote>
+<p>1) 首先创建反向域解析库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim /var/named/192.168.38.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN  SOA master  admin.test.com. ( 1 1D 3H 1W 3H )</span><br><span class="line"></span><br><span class="line">    NS  master</span><br><span class="line"></span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">100     PTR  web.test.com.</span><br><span class="line"></span><br><span class="line">66      PTR  qq.test.com.</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 在配置文件中引用以上域解析库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line">zone &quot;38.168.192.in-addr.arpa&quot;&#123;</span><br><span class="line">type master;</span><br><span class="line">file &quot;192.168.38.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/09/15/MYSQL的编译安装/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MYSQL的编译安装</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="DNS服务的配置" data-title="DNS服务的配置" data-url="http://gmfdevops.com.com/2019/09/16/DNS服务的配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="DNS服务的配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
