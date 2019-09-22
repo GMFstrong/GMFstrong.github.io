@@ -202,6 +202,400 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-rsync配合计划任务实现数据备份" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/rsync配合计划任务实现数据备份/" class="article-date">
+  	<time datetime="2019-09-15T12:03:56.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/rsync配合计划任务实现数据备份/">
+        rsync配合计划任务实现数据备份
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>rsync与scp同样具有远程复制数据的功能。但是，scp 却不能根据判断数据的变化灵活复制数据，而是全部复制在一定成都上降低了性能。rsync却是根据文件的变化，只复制不同的文件，所以性能更好，速度更快。</p>
+<p><strong><em>注意：需要确保安装yum install -y openssh-clients</em></strong></p>
+<blockquote>
+<p>rsync的常用选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-n 模拟复制过程</span><br><span class="line">-v 显示详细过程</span><br><span class="line">-r 递归复制目录树</span><br><span class="line">-p 保留权限</span><br><span class="line">-t 保留时间戳</span><br><span class="line">-g 保留组信息</span><br><span class="line">-o 保留所有者信息</span><br><span class="line">-l 将软链接文件本身进行复制（默认）</span><br><span class="line">-L 将软链接文件指向的文件复制</span><br><span class="line">-a 存档，相当于–rlptgoD，但不保留ACL（-A）和SELinux属性（-X）</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>注意：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rsync -av /etc server1:/tmp 复制目录和目录下文件</span><br><span class="line">rsync -av /etc/ server1:/tmp 只复制目录下文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>结合 crontab 实现数据的同步：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* * * * * /usr/bin/rsync --delete -a root@192.168.38.16:/var/www/html/ /date/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/rsync配合计划任务实现数据备份/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="rsync配合计划任务实现数据备份">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-CA证书的创建与吊销" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/CA证书的创建与吊销/" class="article-date">
+  	<time datetime="2019-09-15T11:51:12.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/CA证书的创建与吊销/">
+        CA证书的创建与吊销
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>首先，创建CA:</p>
+</blockquote>
+<p>查看 /etc/pki/CA的目录结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 pki]# tree -C CA</span><br><span class="line">CA</span><br><span class="line">├── certs</span><br><span class="line">├── crl</span><br><span class="line">├── newcerts</span><br><span class="line">└── private</span><br></pre></td></tr></table></figure></p>
+<p>如上默认没有index.txt 和 serial 两个文件。先创建出来。</p>
+<p>最终的目录结构如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 CA]# tree -C ./</span><br><span class="line">./</span><br><span class="line">├── certs</span><br><span class="line">├── crl</span><br><span class="line">├── index.txt</span><br><span class="line">├── newcerts</span><br><span class="line">├── private</span><br><span class="line">└── serial</span><br></pre></td></tr></table></figure></p>
+<p>1) 在CA生成密钥对用于自签证书为其它服务器颁发证书。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 CA]# cd private/</span><br><span class="line">[root@centos7 private]# (umask 077;openssl genrsa -out ca1.pem 1024)</span><br><span class="line">Generating RSA private key, 1024 bit long modulus</span><br><span class="line">........................++++++</span><br><span class="line">.......++++++</span><br><span class="line">e is 65537 (0x10001)</span><br></pre></td></tr></table></figure></p>
+<p>2) 生成自签的ca证书：<br><strong><em>选项说明</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-new：生成新证书签署请求</span><br><span class="line">-x509：专用于CA生成自签证书</span><br><span class="line">-key：生成请求时用到的私钥文件</span><br><span class="line">-days n：证书的有效期限</span><br><span class="line">-out /PATH/TO/SOMECERTFILE: 证书的保存路径</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 private]# openssl req -new -x509 -key cakey.pem -out /etc/pki/CA/cacert.pem -days 3650</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &apos;.&apos;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [XX]:CN                                    输入：（国家代码）</span><br><span class="line">State or Province Name (full name) []:beijing                           输入：（所在省份）</span><br><span class="line">Locality Name (eg, city) [Default City]:testlab                         输入：（所在城市）</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:devops            输入：（公司名称）                </span><br><span class="line">Organizational Unit Name (eg, section) []:test.app.com                  输入：（部门名称）            </span><br><span class="line">Common Name (eg, your name or your server&apos;s hostname) []:1.app.com      输入：（服务器名称）                     </span><br><span class="line">Email Address []:                                                       输入：（邮箱名称）</span><br></pre></td></tr></table></figure>
+<p>查看⾃签证书详细内容：</p>
+<p>openssl x509 -in xxx.pem -noout -text</p>
+<p>查看⾃签证书简要内容，查看证书有效期：</p>
+<p>openssl x509 -in xxx.pem -noout -issuer</p>
+<p>openssl x509 -in xxx.pem -noout -dates</p>
+<blockquote>
+<p>想私有CA申请证书：</p>
+</blockquote>
+<p>首先，在本地生成私钥，用于生成证书申请的申请文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]# (umask 077;openssl genrsa -out /date/app1.key 1024) </span><br><span class="line">Generating RSA private key, 1024 bit long modulus</span><br><span class="line">.....++++++</span><br><span class="line">...++++++</span><br><span class="line">e is 65537 (0x10001)</span><br><span class="line">[root@centos6 ~]# ls /date/</span><br><span class="line">app1.key</span><br></pre></td></tr></table></figure></p>
+<p>利用生成的私钥去生成证书申请文件：<br><strong><em>默认要求 国家，省，公司名称三项必须和CA一致</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]# openssl req -new -key /date/app1.key -out /date/app1.csr</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &apos;.&apos;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [XX]:CN</span><br><span class="line">State or Province Name (full name) []:beijing</span><br><span class="line">Locality Name (eg, city) [Default City]:testlab</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:devops</span><br><span class="line">Organizational Unit Name (eg, section) []:test.qq.com</span><br><span class="line">Common Name (eg, your name or your server&apos;s hostname) []:qpp.qq.com</span><br><span class="line">Email Address []:</span><br><span class="line"></span><br><span class="line">Please enter the following &apos;extra&apos; attributes</span><br><span class="line">to be sent with your certificate request</span><br><span class="line">A challenge password []:</span><br><span class="line">An optional company name []:</span><br><span class="line">[root@centos6 ~]# ls /date/</span><br><span class="line">app1.csr  app1.key</span><br></pre></td></tr></table></figure></p>
+<p>将生成的证书申请文件发送到CA进行证书申请：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]# scp /date/app1.csr 192.168.38.17:/date/</span><br></pre></td></tr></table></figure></p>
+<p>此时，可以在CA上对发送过来的证书申请文件进行签名(这一步如若没有 index.txt和serial 这两个文件就会报错，确保这两个文件已存在)：</p>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 CA]# openssl ca -in /date/app1.csr -out /etc/pki/CA/app1.crt -days 100</span><br><span class="line">Using configuration from /etc/pki/tls/openssl.cnf</span><br><span class="line">Check that the request matches the signature</span><br><span class="line">Signature ok</span><br><span class="line">Certificate Details:</span><br><span class="line">        Serial Number: 1 (0x1)</span><br><span class="line">        Validity</span><br><span class="line">            Not Before: Sep  3 14:00:16 2019 GMT</span><br><span class="line">            Not After : Dec 12 14:00:16 2019 GMT</span><br><span class="line">        Subject:</span><br><span class="line">            countryName               = CN</span><br><span class="line">            stateOrProvinceName       = beijing</span><br><span class="line">            organizationName          = devops</span><br><span class="line">            organizationalUnitName    = test.qq.com</span><br><span class="line">            commonName                = qpp.qq.com</span><br><span class="line">        X509v3 extensions:</span><br><span class="line">            X509v3 Basic Constraints: </span><br><span class="line">                CA:FALSE</span><br><span class="line">            Netscape Comment: </span><br><span class="line">                OpenSSL Generated Certificate</span><br><span class="line">            X509v3 Subject Key Identifier: </span><br><span class="line">                55:37:49:DD:A1:BC:A3:AA:84:A3:54:74:C4:8C:6F:19:CC:3D:87:F5</span><br><span class="line">            X509v3 Authority Key Identifier: </span><br><span class="line">                keyid:08:73:CD:5C:7C:E7:F5:26:71:4C:51:0A:F8:E4:8A:07:D8:33:20:1A</span><br><span class="line"></span><br><span class="line">Certificate is to be certified until Dec 12 14:00:16 2019 GMT (100 days)</span><br><span class="line">Sign the certificate? [y/n]:y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">1 out of 1 certificate requests certified, commit? [y/n]y</span><br><span class="line">Write out database with 1 new entries</span><br><span class="line">Data Base Updated</span><br><span class="line">[root@centos7 CA]# ls</span><br><span class="line">app1.crt  cacert.pem  certs  crl  index.txt  index.txt.attr  index.txt.old  newcerts  private  serial  serial.old</span><br></pre></td></tr></table></figure>
+<p>将生成的签名证书发回给申请的服务器。</p>
+<blockquote>
+<p>证书吊销:</p>
+</blockquote>
+<p>按照如上方法再生成一个证书：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 CA]# cat index.txt</span><br><span class="line">V       191212140016Z           01      unknown /C=CN/ST=beijing/O=devops/OU=test.qq.com/CN=qpp.qq.com</span><br><span class="line">V       200101141432Z           02      unknown /C=CN/ST=beijing/O=devops/OU=dsfd/CN=dfsg</span><br></pre></td></tr></table></figure></p>
+<p>openssl ca -status SERIAL 查看指定编号的证书状态<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 CA]# openssl ca -status 01</span><br><span class="line">Using configuration from /etc/pki/tls/openssl.cnf</span><br><span class="line">01=Valid (V)</span><br></pre></td></tr></table></figure></p>
+<p>证书吊销<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 CA]# openssl ca -revoke newcerts/01.pem </span><br><span class="line">Using configuration from /etc/pki/tls/openssl.cnf</span><br><span class="line">[root@centos7 CA]# openssl ca -status 01</span><br><span class="line">Using configuration from /etc/pki/tls/openssl.cnf</span><br><span class="line">01=Revoked (R)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> 指定第一个吊销证书的编号,注意：第一次更新证书吊销列表前，才需要执行</span><br><span class="line">echo 01 &gt; /etc/pki/CA/crlnumber</span><br><span class="line"> 更新证书吊销列表</span><br><span class="line">openssl ca -gencrl -out /etc/pki/CA/crl.pem</span><br><span class="line"> 查看crl文件：</span><br><span class="line">openssl crl -in /etc/pki/CA/crl.pem -noout -text</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/CA证书的创建与吊销/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="CA证书的创建与吊销">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-文本处理-awk" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/31/文本处理-awk/" class="article-date">
+  	<time datetime="2019-08-31T08:21:33.000Z" itemprop="datePublished">2019-08-31</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/31/文本处理-awk/">
+        文本处理_awk
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <img src="/2019/08/31/文本处理-awk/1.png">
+<img src="/2019/08/31/文本处理-awk/2.png">
+<blockquote>
+<p>关于变量</p>
+</blockquote>
+<img src="/2019/08/31/文本处理-awk/3.png">
+<img src="/2019/08/31/文本处理-awk/4.png">
+<img src="/2019/08/31/文本处理-awk/5.png">
+<blockquote>
+<p>awk的基本使用格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">awk [options] &apos;program&apos; file</span><br><span class="line">program：表示为pattern&#123;action statements;...&#125;</span><br><span class="line">pattern：表示部分决定动作语句何时触发及触发事件BEGIN、END；</span><br><span class="line">action statements：表示对数据进行处理，放置&#123;&#125;内指明print、printf。</span><br><span class="line"></span><br><span class="line">awk执行时，由分隔符的字段（域）标记$1,$2...$n称为域标识,$0为所有域。</span><br><span class="line">文件的每一行称为记录。</span><br><span class="line">省略action，则默认执行print $0的操作。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: &apos;/^root/&#123;print$1,$3&#125;&apos; /etc/passwd      </span><br><span class="line">root 0</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>不指定action默认“print $0”及所有匹配到的行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: &apos;/^UUID/&apos; /etc/fstab </span><br><span class="line">UUID=63f39645-9ff8-467a-b661-2b01b7c4d904 /                       xfs     defaults        0 0</span><br><span class="line">UUID=47fc0f00-af74-467f-9da3-e666bc8b1f29 /boot                   xfs     defaults        0 0</span><br><span class="line">UUID=da4d0c6b-b89a-4e7b-9d02-e2254fc75737 /date                   xfs     defaults        0 0</span><br><span class="line">UUID=aaef23a7-e6dc-4e1e-9a58-9d9d215fded7 swap                    swap    defaults        0 0</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>如下：只有当“{action}”前的表达式为真时，才有后续的处理。</p>
+</blockquote>
+<p><strong><em>真：结果为非0值，非空字符串</em></strong></p>
+<p><strong><em>假：结果为空字符串或0值</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: -v OFS=*** &apos;1&#123;print $1OFS$3&#125;&apos; /etc/passwd</span><br><span class="line">root***0</span><br><span class="line">bin***1</span><br><span class="line">daemon***2</span><br><span class="line">adm***3</span><br><span class="line">lp***4</span><br><span class="line">sync***5</span><br><span class="line">shutdown***6</span><br><span class="line">...</span><br><span class="line">[root@localhost ~]# awk -F: -v OFS=*** &apos;!1&#123;print $1OFS$3&#125;&apos; /etc/passwd</span><br><span class="line">[root@localhost ~]# </span><br><span class="line">[root@localhost ~]# awk -F: &apos;$3&gt;=100&#123;print $1,$3&#125;&apos; /etc/passwd</span><br><span class="line">avahi-autoipd 170</span><br><span class="line">systemd-bus-proxy 999</span><br><span class="line">systemd-network 998</span><br><span class="line">polkitd 997</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>在“i=1”后面默认隐藏了{print $0}。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk  -F: &apos;i=1;j=1&#123;print $1,$3&#125;&apos; /etc/passwd </span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">root 0</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">bin 1</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon 2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>关于awk的一些特殊使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=0&apos;</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=1&apos;</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=!i&apos;</span><br><span class="line">1</span><br><span class="line">3</span><br><span class="line">5</span><br><span class="line">7</span><br><span class="line">9</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=!i;&#123;print i&#125;&apos;</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">3</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">5</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">7</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">9</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">[root@localhost ~]# seq 10 |awk -v i=1 &apos;i=!i&apos;</span><br><span class="line">2</span><br><span class="line">4</span><br><span class="line">6</span><br><span class="line">8</span><br><span class="line">10</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>awk中数组的使用:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(1) 可使用任意字符串；字符串要使用双引号括起来</span><br><span class="line">(2) 如果某数组元素事先不存在，在引用时，awk会自动创建此元素，并将其值</span><br><span class="line">初始化为“空串”</span><br><span class="line">(3) 若要判断数组中是否存在某元素，要使用“index in array”格式进行遍历</span><br></pre></td></tr></table></figure>
+<img src="/2019/08/31/文本处理-awk/6.png">
+<img src="/2019/08/31/文本处理-awk/7.png">
+<img src="/2019/08/31/文本处理-awk/8.png">
+<img src="/2019/08/31/文本处理-awk/9.png">
+<img src="/2019/08/31/文本处理-awk/10.png">
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/08/31/文本处理-awk/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="文本处理_awk">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Centos6-7启动流程" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/31/Centos6-7启动流程/" class="article-date">
+  	<time datetime="2019-08-31T04:32:33.000Z" itemprop="datePublished">2019-08-31</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/31/Centos6-7启动流程/">
+        Centos6_7启动流程
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。"><a href="#了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。" class="headerlink" title="了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。"></a>了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。</h2><blockquote>
+<p>首先，关于Centos6和Centos7的的启动流程我这里大致分为3个阶段：</p>
+</blockquote>
+<pre><code>(1)POST加电自检，通过BIOS加载MBR,启动(grub)等引导程序。
+(2)（内核空间启动）加载内核，初始化内核,挂载根文件系统。
+(3)（用户空间启动）启动系统的第一个进程，启动加载一些必要的服务和应用。
+</code></pre><p><strong><em>POST加电自检，通过BIOS加载MBR,启动(grub)等引导程序。</em></strong></p>
+<p>POST加电自检中，，是BIOS功能的一个主要部分。负责完成对CPU、主板、内存、硬盘子系统、显示子系统、串并行接口、键盘等硬件情况的检测。BIOS的程序由CPU直接加载执行（电脑制造商硬件设计）。</p>
+<p>根据BIOS的设定，确定从光盘，U盘，硬盘，网络那种介质中启动系统。</p>
+<p>这里以硬盘启动为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">通过BIOS寻找到装载有OS的硬盘以后，在该硬盘的第一个扇区的446个字节的空间中加载grub等系统引导程序。由于gurb引导程序功能过于强大，造成446个字节无法完全实现grub的功能，故而采用了将grub引导过程分阶段完成的方法。grub引导程序大致分为3个阶段完成：</span><br><span class="line">    （1）stage_1:负责加载start程序，并且记录了Stage_2在硬盘上的位置。</span><br><span class="line">    （2）stage_1.5:由于stage_2的程序在/boot所在的文件系统中，故而该阶段负责通过驱动识别文件系统，并加载stage_2。在安装grub时，会根据/boot所在分区的文件系统安装相应的驱动程序。</span><br><span class="line">    （3）stage_2:负责启动用户交互接口，若装有多个系统内核，选择要加载启动的内核。</span><br></pre></td></tr></table></figure></p>
+<img src="/2019/08/31/Centos6-7启动流程/1.png">
+<p><strong><em>将内核加载进内存以后，需要挂载根文件系统，但是若要挂载根文件系统，需要加载根文件系统所在分区的文件系统驱动，然而，文件系统的驱动程序在根文件系统中。故而产生了矛盾。此时就需要引入第三方来解决矛盾。</em></strong></p>
+<p>为了减轻内核的重量，采用将根文件系统驱动加入内核的方法不适用。毕竟，各个文件系统的驱动程序各不相同，直接加载到内核，会造成内核含有多种无用的驱动，浪费资源。</p>
+<p>为此，采用了在装载系统时，我们通过装载系统时使用的光盘/U盘等扫描识别一些系统启动必须的设备，并将设备启动的驱动程序生成一个文件（initramfs-2.6.32-754.el6.x86_64.img）放在/boot/目录下，以供文件系统启动时加载使用。</p>
+<p>通过加载initramfs-2.6.32-754.el6.x86_64.img文件中的驱动程序，我们找到并且可以进入真正的根文件系统。但是此时我们的系统是通过initramfs-2.6.32-754.el6.x86_64.img文件里的驱动临时启动的。我们处于initramfs这个伪根文件系统里，所以我们此时仅仅是以只读的方式挂载根文件系统，防止因系统启动不稳定造成对根文件系统的破坏。</p>
+<p>然后，通过调用伪根文件里的init/systemd(第一个进程)加载各个模块驱动，初始化系统中的各个设备，包括CPU,磁盘等。 此时由于各个模块驱动加载完成，系统启动稳定，切换到真正的根文件系统中，为内核启动系统的init（/sbin/init）/systemd（/sbin/init -&gt; ../lib/systemd/systemd）进程做准备。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">以上为内核空间的启动及初始化过程。下面开始用户空间的启动以及初始化：</span><br><span class="line"></span><br><span class="line">```---------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>对于用户空间的启动与初始化，根据系统版本的不同有所差别：</p>
+<p>这里先介绍Centos6：</p>
+<blockquote>
+<p>1)  通过 ‘ /etc/inittab ‘文件获取系统的启动级别：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]# cat /etc/inittab</span><br><span class="line">id:3:initdefault:</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2)  通过系统初始化脚本 ‘/etc/rc.sysinit ‘，完成系统初始化。</p>
+</blockquote>
+<blockquote>
+<p>3) 根据自己的启动级别，到’ /etc/rc.d/rc*.d/ ‘目录中启动自己的开机自启服务。（根据/etc/rc.d/rc 文件）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 rc3.d]# ls</span><br><span class="line">K10saslauthd    K89netconsole  S08ip6tables  S11auditd     S25blk-availability  S50kdump    S90crond</span><br><span class="line">K61nfs-rdma     K89rdisc       S08iptables   S12rsyslog    S25netfs             S55sshd     S99local</span><br><span class="line">K87restorecond  S05rdma        S10network    S15mdmonitor  S26udev-post         S80postfix</span><br><span class="line">[root@centos6 rc3.d]# pwd</span><br><span class="line">/etc/rc.d/rc3.d</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>这些其实都是软连接：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 rc3.d]# ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx. 1 root root 19 Jul 17 19:22 K10saslauthd -&gt; ../init.d/saslauthd</span><br><span class="line">lrwxrwxrwx. 1 root root 18 Jul 17 19:23 K61nfs-rdma -&gt; ../init.d/nfs-rdma</span><br><span class="line">lrwxrwxrwx. 1 root root 21 Jul 17 19:22 K87restorecond -&gt; ../init.d/restorecond</span><br><span class="line">lrwxrwxrwx. 1 root root 20 Jul 17 19:22 K89netconsole -&gt; ../init.d/netconsole</span><br><span class="line">lrwxrwxrwx. 1 root root 15 Jul 17 19:22 K89rdisc -&gt; ../init.d/rdisc</span><br><span class="line">lrwxrwxrwx. 1 root root 14 Jul 17 19:23 S05rdma -&gt; ../init.d/rdma</span><br><span class="line">lrwxrwxrwx. 1 root root 19 Jul 17 19:23 S08ip6tables -&gt; ../init.d/ip6tables</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 加载用户自定义的服务’ /etc/local ‘</p>
+</blockquote>
+<p>到此，Centos6的系统用户空间加载完成。<br><img src="/2019/08/31/Centos6-7启动流程/2.jpg"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">以下是Centos7的用户空间启动流程：</span><br><span class="line"></span><br><span class="line">```--------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>1) 启动systemd系统启动和服务器守护进程管理器,负责在系统启动或运行时，激<br>活系统资源，服务器进程和其它进程。</p>
+</blockquote>
+<blockquote>
+<p>2) 与Centos6类似，先到/usr/lib/systemd/system/default.target获取自己的运行级别。</p>
+</blockquote>
+<blockquote>
+<p>3) 根据/usr/lib/systemd/system/sysinit.target完成系统初始化。</p>
+</blockquote>
+<blockquote>
+<p>4) 根据自己的运行级别到相应的的target单元中启动对应的开机自启服务。</p>
+</blockquote>
+<img src="/2019/08/31/Centos6-7启动流程/3.png">
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/08/31/Centos6-7启动流程/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Centos6_7启动流程">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-关于字符串的处理" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -733,514 +1127,9 @@
 
 
   
-    <article id="post-Raid磁盘阵列" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/09/Raid磁盘阵列/" class="article-date">
-  	<time datetime="2019-08-09T11:47:28.000Z" itemprop="datePublished">2019-08-09</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/09/Raid磁盘阵列/">
-        Raid磁盘阵列
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>在生产环境中考虑到所需硬盘存储量太大，并且对数据有一定冗余要求，RAID恰好能满足这一需求。</em></strong></p>
-<blockquote>
-<p>整个 RAID由于选择的等级 (level) 不同，而使得整合后的磁盘具有不同的功能， 基本常见的 level 有这几种:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">（1）raid0</span><br><span class="line">（2）raid1</span><br><span class="line">（3）raid5</span><br><span class="line">（4）raid10</span><br><span class="line">（5）raid01</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>下面介绍一下RAID中的一些基本概念：</em></strong><br>（1）在组成RAID的多块磁盘中，通常会依照众多磁盘中容量最小的磁盘作为参照，例如有1T,2T,3T的几块磁盘，则会依照每块1T大小的磁盘容量使用RAID。故而最好使用型号与容量大小的磁盘组成RAID。</p>
-<h3 id="RAID0-性能加强，容量加大，风险加大。"><a href="#RAID0-性能加强，容量加大，风险加大。" class="headerlink" title="RAID0:性能加强，容量加大，风险加大。"></a>RAID0:性能加强，容量加大，风险加大。</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">这种模式的 RAID 会将磁盘先切出等量的区块 (举例来说， 4KB)， 然后当一个文件要写入 RAID 时，该文件会依据区块的大小切割好，之后再依序放到各个磁碟里面去。由於每个磁碟会交错的存放数据， 因此当你的数据要写入 RAID 时，数据会被等量的放置在各个磁碟上面。举例来说，你有两块磁盘组成 RAID-0 ， 当你有 100MB 的数据要写入时，每个磁盘会各被分配到 50MB 的储存量。如下图：</span><br></pre></td></tr></table></figure>
-<img src="/2019/08/09/Raid磁盘阵列/raid0.gif">
-<blockquote>
-<p>读写性能提升：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">上图的意思是，在组成 RAID-0 时，每颗磁盘 (Disk A 与 Disk B) 都会先被分隔成为小区块 (chunk)。 当有数据要写入 RAID 时，数据会先被切割成符合小区块的大小，然后再依序一个一个的放置到不同的磁盘去。 由於数据已经先被切割并且依序放置到不同的磁盘上面，因此每块磁盘所负责的数据量都降低了！照这样的情况来看， 越多磁盘组成的 RAID-0 效能会越好，因为每块磁盘负责的数据量就更低了！ 这表示我的数据可以分散让多块磁盘来储存，当然性能会变的更好啊！此外，磁盘总容量也变大了！ 因为所有磁碟的容量总和成为 RAID-0 的总容量。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>数据丢失风险增大：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">只是使用此等级你必须要自行负担数据损毁的风险，由上图我们知道文件是被切割成为适合每块磁盘分区区块的大小， 然后再依序放置到各个磁盘中。想一想，如果某一块磁盘损毁了，那么文件数据将缺一块，此时这个文件就损毁了。 由於每个文件都是这样存放的，因此 RAID-0 只要有任何一颗磁盘损毁，在 RAID 上面的所有数据都会遗失而无法读取。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>为什么最好选择相同型号与容量的磁盘来组成RAID<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">如果使用不同容量的磁盘来组成 RAID-0 时，由于数据是一直等量的依序放置到不同磁盘中，当小容量磁盘的区块被用完了， 那么所有的数据都将被写入到最大的那颗磁盘去。举例来说，我用 200G 与 500G 组成 RAID-0 ， 那么最初的 400GB 数据可同时写入两块磁盘 (各消耗 200G 的容量)，后来再加入的数据就只能写入 500G 的那块磁盘中了。 此时的效能就变差了，因为只剩下一块可以存放数据。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<h3 id="RAID1-完整的备份容量损失50-，读性能提升，写性能不变。"><a href="#RAID1-完整的备份容量损失50-，读性能提升，写性能不变。" class="headerlink" title="RAID1 完整的备份容量损失50%，读性能提升，写性能不变。"></a>RAID1 完整的备份容量损失50%，读性能提升，写性能不变。</h3><blockquote>
-<p>完整的备份容量损失50%：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">这种模式主要是『让同一份数据，完整的保存在两块磁盘上面』。举例来说，如果我有一个 100MB 的文件，且我仅有两块磁盘组成 RAID-1 时，那么这两块磁盘将会同步写入 100MB 到他们的储存空间去。 因此，整体 RAID 的容量几乎少了 50%。如下图:</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<img src="/2019/08/09/Raid磁盘阵列/raid1.gif">
-<blockquote>
-<p>写性能不变（有可能变差）:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">如上图所示，一份数据传送到 RAID-1 之后会被分为两股，并分别写入到各个磁盘里头去。 由于同一份数据会被分别写入到其他不同磁盘，因此如果要写入 100MB 时，数据传送到 I/O 汇流排 后会被复制多份到各个磁盘， 结果就是数据量感觉变大了！因此在大量写入 RAID-1 的情况下，写入的效能可能会变的非常差 (因为我们只有一个南桥啊！)。 好在如果你使用的是硬件 RAID (磁盘阵列卡) 时，磁盘阵列卡会主动的复制一份而不使用系统的 I/O 汇流排，效能方面则还可以。 如果使用软件磁盘阵列，可能效能就不好了。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>读性能提升:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">虽然 RAID-1 的写入效能不佳，不过读取的效能则还可以啦！这是因为数据有两份在不同的磁碟上面，如果多个 processes 在读取同一份数据时， RAID 会自行取得最佳的读取平衡。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<h3 id="RAID01和RAID10：完整的备份容量损失50-，读写性能提升："><a href="#RAID01和RAID10：完整的备份容量损失50-，读写性能提升：" class="headerlink" title="RAID01和RAID10：完整的备份容量损失50%，读写性能提升："></a>RAID01和RAID10：完整的备份容量损失50%，读写性能提升：</h3><img src="/2019/08/09/Raid磁盘阵列/raid01.gif">
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">如上图所示，Disk A + Disk B 组成第一组 RAID 0，Disk C + Disk D 组成第二组 RAID 0， 然后这两组再整合成为一组 RAID 1。如果我有 100MB 的数据要写入，则由於 RAID 1 的关系， 两组 RAID 0 都会写入 100MB，但由於 RAID 0 的关系，因此每块磁盘仅会写入 50MB 而已。 如此一来不论哪一组 RAID 0 的磁盘损毁，只要另外一组 RAID 0 还存在，那么就能够透过 RAID 1 的机制来回复数据。</span><br><span class="line">由於具有 RAID 0 的优点，所以效能得以提升，由於具有 RAID 1 的优点，所以数据得以备份。 但是也由於 RAID 1 的缺点，所以总容量会少一半用来做为备份！</span><br><span class="line">而RAID10的方式与RAID01类似。</span><br></pre></td></tr></table></figure>
-<h3 id="RAID5：性能与数据备份的均衡考量"><a href="#RAID5：性能与数据备份的均衡考量" class="headerlink" title="RAID5：性能与数据备份的均衡考量"></a>RAID5：性能与数据备份的均衡考量</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RAID-5 至少需要三块以上的磁盘才能够组成这种类型的磁盘阵列。这种磁盘阵列的数据写入有点类似 RAID-0 ， 不过每个循环的写入过程中，在每块磁盘还加入一个同位检查数据 (Parity) ，这个数据会记录其他磁盘的备份数据， 用於当有磁盘损毁时的救援。RAID-5 读写的情况如下图：</span><br></pre></td></tr></table></figure>
-<img src="/2019/08/09/Raid磁盘阵列/raid5.gif">
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">如上图所示，每个循环写入时，都会有部分的同位检查码 (parity) 被记录起来，并且记录的同位检查码每次都记录在不同的磁盘， 因此，任何一个磁盘损毁时都能够由其他磁盘的检查码来重建原本磁盘内的数据！不过需要注意的是， 由於有同位检查码，因此 RAID 5 的总容量会是整体磁盘数量减一块。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>读写性能方面：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">在读写效能的比较上，读取的效能还不赖！与 RAID-0 有的比！不过写的效能就不见得能够添加很多！ 这是因为要写入 RAID 5 的数据还得要经过计算同位检查码 (parity) 的关系。由於加上这个计算的动作， 所以写入的效能与系统的硬件关系较大！尤其当使用软件磁盘阵列时，同位检查码是透过 CPU 去计算而非专职的磁盘阵列卡， 因此效能方面还需要评估。</span><br><span class="line"></span><br><span class="line">另外，由於 RAID 5 仅能支持一颗磁盘的损毁，因此近来还有发展出另外一种等级，就是 RAID 6 ，这个 RAID 6 则使用两块磁盘的容量作为 parity 的储存，因此整体的磁盘容量就会少两块，但是允许出错的磁盘数量就可以达到两块！ 也就是在 RAID 6 的情况下，同时两颗磁盘损毁时，数据还是可以救回来！</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/09/Raid磁盘阵列/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Raid磁盘阵列">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-基于http的yum源服务器的搭建" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/08/基于http的yum源服务器的搭建/" class="article-date">
-  	<time datetime="2019-08-08T06:00:47.000Z" itemprop="datePublished">2019-08-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/08/基于http的yum源服务器的搭建/">
-        基于http的yum源服务器的搭建
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>首先介绍yum命令的常用选项</em></strong></p>
-<blockquote>
-<p>显示yum仓库的列表：</p>
-</blockquote>
-<pre><code>yum repolist 
-</code></pre><p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost yum.repos.d]#yum repolist</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Repository base is listed more than once in the configuration</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirror-hk.koddos.net</span><br><span class="line"> * updates: mirror.lzu.edu.cn</span><br><span class="line"> repo id                                                                   repo name                                                                    status</span><br><span class="line">base/7/x86_64                                                             CentOS-7 - Base                                                              4,021</span><br><span class="line">extras/7/x86_64                                                           CentOS-7 - Extras                                                              435</span><br><span class="line">updates/7/x86_64                                                          CentOS-7 - Updates                                                           2,500</span><br><span class="line">repolist: 6,956</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>显示程序包：</p>
-</blockquote>
-<pre><code>yum list
-</code></pre><p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost yum.repos.d]#yum list | tail</span><br><span class="line">Repository base is listed more than once in the configuration</span><br><span class="line">yum-langpacks.noarch                     0.4.2-7.el7                   base     </span><br><span class="line">yum-plugin-aliases.noarch                1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-changelog.noarch              1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-tmprepo.noarch                1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-verify.noarch                 1.1.31-50.el7                 base     </span><br><span class="line">yum-plugin-versionlock.noarch            1.1.31-50.el7                 base     </span><br><span class="line">yum-utils.noarch                         1.1.31-50.el7                 base     </span><br><span class="line">zenity.x86_64                            3.28.1-1.el7                  base     </span><br><span class="line">zsh.x86_64                               5.0.2-31.el7                  base     </span><br><span class="line">zziplib.x86_64                           0.13.62-9.el7                 base</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>安装程序包：</p>
-</blockquote>
-<pre><code>yum install 
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-q：静默模式</span><br><span class="line">-y: 自动回答为“yes”</span><br><span class="line">--nogpgcheck：禁止进行gpg check</span><br></pre></td></tr></table></figure>
-<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum install -q -y wget</span><br><span class="line">[root@localhost ~]#</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>重新安装<br>    yum reinstall</p>
-</blockquote>
-<p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum reinstall wget</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.neusoft.edu.cn</span><br><span class="line"> * extras: mirrors.neusoft.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">Resolving Dependencies</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package wget.x86_64 0:1.14-18.el7_6.1 will be reinstalled</span><br><span class="line">--&gt; Finished Dependency Resolution</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>卸载程序包：</p>
-</blockquote>
-<pre><code>yum remove
-</code></pre><p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum remove wget</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Resolving Dependencies</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package wget.x86_64 0:1.14-18.el7_6.1 will be erased</span><br><span class="line">--&gt; Finished Dependency Resolution</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>查看程序包信息:</p>
-</blockquote>
-<pre><code>yum info
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum info wget</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.neusoft.edu.cn</span><br><span class="line"> * extras: mirrors.neusoft.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">Available Packages</span><br><span class="line">Name        : wget</span><br><span class="line">Arch        : x86_64</span><br><span class="line">Version     : 1.14</span><br><span class="line">Release     : 18.el7_6.1</span><br><span class="line">Size        : 547 k</span><br><span class="line">Repo        : updates/7/x86_64</span><br><span class="line">Summary     : A utility for retrieving files using the HTTP or FTP protocols</span><br><span class="line">URL         : http://www.gnu.org/software/wget/</span><br><span class="line">License     : GPLv3+</span><br><span class="line">Description : GNU Wget is a file retrieval utility which can use either the HTTP or</span><br><span class="line">            : FTP protocols. Wget features include the ability to work in the</span><br><span class="line">            : background while you are logged out, recursive retrieval of</span><br><span class="line">            : directories, file name wildcard matching, remote file timestamp</span><br><span class="line">            : storage and comparison, use of Rest with FTP servers and Range with</span><br><span class="line">            : HTTP servers to retrieve files over slow or unstable connections,</span><br><span class="line">            : support for Proxy servers, and configurability.</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>查看指定的特性(可以是某文件)是由哪个程序包所提供：</p>
-</blockquote>
-<pre><code>yum provides
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum provides /usr/share/locale/eu/LC_MESSAGES/wget.mo</span><br><span class="line">wget-1.14-18.el7.x86_64 : A utility for retrieving files using the HTTP or FTP protocols</span><br><span class="line">Repo        : base</span><br><span class="line">Matched from:</span><br><span class="line">Filename    : /usr/share/locale/eu/LC_MESSAGES/wget.mo</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>清理本地缓存：</p>
-</blockquote>
-<pre><code>yum clean all [ packages | metadata | expire-cache | rpmdb | plugins ]
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum clean all</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Cleaning repos: base extras updates</span><br><span class="line">Cleaning up everything</span><br><span class="line">Cleaning up list of fastest mirrors</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>构建缓存：</p>
-</blockquote>
-<pre><code>yum makecache
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum makecache</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">base                                                                                                                                  | 3.6 kB  00:00:00     </span><br><span class="line">extras                                                                                                                                | 3.4 kB  00:00:00     </span><br><span class="line">updates                                                                                                                               | 3.4 kB  00:00:00     </span><br><span class="line">(1/8): extras/7/x86_64/prestodelta                                                                                                    |  73 kB  00:00:00     </span><br><span class="line">(2/8): extras/7/x86_64/other_db                                                                                                       | 131 kB  00:00:00     </span><br><span class="line">(3/8): updates/7/x86_64/prestodelta                                                                                                   | 945 kB  00:00:00     </span><br><span class="line">(4/8): updates/7/x86_64/filelists_db                                                                                                  | 5.2 MB  00:00:01     </span><br><span class="line">(5/8): base/7/x86_64/other_db                                                                                                         | 2.6 MB  00:00:01     </span><br><span class="line">(6/8): updates/7/x86_64/other_db                                                                                                      | 764 kB  00:00:00     </span><br><span class="line">(7/8): extras/7/x86_64/filelists_db                                                                                                   | 249 kB  00:00:02     </span><br><span class="line">(8/8): base/7/x86_64/filelists_db                                                                                                     | 7.1 MB  00:00:07     </span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">Metadata Cache Created</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>搜索（以指定的关键字搜索程序包名及summary信息）</p>
-</blockquote>
-<pre><code>yum search
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum search mysql</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">==================================================================== N/S matched: mysql =====================================================================</span><br><span class="line">MySQL-python.x86_64 : An interface to MySQL</span><br><span class="line">akonadi-mysql.x86_64 : Akonadi MySQL backend support</span><br><span class="line">apr-util-mysql.x86_64 : APR utility library MySQL DBD driver</span><br><span class="line">dovecot-mysql.x86_64 : MySQL back end for dovecot</span><br><span class="line">freeradius-mysql.x86_64 : MySQL support for freeradius</span><br><span class="line">libdbi-dbd-mysql.x86_64 : MySQL plugin for libdbi</span><br><span class="line">mysql-connector-java.noarch : Official JDBC driver for MySQL</span><br><span class="line">mysql-connector-odbc.x86_64 : ODBC driver for MySQL</span><br><span class="line">pcp-pmda-mysql.x86_64 : Performance Co-Pilot (PCP) metrics for MySQL</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>查看指定包所依赖的capabilities：</p>
-</blockquote>
-<pre><code>yum deplist
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum deplist httpd</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.neusoft.edu.cn</span><br><span class="line">package: httpd.x86_64 2.4.6-89.el7.centos.1</span><br><span class="line">  dependency: /bin/sh</span><br><span class="line">   provider: bash.x86_64 4.2.46-31.el7</span><br><span class="line">  dependency: /etc/mime.types</span><br><span class="line">   provider: mailcap.noarch 2.1.41-2.el7</span><br><span class="line">  dependency: /usr/sbin/groupadd</span><br><span class="line">   provider: shadow-utils.x86_64 2:4.1.5.1-25.el7_6.1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>查看yum事务历史：</p>
-</blockquote>
-<pre><code>yum history [redo|undo|info|list|packages-list|packages-info|summary|addon-info]
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum history</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">ID     | Login user               | Date and time    | Action(s)      | Altered</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">     8 | root &lt;root&gt;              | 2019-08-08 23:54 | I, U           |   11 EE</span><br><span class="line">     7 | root &lt;root&gt;              | 2019-08-08 23:38 | Install        |    1   </span><br><span class="line">     6 | root &lt;root&gt;              | 2019-08-08 23:33 | Erase          |    1   </span><br><span class="line">     5 | root &lt;root&gt;              | 2019-08-08 23:27 | Reinstall      |    1   </span><br><span class="line">     4 | root &lt;root&gt;              | 2019-08-08 23:24 | Install        |    1   </span><br><span class="line">     3 | root &lt;root&gt;              | 2019-08-08 22:54 | Install        |    1   </span><br><span class="line">     2 | root &lt;root&gt;              | 2019-08-08 22:35 | Install        |   31   </span><br><span class="line">     1 | System &lt;unset&gt;           | 2019-07-18 04:34 | Install        |  279   </span><br><span class="line">history list</span><br><span class="line">[root@localhost ~]#yum history info 8</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Transaction ID : 8</span><br><span class="line">Begin time     : Thu Aug  8 23:54:00 2019</span><br><span class="line">Begin rpmdb    : 312:7e4bbf6cb5316d8b59796ab2493c12e8c4bf7aca</span><br><span class="line">End time       :            23:54:23 2019 (23 seconds)</span><br><span class="line">End rpmdb      : 319:4f1b22d936cae2c01881c331147218195e37e7c3</span><br><span class="line">User           : root &lt;root&gt;</span><br><span class="line">Return-Code    : Success</span><br><span class="line">Command Line   : install -y gcc</span><br><span class="line">Transaction performed with:</span><br><span class="line">    Installed     rpm-4.11.3-17.el7.x86_64                      @anaconda</span><br><span class="line">    Installed     yum-3.4.3-132.el7.centos.0.1.noarch           @anaconda</span><br><span class="line">    Installed     yum-plugin-fastestmirror-1.1.31-34.el7.noarch @anaconda</span><br><span class="line">Packages Altered:</span><br><span class="line">    Dep-Install cpp-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Install     gcc-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Updated     glibc-2.17-105.el7.x86_64                 @anaconda</span><br><span class="line">    Update            2.17-260.el7_6.6.x86_64             @updates</span><br><span class="line">    Updated     glibc-common-2.17-105.el7.x86_64          @anaconda</span><br><span class="line">    Update                   2.17-260.el7_6.6.x86_64      @updates</span><br><span class="line">    Dep-Install glibc-devel-2.17-260.el7_6.6.x86_64       @updates</span><br><span class="line">    Dep-Install glibc-headers-2.17-260.el7_6.6.x86_64     @updates</span><br><span class="line">    Dep-Install kernel-headers-3.10.0-957.27.2.el7.x86_64 @updates</span><br><span class="line">    Updated     libgcc-4.8.5-4.el7.x86_64                 @anaconda</span><br><span class="line">    Update             4.8.5-36.el7_6.2.x86_64            @updates</span><br><span class="line">    Updated     libgomp-4.8.5-4.el7.x86_64                @anaconda</span><br><span class="line">    Update              4.8.5-36.el7_6.2.x86_64           @updates</span><br><span class="line">    Dep-Install libmpc-1.0.1-3.el7.x86_64                 @base</span><br><span class="line">    Dep-Install mpfr-3.1.1-4.el7.x86_64                   @base</span><br><span class="line">Scriptlet output:</span><br><span class="line">   1 warning: /etc/nsswitch.conf created as /etc/nsswitch.conf.rpmnew</span><br><span class="line">history info</span><br><span class="line">[root@localhost ~]#yum history undo 8</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Undoing transaction 8, from Thu Aug  8 23:54:00 2019</span><br><span class="line">    Dep-Install cpp-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Install     gcc-4.8.5-36.el7_6.2.x86_64               @updates</span><br><span class="line">    Updated     glibc-2.17-105.el7.x86_64                 @anaconda</span><br><span class="line">    Update            2.17-260.el7_6.6.x86_64             @updates</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">  Verifying  : glibc-devel-2.17-260.el7_6.6.x86_64                                                                                                       2/7 </span><br><span class="line">  Verifying  : kernel-headers-3.10.0-957.27.2.el7.x86_64                                                                                                 3/7 </span><br><span class="line">  Verifying  : cpp-4.8.5-36.el7_6.2.x86_64                                                                                                               4/7 </span><br><span class="line">  Verifying  : gcc-4.8.5-36.el7_6.2.x86_64                                                                                                               5/7 </span><br><span class="line">  Verifying  : glibc-headers-2.17-260.el7_6.6.x86_64                                                                                                     6/7 </span><br><span class="line">  Verifying  : libmpc-1.0.1-3.el7.x86_64                                                                                                                 7/7 </span><br><span class="line"></span><br><span class="line">Removed:</span><br><span class="line">  cpp.x86_64 0:4.8.5-36.el7_6.2                gcc.x86_64 0:4.8.5-36.el7_6.2  glibc-devel.x86_64 0:2.17-260.el7_6.6  glibc-headers.x86_64 0:2.17-260.el7_6.6 </span><br><span class="line">  kernel-headers.x86_64 0:3.10.0-957.27.2.el7  libmpc.x86_64 0:1.0.1-3.el7    mpfr.x86_64 0:3.1.1-4.el7             </span><br><span class="line"></span><br><span class="line">Complete!</span><br></pre></td></tr></table></figure>
-<p><strong><em>在对yum命令有了一定的了解以后，下面通过挂载光盘，或者基于光盘和http服务搭建yum仓库：</em></strong></p>
-<blockquote>
-<p>首先是用光盘作为yum源：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">（1）挂载光盘到一个指定目录：</span><br><span class="line">    mount /dev/cdrom /mnt</span><br><span class="line">（2）创建配置文件(若有其他yum源先移动到其他目录)：</span><br><span class="line">    cd /etc/yum.repos.d</span><br><span class="line">    vim base.repo</span><br><span class="line">▽</span><br><span class="line">   [centos7]</span><br><span class="line">   name=ISO</span><br><span class="line">   baseurl=file:///mnt/</span><br><span class="line">   gpgcheck=0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>基于http服务搭建yum服务器（适用于不能访问互联网的企业）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">（1）先通过本地yum源（如上所述：）yum install -y httpd</span><br><span class="line">（2）cd /var/www/html/</span><br><span class="line">（3）mkdir centos&#123;6,7&#125;</span><br><span class="line">（4）mount /dev/cdrom /var/www/html/centos7</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>将已有的rpm包制作成yum仓库：</p>
-</blockquote>
-<pre><code>createrepo [options] &lt;directory&gt;
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">（1）mkdir /tmp/rpm</span><br><span class="line">（2）mv rpm文件 /tmp/rpm</span><br><span class="line">（3）createrepo /tmp/rpm/</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/08/基于http的yum源服务器的搭建/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="基于http的yum源服务器的搭建">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-关于shell脚本通过相对路径调用其它脚本失败的问题解决" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/04/关于shell脚本通过相对路径调用其它脚本失败的问题解决/" class="article-date">
-  	<time datetime="2019-08-04T05:30:14.000Z" itemprop="datePublished">2019-08-04</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/04/关于shell脚本通过相对路径调用其它脚本失败的问题解决/">
-        关于shell脚本通过相对路径调用其它脚本失败的问题解决
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题"><a href="#解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题" class="headerlink" title="解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题"></a>解决shell脚本中通过相对路径包含（调用）其它子脚本，找不到文件的问题</h1><blockquote>
-<p>先附上我个人的测试脚本：<br>（1）：在/data/script/目录下创建installmenu.sh主脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">cat &lt;&lt; ENF</span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">ENF</span><br><span class="line">read -p &quot;Please input you want install app:&quot; app</span><br><span class="line">case $app in</span><br><span class="line">1)</span><br><span class="line">    . ./app/apache.sh</span><br><span class="line">    ;;</span><br><span class="line">2)</span><br><span class="line">    . ./app/nginx.sh</span><br><span class="line">    ;;</span><br><span class="line">3)</span><br><span class="line">    . ./app/mysql.sh</span><br><span class="line">    ;;</span><br><span class="line">4)</span><br><span class="line">    . ./app/tomcat.sh</span><br><span class="line">    ;;</span><br><span class="line">5)</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">*)</span><br><span class="line">    echo &quot;Please input 1-5!!!&quot;</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>再在/data/script/app/目录下创建4个子脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Nginx installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Nginx install finished!!!&quot; </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Apache installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Apache install finished!!!&quot; </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Tomcat installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Tomcat install finished!!!&quot; </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;Mysql installing ...&quot;</span><br><span class="line">sleep 3</span><br><span class="line">echo &quot;Mysql install finished!!!&quot;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>以上是通过相对路径的方法包含子脚本的。</em></strong></p>
-<blockquote>
-<p>会出现如下问题：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost script]#bash installmenu.sh </span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">Please input you want install app:1</span><br><span class="line">Apache installing ...</span><br><span class="line">Apache install finished!!!</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>在installmenu.sh所在目录执行不会出现任何问题。但是如果在其它位置执行该主脚本会出现如下问题：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#bash /data/script/installmenu.sh </span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">Please input you want install app:1</span><br><span class="line">/data/script/installmenu.sh: line 25: ./app/apache.sh: No such file or directory</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>如上所示，报错：No such file or directory。若要深究其原因的话就是主脚本（installmenu.sh）在哪里执行，子脚本中的相对路径就是相对于哪里。本例中话就是在“/root”路径下找“app/apache.sh”文件。因为“/root”下没有该文件夹，故而报错。</em></strong></p>
-<blockquote>
-<p>以上问题有两种常用的解决方法（还有其他方法）这里仅给出两种常用且容易理解的：</p>
-</blockquote>
-<p>（1）将子脚本中的相对路径改为绝对路径。这种方法比较简单，是处理这类问题的常用方法。但是缺陷在于如若将脚本更改了环境（换到另一台文件结构不同与当前环境），就需要更改文件中的绝对路径了。此方法过于无脑此处的详细过程略过。</p>
-<p>（2）这种方法的大体思路如下：</p>
-<p>既然脚本中使用的文件或目录期望基于脚本的所在目录，那么可以在脚本中先进入到这个脚本所在的目录里，后续要使用目录和文件时，都基于此目录，用相对路径描述。</p>
-<p>$0 代标脚本自己的文件名，”dirname $0”代表脚本所在的路径。<br>测试脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;&apos;\$0-----------&gt;&apos; $0&quot;</span><br><span class="line">echo &quot;&apos;dirname \$0---&gt;&apos; `dirname $0`&quot;</span><br><span class="line">path1=`dirname \$0`</span><br><span class="line">path2=`cd $path1;pwd`</span><br><span class="line">echo &quot;`basename $0`的位置是：$path2&quot;</span><br></pre></td></tr></table></figure></p>
-<p>在家目录测试如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#chmod +x /data/script/test1.sh</span><br><span class="line">[root@localhost ~]#test1.sh   # 我将/data/script/加入到了$PATH环境变量中。             </span><br><span class="line">&apos;$0-----------&gt;&apos; /data/script/test1.sh</span><br><span class="line">&apos;dirname $0---&gt;&apos; /data/script</span><br><span class="line">test1.sh的位置是：/data/script</span><br></pre></td></tr></table></figure></p>
-<p>在/etc目录下测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost etc]#bash ../data/script/test1.sh </span><br><span class="line">&apos;$0-----------&gt;&apos; ../data/script/test1.sh</span><br><span class="line">&apos;dirname $0---&gt;&apos; ../data/script</span><br><span class="line">test1.sh的位置是：/data/script</span><br></pre></td></tr></table></figure></p>
-<p>在/data目录下测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#bash script/test1.sh </span><br><span class="line">&apos;$0-----------&gt;&apos; script/test1.sh</span><br><span class="line">&apos;dirname $0---&gt;&apos; script</span><br><span class="line">test1.sh的位置是：/data/script</span><br></pre></td></tr></table></figure></p>
-<p><strong><em>综上所述：无论在何处执行脚本都能通过变量path2进入到脚本自身所在的位置。</em></strong></p>
-<blockquote>
-<p>代码实现如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">cat &lt;&lt; ENF</span><br><span class="line">1:install Apache</span><br><span class="line">2:install Nginx</span><br><span class="line">3:install Mysql</span><br><span class="line">4:install Tomcat</span><br><span class="line">5:exit</span><br><span class="line">ENF</span><br><span class="line">path1=`dirname $0` # -------&gt;找到脚本相对于当前位置的路径</span><br><span class="line">path2=`cd $path1;pwd` # --------&gt;取出脚本的绝对路径</span><br><span class="line">cd $path2 # --------&gt;进入脚本所在的目录</span><br><span class="line">read -p &quot;Please input you want install app:&quot; app</span><br><span class="line">case $app in</span><br><span class="line">1)</span><br><span class="line">    . ./app/apache.sh</span><br><span class="line">    ;;</span><br><span class="line">2)</span><br><span class="line">    . ./app/nginx.sh</span><br><span class="line">    ;;</span><br><span class="line">3)</span><br><span class="line">    . ./app/mysql.sh</span><br><span class="line">    ;;</span><br><span class="line">4)</span><br><span class="line">    . ./app/tomcat.sh</span><br><span class="line">    ;;</span><br><span class="line">5)</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">*)</span><br><span class="line">    echo &quot;Please input 1-5!!!&quot;</span><br><span class="line">    exit</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br><span class="line">``` </span><br><span class="line">&gt;测试结果：</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>[root@localhost ~]#installmenu.sh<br>1:install Apache<br>2:install Nginx<br>3:install Mysql<br>4:install Tomcat<br>5:exit<br>Please input you want install app:1<br>Apache installing …<br>Apache install finished!!!<br>[root@localhost ~]#cd /etc<br>[root@localhost etc]#installmenu.sh<br>1:install Apache<br>2:install Nginx<br>3:install Mysql<br>4:install Tomcat<br>5:exit<br>Please input you want install app:3<br>mysql installing …<br>mysql install finished!!!<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;在另一台文件结果完全不同的机器上测试(centos6)：</span><br></pre></td></tr></table></figure></p>
-<p>[root@localhost test]# ls<br>app<br>[root@localhost test]# ls<br>app  installmenu.sh<br>[root@localhost test]# cd<br>[root@localhost ~]# sh test/installmenu.sh<br>1:install Apache<br>2:install Nginx<br>3:install Mysql<br>4:install Tomcat<br>5:exit<br>Please input you want install app:2<br>Nginx installing …<br>Nginx install finished!!!<br><code>`</code></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/shell/">shell</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/04/关于shell脚本通过相对路径调用其它脚本失败的问题解决/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="关于shell脚本通过相对路径调用其它脚本失败的问题解决">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-常用的文本处理工具" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/29/常用的文本处理工具/" class="article-date">
-  	<time datetime="2019-07-29T11:21:47.000Z" itemprop="datePublished">2019-07-29</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/29/常用的文本处理工具/">
-        常用的文本处理工具
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>tr的常用参数：</p>
-</blockquote>
-<pre><code>-s 删除所有重复出现字符序列，只保留第一个；即将重复出现字符串压缩为一个字符串。
--d 删除字符串1中所有输入字符。
--s 删除所有重复出现字符序列，只保留第一个；即将重复出现字符串压缩为一个字符串。
--c 用字符串1中字符集的补集替换此字符集。
-
-例如：
-    [root@localhost ~]# cat /dev/urandom | tr -dc [a-zA-Z0-9[[:punct:]]]|head -c 12
-    6FS}r`M*(~P|
--dc [a-zA-Z0-9[[:punct:]]]就是删除了标点符号和数字及字母以外的所有字符。
-    [root@localhost ~]# df -h 
-        Filesystem      Size  Used Avail Use% Mounted on
-        /dev/sda2       100G  1.1G   99G   2% /
-        devtmpfs        480M     0  480M   0% /dev
-        tmpfs           489M     0  489M   0% /dev/shm
-        tmpfs           489M  6.6M  483M   2% /run
-        tmpfs           489M     0  489M   0% /sys/fs/cgroup
-        /dev/sda5        50G   33M   50G   1% /date
-        /dev/sda1      1014M  124M  891M  13% /boot
-        tmpfs            98M     0   98M   0% /run/user/0
-    [root@localhost ~]# df -h |grep &apos;/dev/sda.&apos;|tr -s &quot; &quot; %|cut -d% -f5
-        2
-        1
-        13
-</code></pre><blockquote>
-<p>cut的常用参数：</p>
-</blockquote>
-<pre><code>-d DELIMITER: 指明分隔符，默认tab 。
--f FILEDS:       
-#: 第#个字段       
-#,#[,#]：离散的多个字段，例如1,3,6       
-#-#：连续的多个字段, 例如1-6                 
-混合使用：1-3,7 
--c 按字符切割  --output-delimiter=STRING指定输出分隔符。
-
-例如：
-    [root@localhost ~]# cut -d: -f1,3 /etc/passwd
-        root:0
-        bin:1
-        daemon:2
-        adm:3
-        lp:4
-        sync:5
-        shutdown:6
-        halt:7
-        mail:8
-        operator:11
-        games:12
-        ftp:14
-    就是以：为为分隔符，取出第1列和第3列的数据。
-
-    root@localhost ~]# cut -d: -f1,3 --output-delimiter=+ /etc/passwd
-        root+0
-        bin+1
-        daemon+2
-        adm+3
-    就是将取出的数据以+连接。
-</code></pre><blockquote>
-<p>wc的常用参数：</p>
-</blockquote>
-<pre><code>-l 只计数行数 
--w 只计数单词总数 
--c 只计数字节总数 
--m 只计数字符总数 
--L 显示文件中最长行的长度 
-
-例如：
-    [root@localhost ~]# cut -d: -f1,3 /etc/passwd | wc -l
-    31
-</code></pre><blockquote>
-<p>sort的常用参数:</p>
-</blockquote>
-<pre><code>-r 执行反方向（由上至下）整理 
--R 随机排序 
--n 执行按数字大小整理 
--f 选项忽略（fold）字符串中的字符大小写 
--u 选项（独特，unique）删除输出中的重复行 
--t  c 选项使用c做为字段界定符 
--k  X 选项按照使用c字符分隔的X列来整理能够使用多次 
-</code></pre><blockquote>
-<p>uniq的常用参数：</p>
-</blockquote>
-<pre><code>-c: 显示每行重复出现的次数  
--d: 仅显示重复过的行  
--u: 仅显示不曾重复的行           
-注：连续且完全相同方为重复 
-常和sort 命令一起配合使用：      
-sort  userlist.txt  |  uniq  -c 
-
-例如：[root@localhost ~]# cut -d &quot; &quot; -f 1 access_log|sort |uniq -c|sort -nr|head -n 5
-4870 172.20.116.228
-3429 172.20.116.208
-2834 172.20.0.222
-2613 172.20.112.14
-2267 172.20.0.227
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/07/29/常用的文本处理工具/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="常用的文本处理工具">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
     </nav>
   
 </div>

