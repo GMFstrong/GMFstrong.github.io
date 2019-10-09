@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>HTTPD的配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="httpd 的一些常见配置  1) 关于网站访问量的3个重要指标：123456789PV：访问量，即Page View, 页面浏览量或点击量，用户每次刷新即被计算一次，PV反映的是浏览某网站的页面数，PV与来访者的数量成正比，PV并不是页面来访者的数量，而是网站被访问的页面数量。UV：独立访客，即Unique Visitor,访问网站的一台电脑为一个访客。一天内相同的客户端只被计算一次。可以理解成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTPD的配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/10/09/HTTPD的配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="httpd 的一些常见配置  1) 关于网站访问量的3个重要指标：123456789PV：访问量，即Page View, 页面浏览量或点击量，用户每次刷新即被计算一次，PV反映的是浏览某网站的页面数，PV与来访者的数量成正比，PV并不是页面来访者的数量，而是网站被访问的页面数量。UV：独立访客，即Unique Visitor,访问网站的一台电脑为一个访客。一天内相同的客户端只被计算一次。可以理解成">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-09T13:58:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTPD的配置">
+<meta name="twitter:description" content="httpd 的一些常见配置  1) 关于网站访问量的3个重要指标：123456789PV：访问量，即Page View, 页面浏览量或点击量，用户每次刷新即被计算一次，PV反映的是浏览某网站的页面数，PV与来访者的数量成正比，PV并不是页面来访者的数量，而是网站被访问的页面数量。UV：独立访客，即Unique Visitor,访问网站的一台电脑为一个访客。一天内相同的客户端只被计算一次。可以理解成">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-HTTPD的配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/09/HTTPD的配置/" class="article-date">
+  	<time datetime="2019-10-09T13:53:53.000Z" itemprop="datePublished">2019-10-09</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      HTTPD的配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/10/09/HTTPD的配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HTTPD的配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>httpd 的一些常见配置</em></strong></p>
+<blockquote>
+<p>1) 关于网站访问量的3个重要指标：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PV：访问量，即Page View, 页面浏览量或点击量，用户每次刷新即被计算一次，PV反映的是浏览某网站的页面数，PV与来访者的数量成正比，PV并不是页面来访者的数量，而是网站被访问的页面数量。</span><br><span class="line">UV：独立访客，即Unique Visitor,访问网站的一台电脑为一个访客。一天内相同的客户端只被计算一次。可以理解成访问某网站的电脑的数量。网站判断来访电脑的身份是通过来访电脑的cookies实现的。如果更换了IP后但不清除cookies，再访问相同网站，该网站的统计中UV数是不变的。</span><br><span class="line">IP：独立ip，即Internet Protocol,指独立IP数。一天内来自相同客户机IP地址只计算一次，记录远程客户机IP地址的计算机访问网站的次数，是衡量网站流量的重要指标。</span><br><span class="line"></span><br><span class="line">可以在此网站查询某网站的以上三个指标：</span><br><span class="line">http://www.alexa.cn/rank/</span><br><span class="line">QPS：request per second，每秒请求数</span><br><span class="line"></span><br><span class="line">cat /etc/httpd/conf/httpd.conf | egrep -v &apos;^ *#|^$&apos;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 隐藏Apache版本的信息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">servertokens prod   仅仅显示apache</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 持久连接<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">keepalive on/off 默认开启。</span><br><span class="line">KeepAliveTimeout  设置超时的时长，默认5秒，支持毫秒级。</span><br><span class="line">MaxKeepAliveRequests    设置最大请求数，大于该值自动断开连接。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 动态模块的设置不需要重启服务即可生效。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">查看静态编译的模块：</span><br><span class="line">httpd -l</span><br><span class="line">查看动态编译的模块：</span><br><span class="line">httpd -M</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 关于mpm（多路处理模块）模块的一些设置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">切换使用MPM</span><br><span class="line">仅仅在/etc/httpd/conf.modules.d/00-mpm.conf中启用需要启用的模块即可。</span><br><span class="line">其中常用的为prefork和event 两种模式。</span><br><span class="line">关于 prefork 的设置：</span><br><span class="line">yum install httpd-tools  安装an测试工具。</span><br><span class="line">ab -c 1000 -n 100000 http://xxx.xxx.xxx.xxx/</span><br><span class="line"></span><br><span class="line">关于 prefork 的一些常见优化：</span><br><span class="line">StartServers 2000</span><br><span class="line">MinSpareServers 2000</span><br><span class="line">MaxSpareServers 2000</span><br><span class="line">ServerLimit 2560 最多进程数,最大值 20000</span><br><span class="line">MaxRequestWorkers 2560 最大的并发连接数，默认256</span><br><span class="line">MaxRequestsPerChild 4000 子进程最多能处理的请求数量。在处理MaxRequestsPerChild 个请求之后,子进程将会被父进程终止，这时候子进程占用的内存就会</span><br><span class="line">释放(为0时永远不释放，进程的反复利用可能会产生错误，故而需要在利用一定次数后杀死重建。）</span><br><span class="line">MaxConnectionsPerChild 4000 子进程最多能处理的连接数量，代替上面MaxRequestsPerChild ，httpd.2.4.9开始支持</span><br><span class="line">关于 event 的一些优化：</span><br><span class="line">ServerLimit 16</span><br><span class="line">StartServers 2</span><br><span class="line">MaxRequestWorkers 150</span><br><span class="line">MinSpareThreads 25</span><br><span class="line">MaxSpareThreads 75</span><br><span class="line">ThreadsPerChild 25</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 更改httpd默认的文件资源主页：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DocumentRoot &quot;/data/html/&quot;</span><br><span class="line">&lt;Directory &quot;/data/html/&quot;&gt;</span><br><span class="line">    Require all granted   #2.4以后的版本必须授权。                                                                      </span><br><span class="line">&lt;/Directory&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>7) 以索引方式显示网站目录下的内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">DocumentRoot &quot;/var/www/html&quot;</span><br><span class="line">&lt;Directory &quot;/var/www&quot;&gt;</span><br><span class="line">    AllowOverride None</span><br><span class="line">    Options Indexe  #开启索引模式</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line">Options：后跟1个或多个以空白字符分隔的选项列表,在选项前的+，- 表示增加或删除指定选项.</span><br><span class="line">Indexes：指明的URL路径下不存在与定义的主页面资源相符的资源文件时，返回索引列表给用户。</span><br><span class="line">FollowSymLinks：允许访问符号链接文件所指向的源文件。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>8) 定义网站的默认页面。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line">    DirectoryIndex index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>9) AllowOverride 选项<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">可以允许目录下的访问配置文件属性覆盖当前的配置选项，这个文件名称为 .htaccess。</span><br><span class="line">只对&lt;directory&gt;语句有效。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>10) 基于IP地址的访问控制。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">无明确授权的目录，默认拒绝</span><br><span class="line">允许所有主机访问：Require all granted</span><br><span class="line">拒绝所有主机访问：Require all denied</span><br><span class="line">Require ip IPADDR：授权指定来源的IP访问</span><br><span class="line">Require not ip IPADDR：拒绝特定的IP访问</span><br><span class="line">Require host HOSTNAME：授权特定主机访问</span><br><span class="line">Require not host HOSTNAME：拒绝</span><br><span class="line">FQDN：特定主机</span><br><span class="line">domin.tld：指定域名下的所有主机</span><br><span class="line">&lt;Directory &quot;/var/www/html&quot;&gt;</span><br><span class="line">     &lt;requireall&gt;   </span><br><span class="line">          Require all granted</span><br><span class="line">          require not ip 192.168.38.16</span><br><span class="line">     &lt;/requireall&gt;</span><br><span class="line">&lt;/Directory&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>11) 定义路径别名，可以隐藏真实文件系统路径。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">alias /image /opt/image</span><br><span class="line">&lt;directory /opt/image&gt;</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">echo aaaaaaaaaaaaaaaaaaaa &gt; /opt/image/index.html</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>12) 基于用户的访问控制。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">通过htpasswd创建用户文件：</span><br><span class="line">-c 自动创建文件，仅应该在文件不存在时使用</span><br><span class="line">-p 明文密码</span><br><span class="line">-d CRYPT格式加密，默认</span><br><span class="line">-m md5格式加密</span><br><span class="line">-s sha格式加密</span><br><span class="line">-D 删除指定用户</span><br><span class="line">允许账号文件中的所有用户登录访问：Require valid-user</span><br><span class="line">[root@localhost conf]#htpasswd -c .httpwd test</span><br><span class="line">New password: </span><br><span class="line">Re-type new password: </span><br><span class="line">Adding password for user test</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;Directory &quot;/var/www/html/test1&quot;&gt;</span><br><span class="line">AllowOverride None</span><br><span class="line">AuthType Basic</span><br><span class="line">AuthName &quot;Please input your password!!!&quot;</span><br><span class="line">AuthUserFile &quot;/etc/httpd/conf/.httpwd&quot;</span><br><span class="line">Require user test</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">Satisfy ALL|Any</span><br><span class="line">ALL 客户机IP和用户验证都需要通过才可以</span><br><span class="line">Any客户机IP和用户验证,有一个满足即可</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>13) 实现用户家目录的共享。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/httpd/conf.d/userdir.conf</span><br><span class="line">&lt;IfModule mod_userdir.c&gt;</span><br><span class="line">#UserDir disabled</span><br><span class="line">UserDir public_html #指定共享目录的名称</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line">创建对应的目录，并授权：</span><br><span class="line">mkdir /home/test/public_html</span><br><span class="line">echo `pwd` &gt; index.html</span><br><span class="line">setfacl –m u:apache:x /home/test</span><br><span class="line">为该目录开放权限：</span><br><span class="line">&lt;directory /home/*/public_html&gt;</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/directory&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>14) 隐藏报错信息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ServerSignature On | Off | EMail</span><br><span class="line">默认值Off，当客户请求的网页并不存在时，服务器将产生错误文档，如果打开</span><br><span class="line">了 ServerSignature选项，错误文档的最后一行将包含服务器的名字、Apache</span><br><span class="line">的版本等信息，如果不对外显示这些信息，就可以将这个参数设置为Off</span><br><span class="line">设置为Email，将显示ServerAdmin 的Email提示</span><br><span class="line"></span><br><span class="line">TraceEnable [on|off|extended]</span><br><span class="line">是否支持trace方法，默认on，基于安全风险，建议关闭</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>15) 开启status页面（注意控制访问IP）:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LoadModule status_module modules/mod_status.so</span><br><span class="line">&lt;Location &quot;/status&quot;&gt;</span><br><span class="line"> SetHandler server-status</span><br><span class="line">&lt;/Location&gt;</span><br><span class="line">ExtendedStatus On 显示扩展信息</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>16) 虚拟主机。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line">基于端口：</span><br><span class="line"> listen 8001</span><br><span class="line"> listen 8002</span><br><span class="line"> listen 8003</span><br><span class="line"> &lt;virtualhost *:8001&gt;</span><br><span class="line">     documentroot /data/www1</span><br><span class="line">     &lt;directory /data/www1&gt;</span><br><span class="line">         require all granted</span><br><span class="line">     &lt;/directory&gt;</span><br><span class="line">     ErrorLog /data/www1/err.log</span><br><span class="line">     &lt;IfModule log_config_module&gt;</span><br><span class="line">        LogFormat &quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot; combined</span><br><span class="line">        CustomLog &quot;/data/www1//access_log&quot; combined</span><br><span class="line">     &lt;/IfModule&gt;</span><br><span class="line"> &lt;/virtualhost&gt;</span><br><span class="line"> </span><br><span class="line"> &lt;virtualhost *:8002&gt;</span><br><span class="line">     documentroot /data/www2</span><br><span class="line">     &lt;directory /data/www2&gt;</span><br><span class="line">         require all granted</span><br><span class="line">     &lt;/directory&gt;</span><br><span class="line"> &lt;/virtualhost&gt;</span><br><span class="line"> </span><br><span class="line"> &lt;virtualhost *:8003&gt;                                                                                                                 </span><br><span class="line">     documentroot /data/www3</span><br><span class="line">     &lt;directory /data/www3&gt;</span><br><span class="line">         require all granted</span><br><span class="line">     &lt;/directory&gt;</span><br><span class="line"> &lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line"> mkdir /data/www&#123;1,2,3&#125; -pv</span><br><span class="line"> echo /data/www1 &gt; /data/www1/index.html</span><br><span class="line"> echo /data/www2 &gt; /data/www2/index.html</span><br><span class="line"> echo /data/www3 &gt; /data/www3/index.html</span><br><span class="line"></span><br><span class="line"> 基于ip:</span><br><span class="line">[root@localhost ~]#ip a a 192.168.38.101/24 dev eth0</span><br><span class="line">[root@localhost ~]#ip a a 192.168.38.102/24 dev eth0 </span><br><span class="line">[root@localhost ~]#ip a a 192.168.38.103/24 dev eth0</span><br><span class="line">&lt;virtualhost 192.168.38.101&gt;</span><br><span class="line">    documentroot /data/www1</span><br><span class="line">    &lt;directory /data/www1&gt;</span><br><span class="line">        require all granted</span><br><span class="line">    &lt;/directory&gt;</span><br><span class="line">    ErrorLog /data/www1/err.log</span><br><span class="line">    CustomLog &quot;/data/www1//access_log&quot; combined</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost 192.168.38.102&gt;</span><br><span class="line">    documentroot /data/www2</span><br><span class="line">    &lt;directory /data/www2&gt;</span><br><span class="line">        require all granted</span><br><span class="line">    &lt;/directory&gt;</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost 192.168.38.103&gt;</span><br><span class="line">    documentroot /data/www3</span><br><span class="line">    &lt;directory /data/www3&gt;</span><br><span class="line">        require all granted</span><br><span class="line">    &lt;/directory&gt;</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">基于主机头：</span><br><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">    documentroot /data/www1</span><br><span class="line">    servername www.a.com</span><br><span class="line">    &lt;directory /data/www1&gt;</span><br><span class="line">        require all granted</span><br><span class="line">    &lt;/directory&gt;</span><br><span class="line">    ErrorLog /data/www1/err.log</span><br><span class="line">    CustomLog &quot;/data/www1//access_log&quot; combined</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">    documentroot /data/www2</span><br><span class="line">    servername www.b.com</span><br><span class="line">    &lt;directory /data/www2&gt;</span><br><span class="line">        require all granted</span><br><span class="line">    &lt;/directory&gt;</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">    servername www.c.com</span><br><span class="line">    documentroot /data/www3</span><br><span class="line">    &lt;directory /data/www3&gt;</span><br><span class="line">        require all granted</span><br><span class="line">    &lt;/directory&gt;</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">在待测主机的 /etc/hosts 文件中加上：</span><br><span class="line">192.168.38.17 www.a.com www.b.com www.c.com</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>17) httpd利用mod_deflate模块的页面压缩:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">(1) 节约带宽，额外消耗CPU；同时，可能有些较老浏览器不支持</span><br><span class="line">(2) 压缩适于压缩的资源</span><br><span class="line">首先，确认Apache已经加载了mod_deflate.so这个模块（默认系统自动加载）。</span><br><span class="line">    [root@localhost conf.modules.d]#pwd</span><br><span class="line">    /etc/httpd/conf.modules.d</span><br><span class="line">    [root@localhost conf.modules.d]#grep mod_deflate *</span><br><span class="line">    00-base.conf:LoadModule deflate_module modules/mod_deflate.so</span><br><span class="line">启用压缩功能。</span><br><span class="line">    [root@localhost conf.d]#cat test.conf </span><br><span class="line">    AddOutputFilterByType DEFLATE text/plain</span><br><span class="line">    AddOutputFilterByType DEFLATE text/html</span><br><span class="line">    DeflateCompressionLevel 9</span><br><span class="line">以上仅仅对纯文本和HTML进行了压缩。</span><br><span class="line">[root@localhost ~]#curl -I --compressed 192.168.38.57/test1.html</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Tue, 08 Oct 2019 11:26:58 GMT</span><br><span class="line">Server: Apache/2.4.6 (CentOS)</span><br><span class="line">Last-Modified: Tue, 08 Oct 2019 11:22:10 GMT</span><br><span class="line">ETag: &quot;8063d-59464611ffc31-gzip&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">Content-Type: text/html; charset=UTF-8</span><br><span class="line"></span><br><span class="line">[root@localhost ~]#curl -I --compressed 192.168.38.57/test1.html</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Tue, 08 Oct 2019 11:29:49 GMT</span><br><span class="line">Server: Apache/2.4.6 (CentOS)</span><br><span class="line">Last-Modified: Tue, 08 Oct 2019 11:22:10 GMT</span><br><span class="line">ETag: &quot;8063d-59464611ffc31&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Content-Length: 525885</span><br><span class="line">Content-Type: text/html; charset=UTF-8</span><br><span class="line">压缩与不压缩的对比。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>以下是压缩的常用配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">AddOutputFilterByType DEFLATE text/plain</span><br><span class="line">AddOutputFilterByType DEFLATE text/html</span><br><span class="line">AddOutputFilterByType DEFLATE application/xhtml+xml</span><br><span class="line">AddOutputFilterByType DEFLATE text/xml</span><br><span class="line">AddOutputFilterByType DEFLATE application/xml</span><br><span class="line">AddOutputFilterByType DEFLATE application/x-javascript</span><br><span class="line">AddOutputFilterByType DEFLATE text/javascript</span><br><span class="line">AddOutputFilterByType DEFLATE text/css</span><br><span class="line">DeflateCompressionLevel 9</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/10/09/https的·相关配置/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          https的·相关配置
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/10/02/MYSQL主从复制/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MYSQL主从复制</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="HTTPD的配置" data-title="HTTPD的配置" data-url="http://gmfdevops.com.com/2019/10/09/HTTPD的配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="HTTPD的配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
