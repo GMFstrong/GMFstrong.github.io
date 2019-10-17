@@ -202,6 +202,329 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-关于Linux日志" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/关于Linux日志/" class="article-date">
+  	<time datetime="2019-10-17T11:07:58.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/17/关于Linux日志/">
+        关于Linux日志
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 各种日志文件的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. /var/log/secure：系统安装日志，文本格式，应周期性分析。</span><br><span class="line">2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。</span><br><span class="line">3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。</span><br><span class="line">4. /var/log/lastlog：每一个用户最近一次的登录信息，二进制格式，lastlog命令可以查看。</span><br><span class="line">5. /var/log/dmesg：系统引导过程中的日志信息，文本格式文本查看工具查看。也可用专用命令dmesg查看。</span><br><span class="line">6. /var/log/messages ：系统中大部分的信息。</span><br><span class="line">7. /var/log/anaconda : anaconda的日志。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 用数据库mysql存储日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. 准备一台mysql服务器用来存放日志信息：</span><br><span class="line">    yum install -y mariadb-server</span><br><span class="line">    systemctl enable --now mariadb</span><br><span class="line">2. 创建一个管理该数据库的用户：</span><br><span class="line">    GRANT ALL ON Syslog.* TO &apos;log&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY &apos;testroot&apos;;</span><br><span class="line">3. 在rsyslog日志服务器上安装与mysql交互的模块：</span><br><span class="line">    yum install -y rsyslog-mysql</span><br><span class="line">    [root@localhost ~]#rpm -ql rsyslog-mysql</span><br><span class="line">    /usr/lib64/rsyslog/ommysql.so</span><br><span class="line">    /usr/share/doc/rsyslog-8.24.0/mysql-createDB.sql</span><br><span class="line">4. 将上面的mysql-createDB.sql传到mysql服务器上运行，生成需要的数据库及表。</span><br><span class="line">    mysql &lt;  mysql-createDB.sql</span><br><span class="line">5. 在日志服务器上修改配置，使其调用ommysql.so与mysql服务器交互。</span><br><span class="line">    #### MODULES ####</span><br><span class="line">    $ModLoad ommysql</span><br><span class="line">    #### RULES ####</span><br><span class="line">    local6.*                                                :ommysql:192.168.38.18,Syslog,log,testroot  #:ommysql:DBHOST,DBNAME,DBUSER, PASSWORD</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 基于loganalyzer管理日志服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install  httpd php php-mysqlnd php-gd</span><br><span class="line">wget http://download.adiscon.com/loganalyzer/loganalyzer-4.1.8.tar.gz</span><br><span class="line">tar xf loganalyzer-4.1.5.tar.gz</span><br><span class="line">cp -a loganalyzer-4.1.5/src /var/www/html/loganalyzer</span><br><span class="line">cd /var/www/html/loganalyzer</span><br><span class="line">touch config.php</span><br><span class="line">chmod 666 config.php</span><br><span class="line">在配置完成以后，要回收config.php权限，为了安全考虑。</span><br><span class="line">chmod 644 config.php</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/17/关于Linux日志/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="关于Linux日志">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-实现实时同步" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/实现实时同步/" class="article-date">
+  	<time datetime="2019-10-17T11:07:44.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/17/实现实时同步/">
+        实现实时同步
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 通过inotify监控指定目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。</span><br><span class="line">ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_queued_events</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_user_instances</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 6 05:54 max_user_watches</span><br><span class="line">max_queued_events：inotify事件队列最大长度，如值太小会出现 EventQueue Overflow 错误，默认值：16384</span><br><span class="line">max_user_watches：可以监视的文件数量（单进程），默认值：8192</span><br><span class="line">max_user_instances：每个用户创建inotify实例最大值，默认值：128</span><br><span class="line">2.我们需要安装inotify-tools这一用户空间工具对其进行管理。</span><br><span class="line">yum install -y inotify-tools</span><br><span class="line">notify-tools包主要文件：</span><br><span class="line">inotifywait： 在被监控的文件或目录上等待特定文件系统事件（open closedelete等）发生，常用于实时同步的目录监控。</span><br><span class="line">inotifywatch：收集被监控的文件系统使用的统计数据，指文件系统事件发生的次数统计。</span><br><span class="line">inotifywait 命令常见选项</span><br><span class="line"> -m, --monitor 始终保持事件监听</span><br><span class="line"> -d, --daemon 以守护进程方式执行，和-m相似，配合-o使用</span><br><span class="line"> -r, --recursive 递归监控目录数据信息变化</span><br><span class="line"> -q, --quiet 输出少量事件信息</span><br><span class="line"> --exclude &lt;pattern&gt; 指定排除文件或目录，使用扩展的正则表达式匹配的模式实现</span><br><span class="line"> --excludei &lt;pattern&gt; 和exclude相似，不区分大小写</span><br><span class="line"> -o, --outfile &lt;file&gt;打印事件到文件中，相当于标准正确输出</span><br><span class="line"> -s, --syslogOutput 发送错误到syslog相当于标准错误输出</span><br><span class="line"> --timefmt &lt;fmt&gt; 指定时间输出格式</span><br><span class="line"> --format &lt;fmt&gt; 指定的输出格式；即实际监控输出内容</span><br><span class="line"> -e 指定监听指定的事件，如果省略，表示所有事件都进行监听</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 通过rsync服务实现数据同步：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">1.安装rsync的服务端软件：</span><br><span class="line">yum install -y rsync</span><br><span class="line">2.配置rsync：</span><br><span class="line">vim /etc/rsyncd.conf</span><br><span class="line">uid = root</span><br><span class="line">gid = root</span><br><span class="line">use chroot = no</span><br><span class="line">max connections = 0</span><br><span class="line">ignore errors</span><br><span class="line">exclude = lost+found/</span><br><span class="line">log file = /var/log/rsyncd.log</span><br><span class="line">pid file = /var/run/rsyncd.pid</span><br><span class="line">lock file = /var/run/rsyncd.lock</span><br><span class="line">reverse lookup = no</span><br><span class="line">hosts allow = 192.168.8.0/24</span><br><span class="line">[backup]</span><br><span class="line">path = /backup/</span><br><span class="line">comment = backup</span><br><span class="line">read only = no</span><br><span class="line">auth users = rsyncuser</span><br><span class="line">secrets file = /etc/rsync.pass</span><br><span class="line">3.在服务端创建用户密码文件：</span><br><span class="line">echo &quot;rsyncuser:testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">4.创建备份目录：</span><br><span class="line">mkdir /backup</span><br><span class="line">5.启动服务：</span><br><span class="line">systemctl enable --now rsyncd</span><br><span class="line">rsync --daemon 可加入/etc/rc.d/rc.local实现开机启动 Centos6中</span><br><span class="line">6.客户端配置密码文件</span><br><span class="line">echo &quot;testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">7.客户端测试同步数据</span><br><span class="line">rsync -avz --password-file=/etc/rsync.pass /data/ rsyncuser@rsync服务器IP::backup</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过以上实现实时同步数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">SRC=&apos;/data/&apos;</span><br><span class="line">DEST=&apos;rsyncuser@rsync服务器IP::backup&apos;</span><br><span class="line">inotifywait -mrq --timefmt &apos;%Y-%m-%d %H:%M&apos; --format &apos;%T %w %f&apos; -e create,delete,moved_to,close_write,attrib $&#123;SRC&#125; |while read DATE TIME DIR FILE;do</span><br><span class="line">    FILEPATH=$&#123;DIR&#125;$&#123;FILE&#125;</span><br><span class="line">    rsync -az --delete --password-file=/etc/rsync.pass $SRC $DEST &amp;&amp;</span><br><span class="line">    echo &quot;At $&#123;TIME&#125; on $&#123;DATE&#125;, file $FILEPATH was backuped up via rsync&quot; &gt;&gt; /var/log/changelist.log</span><br><span class="line">done</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/17/实现实时同步/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="实现实时同步">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-NFS文件系统配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/NFS文件系统配置/" class="article-date">
+  	<time datetime="2019-10-17T11:07:21.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/17/NFS文件系统配置/">
+        NFS文件系统配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装nfs：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nfs-utils</span><br><span class="line">systemct enable --now nfs-server</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 该服务依赖于rpcbind服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpcbind监听在tcp,udp的111端口。</span><br><span class="line">rpcinfo -p hostname</span><br><span class="line">rpcinfo –s hostname 查看RPC注册程序</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3)关于nfs服务的选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exportfs</span><br><span class="line">–v 查看本机所有NFS共享</span><br><span class="line">–r 重读配置文件，并共享目录</span><br><span class="line">–a 输出本机所有共享</span><br><span class="line">–au 停止本机所有共享</span><br><span class="line">showmount -e hostname</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 默认的配置文件：/etc/exports    /etc/exports.d/*.exports<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/exports</span><br><span class="line">/data/www1/  *</span><br><span class="line">/data/www2/  *</span><br><span class="line">fg（默认）前台挂载，bg后台挂载</span><br><span class="line">hard（默认）持续请求，soft 非持续请求</span><br><span class="line">intr 和hard配合，请求可中断</span><br><span class="line">rsize和wsize 一次读和写数据最大字节数，rsize=32768</span><br><span class="line">_netdev 无网络不挂载</span><br><span class="line">基于安全考虑，建议使用nosuid,nodev,noexec挂载选项</span><br><span class="line">vim /etc/fstab</span><br><span class="line">172.16.0.1:/public /mnt/nfs nfs defaults,_netdev 0 0</span><br><span class="line">vim /etc/auto.misc</span><br><span class="line">nfs2    -fstype=nfs,rw                  192.168.38.47:/data/www2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) nfs权限的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">• 默认选项：(ro,sync,root_squash,no_all_squash)</span><br><span class="line">• ro,rw 只读和读写</span><br><span class="line">• async 异步，数据变化后不立即写磁盘，性能高</span><br><span class="line">• sync（1.0.0后为默认）同步，数据在请求时立即写入共享</span><br><span class="line">• no_all_squash （默认）保留共享文件的UID和GID</span><br><span class="line">• all_squash 所有远程用户(包括root)都变成nfsnobody</span><br><span class="line">• root_squash （默认）远程root映射为nfsnobody,UID为65534，早期版本是4294967294 (nfsnobody)</span><br><span class="line">• no_root_squash 远程root映射成root用户</span><br><span class="line">• anonuid和anongid 指明匿名用户映射为特定用户UID和组GID，而非nfsnobody,可配合all_squash使用</span><br><span class="line">setfacl -m u:nfsnobody:rwx /data/www1/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/17/NFS文件系统配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="NFS文件系统配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-PHP编译安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/PHP编译安装/" class="article-date">
+  	<time datetime="2019-10-17T11:06:49.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/17/PHP编译安装/">
+        PHP编译安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 关于安装LAMP:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">安装清华的epel源：</span><br><span class="line">yum install https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">yum install  httpd  php73-php-fpm php73-php-mysqlnd  php73-php-opcache -y</span><br><span class="line">vim  /etc/httpd/conf.d/test.conf </span><br><span class="line">DirectoryIndex index.php</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/var/www/html/$1</span><br><span class="line">UDS模式：</span><br><span class="line">vi /etc/opt/remi/php73/php-fpm.d/www.conf</span><br><span class="line">listen=/var/run/php.sock </span><br><span class="line">listen.owner = apache</span><br><span class="line">listen.group = apache</span><br><span class="line">listen.mode = 0660   </span><br><span class="line"></span><br><span class="line">vim /etc/httpd/conf.d/test.conf </span><br><span class="line">DirectoryIndex index.php</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ unix:/var/run/php.sock|fcgi://localhost/var/www/html/$1</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 关于PHP的加速器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">在Centos7上编译安装Xcache，实现PHP加速。</span><br><span class="line">1. 安装需要的工具包：</span><br><span class="line">yum install gcc php-devel</span><br><span class="line">2. 编译安装xcache：</span><br><span class="line">tar xvf xcache-3.2.0.tar.gz</span><br><span class="line">phpize --clean &amp;&amp; phpize</span><br><span class="line">cd xcache-3.2.0</span><br><span class="line">./configure --enable-xcache</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp xcache.ini /etc/php.d/</span><br><span class="line">systemctl restart httpd.service</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 编译安装php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">yum install libxml2-devel bzip2-devel libmcrypt-devel</span><br><span class="line">tar xvf php-7.3.10.tar.xz</span><br><span class="line">cd php-7.3.10</span><br><span class="line">./configure --prefix=/apps/php \</span><br><span class="line">--enable-mysqlnd \</span><br><span class="line">--with-mysqli=mysqlnd \</span><br><span class="line">--with-pdo-mysql=mysqlnd \</span><br><span class="line">--with-openssl \</span><br><span class="line">--with-freetype-dir \</span><br><span class="line">--with-jpeg-dir \</span><br><span class="line">--with-png-dir \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-libxml-dir=/usr \</span><br><span class="line">--with-config-file-path=/etc \</span><br><span class="line">--with-config-file-scan-dir=/etc/php.d \</span><br><span class="line">--enable-mbstring \</span><br><span class="line">--enable-xml \</span><br><span class="line">--enable-sockets \</span><br><span class="line">--enable-fpm \</span><br><span class="line">--enable-maintainer-zts \</span><br><span class="line">--disable-fileinfo</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp php.ini-production /etc/php.ini</span><br><span class="line">cp sapi/fpm/php-fpm.service  /usr/lib/systemd/system/</span><br><span class="line">cp /app/php/etc/php-fpm.conf.default /app/php/etc/php-fpm.conf </span><br><span class="line">cp /app/php/etc/php-fpm.d/www.conf.default /app/php/etc/php-fpm.d/www.conf</span><br><span class="line">vim /app/php/etc/php-fpm.d/www.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br><span class="line">useradd -r -s /sbin/nologin apache</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl status php-fpm.service </span><br><span class="line">systemctl enable --now  php-fpm.service</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 修改httpd使其支持php-fpm：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so</span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so</span><br><span class="line">修改下面行</span><br><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line">DirectoryIndex index.php index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line">加下面四行</span><br><span class="line">AddType application/x-httpd-php .php</span><br><span class="line">AddType application/x-httpd-php-source .phps</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd/htdocs/$1</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 支持opcache:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/php.ini</span><br><span class="line">[opcache]</span><br><span class="line">zend_extension=/app/php/lib/php/extensions/no-debug-zts-20180731/opcache.so                               </span><br><span class="line">opcache.enable=1</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 实现虚拟主机：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">servername wordpress.magedu.net</span><br><span class="line">documentroot /data/wordpress</span><br><span class="line">&lt;directory /data/wordpress&gt;</span><br><span class="line">require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/data/wordpress/$1</span><br><span class="line">CustomLog &quot;logs/access_wordpress_log&quot; common</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">servername discuz.magedu.net</span><br><span class="line">documentroot /app/httpd24/htdocs/</span><br><span class="line">&lt;directory /app/httpd24/htdocs/&gt;</span><br><span class="line">require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd24/htdocs/$1</span><br><span class="line">CustomLog &quot;logs/access_discuz_log&quot; common</span><br><span class="line">&lt;/virtualhost&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/17/PHP编译安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="PHP编译安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-HTTPD的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -748,379 +1071,9 @@
 
 
   
-    <article id="post-MYSQL多实例配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/22/MYSQL多实例配置/" class="article-date">
-  	<time datetime="2019-09-22T13:16:54.000Z" itemprop="datePublished">2019-09-22</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/22/MYSQL多实例配置/">
-        MYSQL多实例配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>MYSQL基于不同版本的多实例实现：</em></strong></p>
-<blockquote>
-<p>1) 在同一台主机上安装两个或两个以上版本的mysql。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mariadb-server  #默认为5.5.60-MariaDB版本</span><br><span class="line"></span><br><span class="line">#这里又用二进制安装了一个10.2.27-MariaDB版本</span><br><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">#具体的安装过程不再记录。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 规划多个实例的数据库，配置文件等的存放目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql/&#123;3306,3307,3308&#125;/&#123;etc,sock,log,pid,data&#125;/ -pv</span><br><span class="line">chown -R mysql:mysql /data/mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 复制 /etc/my.cnf 到 /data/mysql/3308/etc/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cp /etc/my.cnf /data/mysql/3308/etc/</span><br><span class="line">vim /data/mysql/3308/etc/my.cnf</span><br><span class="line">#添加以下内容：</span><br><span class="line">[mysqld]</span><br><span class="line">port=3308</span><br><span class="line">datadir=/data/mysql/3308/data</span><br><span class="line">socket=/data/mysql/3308/sock/mysql.sock</span><br><span class="line">[mysqld_safe]</span><br><span class="line">log-error=/data/mysql/3308/log/mariadb.log</span><br><span class="line">pid-file=/data/mysql/3308/pid/mariadb.pid</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#二进制安装初始化</span><br><span class="line">yum install -y  libaio</span><br><span class="line">/usr/local/mariadb-10.2.27-linux-x86_64/scripts/mysql_install_db --datadir=/data/mysql/3308/data/ --user=mysql</span><br><span class="line">#yum安装初始化</span><br><span class="line">mysql_install_db --datadir=/data/mysql/3306/data/ --user=mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 配置mysql服务启动脚本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">port=3308                                   #根据实例配置不同端口</span><br><span class="line">mysql_user=&quot;root&quot;</span><br><span class="line">mysql_pwd=&quot;&quot;</span><br><span class="line">cmd_path=&quot;/usr/local/mysql-10.2.27/bin&quot;     #指定mysqld_safe所在的目录</span><br><span class="line">mysql_basedir=&quot;/data/mysql&quot;                 #指定规划的多实例mysql的目录</span><br><span class="line">mysql_sock=&quot;$&#123;mysql_basedir&#125;/$&#123;port&#125;/sock/mysql.sock&quot;</span><br><span class="line"></span><br><span class="line">function_start_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">      printf &quot;Starting MySQL...\n&quot;</span><br><span class="line">      $&#123;cmd_path&#125;/mysqld_safe --defaults-file=$&#123;mysql_basedir&#125;/$&#123;port&#125;/etc/my.cnf  &amp;&gt; /dev/null  &amp;</span><br><span class="line">    else</span><br><span class="line">      printf &quot;MySQL is running...\n&quot;</span><br><span class="line">      exit</span><br><span class="line">    fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_stop_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">       printf &quot;MySQL is stopped...\n&quot;</span><br><span class="line">       exit</span><br><span class="line">    else</span><br><span class="line">       printf &quot;Stoping MySQL...\n&quot;</span><br><span class="line">       $&#123;cmd_path&#125;/mysqladmin -u $&#123;mysql_user&#125; -p$&#123;mysql_pwd&#125; -S $&#123;mysql_sock&#125; shutdown</span><br><span class="line">   fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_restart_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    printf &quot;Restarting MySQL...\n&quot;</span><br><span class="line">    function_stop_mysql</span><br><span class="line">    sleep 2</span><br><span class="line">    function_start_mysql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">start)</span><br><span class="line">    function_start_mysql</span><br><span class="line">;;</span><br><span class="line">stop)</span><br><span class="line">    function_stop_mysql</span><br><span class="line">;;</span><br><span class="line">restart)</span><br><span class="line">    function_restart_mysql</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">    printf &quot;Usage: $&#123;mysql_basedir&#125;/$&#123;port&#125;/bin/mysqld &#123;start|stop|restart&#125;\n&quot;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/22/MYSQL多实例配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL多实例配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-MYSQL的备份与还原" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/22/MYSQL的备份与还原/" class="article-date">
-  	<time datetime="2019-09-22T13:16:31.000Z" itemprop="datePublished">2019-09-22</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/22/MYSQL的备份与还原/">
-        MYSQL的备份与还原
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>msqldump的 mysql 备份</em></strong></p>
-<blockquote>
-<p>1) 打开mysql的二进制日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/mysql.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">log-bin</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 备份mysql数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -A -F --single-transaction --master-data=2 | gzip &gt; /data/all.sql.gz</span><br><span class="line"># -A 备份所有数据库包括（mysql库,用户自己的数据库）</span><br><span class="line"># -F 滚动二进制日志，方便还原。需要与--single-transaction或-x，--master-data 一起使用，否者会生成多个二进制文件。</span><br><span class="line"># --single-transaction 开启一个备份事务，防止出现备份数据不一致的现象。</span><br><span class="line"># --master-data   记录此备份对应的二进制文件以及位置。</span><br><span class="line"># 建议-q, --quick 不缓存查询，直接输出，加快备份速度。（mysqldump相当于查询数据库，会产生缓存）</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 注意备份二进制日志，最好不要和数据库文件放在一个硬盘上。</p>
-</blockquote>
-<blockquote>
-<p>4) 关于数据还原的注意事项。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">在数据库发生损坏以后，还原数据库时：</span><br><span class="line">1） 通过 iptable 等手段停用用户访问数据库。</span><br><span class="line">2） 关闭二进制日志。</span><br><span class="line">    mysql&gt; set sql_log_bin=off;（临时关闭二进制日志）</span><br><span class="line">3）通过备份还原数据。（数据库回到备份时的状态）</span><br><span class="line">    zip -d  all.sql.gz</span><br><span class="line">    mysql&gt;\. /data/all.sql</span><br><span class="line">4）查看/data/all.sql 中记录的二进制位置，通过mysqlbinlog生成sql文件。（减少数据的丢失）</span><br><span class="line">mysqlbinlog  mariadb-bin.000002 &gt; inc.sql</span><br><span class="line">mysql&gt;\. /data/backup/inc.sql</span><br><span class="line">5）开启二进制日志，恢复iptable规制，接受用户访问。</span><br><span class="line">mysql&gt; set sql_log_bin=on;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>xtrabackup的mysql备份</em></strong></p>
-<blockquote>
-<p>1) 安装xtrabackup。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install percona-xtrabackup-24-2.4.12-1.el7.x86_64.rpm -y</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 完全备份。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup --backup --target-dir=/date/bakup/</span><br><span class="line">#--defaults-file：该选项指定从哪个文件读取MySQL配置，必须放在命令行第一个选项位置，默认读取/etc/my.cnf。若使用其他位置的配置文件，用该选项指定。</span><br><span class="line">#--target-dir：指定备份的目标路径。</span><br><span class="line">xtrabackup --prepare --target-dir=/bakup/   #完全备份恢复</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 默认xtrabackup会生成一下文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">backup-my.cnf   #备份命令用到的配置选项信息</span><br><span class="line">xtrabackup_binlog_info  #该备份发生时使用的二进制日志文件，以及当前日志记录的位置，便于以后利用二进制日志恢复。</span><br><span class="line">xtrabackup_checkpoints  #记录当前的备份类型，以及LSN备份的起始位置，结束为止。便于下次增量备份。</span><br><span class="line">xtrabackup_info     #记录了当前备份详细信息。</span><br><span class="line">xtrabackup_logfile  #备份过程的二进制日志。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 基于以上完全备份的增量备份。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#第一次增量备份：</span><br><span class="line">xtrabackup --backup --target-dir=/date/bakup/inc1 --incremental-basedir=/date/bakup/base</span><br><span class="line">#第二次增量备份：</span><br><span class="line">xtrabackup --backup --target-dir=/date/bakup/inc2 --incremental-basedir=/date/bakup/inc1</span><br><span class="line">#以下为增量备份的原理（LSN日志序列号）：</span><br><span class="line">----------------------------------------------------------------------------</span><br><span class="line">[root@localhost inc1]#cat ../base/xtrabackup_checkpoints</span><br><span class="line">backup_type = full-backuped</span><br><span class="line">from_lsn = 0</span><br><span class="line">to_lsn = 1630179</span><br><span class="line">last_lsn = 1630179</span><br><span class="line">compact = 0</span><br><span class="line">recover_binlog_info = 0</span><br><span class="line">[root@localhost inc1]#cat xtrabackup_checkpoints        </span><br><span class="line">backup_type = incremental</span><br><span class="line">from_lsn = 1630179</span><br><span class="line">to_lsn = 1630824</span><br><span class="line">last_lsn = 1630824</span><br><span class="line">compact = 0</span><br><span class="line">recover_binlog_info = 0</span><br><span class="line">[root@localhost inc1]#cat ../inc2/xtrabackup_checkpoints</span><br><span class="line">backup_type = incremental</span><br><span class="line">from_lsn = 1630824</span><br><span class="line">to_lsn = 1631402</span><br><span class="line">last_lsn = 1631402</span><br><span class="line">compact = 0</span><br><span class="line">recover_binlog_info = 0</span><br><span class="line">----------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 备份的还原。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup --prepare --apply-log-only --target-dir=/date/bakup/base/</span><br><span class="line"># --prepare 预处理。</span><br><span class="line"># --apply-log-only 阻止回滚未完成的事务。</span><br><span class="line"></span><br><span class="line">xtrabackup --prepare --apply-log-only --target-dir=/date/bakup/base --incremental-dir=/date/bakup/inc1</span><br><span class="line"># --incremental-dir 指定合并的增量备份。</span><br><span class="line"></span><br><span class="line">xtrabackup --prepare --target-dir=/date/bakup/base --incremental-dir=/date/bakup/inc2</span><br><span class="line">#最后一次合并不加--apply-log-only，让未完成的事务回滚。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) 在恢复备份至数据库目录前，必须停掉mysql服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop mariadb</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>7) 恢复数据库至目标目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup --copy-back --target-dir=/date/bakup/base/</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>8) 变更目录属性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown -R mysql:mysql /var/lib/mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>9) 启动服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start mariadb</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/22/MYSQL的备份与还原/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL的备份与还原">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-MYSQL的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/15/MYSQL的编译安装/" class="article-date">
-  	<time datetime="2019-09-15T12:05:24.000Z" itemprop="datePublished">2019-09-15</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/15/MYSQL的编译安装/">
-        MYSQL的编译安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>源码编译安装 mariadb ：</em></strong></p>
-<blockquote>
-<p>1) 安装依赖的包和软件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boost-devel gcc gcc-c++ cmake ncurses-devel gnutls-devel libxml2-devel openssl-devel libevent-devel libaio-devel</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 准备用户，以及数据库文件目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">useradd -r -s /sbin/nologin -d /data/mysql mysql</span><br><span class="line">mkdir -p /data/mysql/</span><br><span class="line">chown -R mysql:mysql /data/mysql/</span><br><span class="line">tar -xvf mariadb-10.2.27.tar.gz -C /tmp/</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 通过 cmake 生成配置选项文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">cd mariadb-10.2.27/</span><br><span class="line">cmake . \</span><br><span class="line">-DCMAKE_INSTALL_PREFIX=/app/mysql \</span><br><span class="line">-DMYSQL_DATADIR=/data/mysql/ \</span><br><span class="line">-DSYSCONFDIR=/etc/ \</span><br><span class="line">-DMYSQL_USER=mysql \</span><br><span class="line">-DWITH_INNOBASE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_ARCHIVE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_PARTITION_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITHOUT_MROONGA_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_DEBUG=0 \</span><br><span class="line">-DWITH_READLINE=1 \</span><br><span class="line">-DWITH_SSL=system \</span><br><span class="line">-DWITH_ZLIB=system \</span><br><span class="line">-DWITH_LIBWRAP=0 \</span><br><span class="line">-DENABLED_LOCAL_INFILE=1 \</span><br><span class="line">-DMYSQL_UNIX_ADDR=/data/mysql/mysql.sock \</span><br><span class="line">-DDEFAULT_CHARSET=utf8 \</span><br><span class="line">-DDEFAULT_COLLATION=utf8_general_ci</span><br><span class="line"></span><br><span class="line">如若以上发生错误，请先执行：</span><br><span class="line">rm -f CMakeCache.txt</span><br><span class="line"></span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 准备配置文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /app/mysql/support-files/my-huge.cnf /etc/my.cnf</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /app/mysql/</span><br><span class="line">scripts/mysql_install_db --datadir=/data/mysql/ --user=mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) 准备环境变量，启动脚本，启动服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">echo &apos;PATH=/app/mysql/bin:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">. /etc/profile.d/app.sh</span><br><span class="line"></span><br><span class="line">cp /app/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line"></span><br><span class="line">chkconfig --add mysqld</span><br><span class="line"></span><br><span class="line">service mysqld start</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/15/MYSQL的编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL的编译安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-MYSQL的二进制安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/15/MYSQL的二进制安装/" class="article-date">
-  	<time datetime="2019-09-15T12:05:03.000Z" itemprop="datePublished">2019-09-15</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/15/MYSQL的二进制安装/">
-        MYSQL的二进制安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>关于 mariadb 的二进制安装流程：</em></strong></p>
-<blockquote>
-<p>1) 准备用户。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">useradd -r -s /sbin/nologin -d /data/mysql/ mysql </span><br><span class="line">#建议 /data/mysql/ 目录使用逻辑卷，便于后期扩展。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 准备存放数据库的目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql -p </span><br><span class="line">chown -R mysql:mysql /data/mysql/</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) z准备二进制程序。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">cd /usr/local/</span><br><span class="line">ln -s mariadb-VERSION mysql</span><br><span class="line">chown -R mysql:mysql /usr/local/mysql/</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 准备配置文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/mysql/</span><br><span class="line">cp support-files/my-large.cnf /etc/mysql/my.cnf</span><br><span class="line">vim  /etc/mysql/my.cnf</span><br><span class="line">在[mysqld]下加入如下三项：</span><br><span class="line">datadir = /data/mysql</span><br><span class="line">innodb_file_per_table = on</span><br><span class="line">skip_name_resolve = on #禁止主机名解析，建议使用</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libaio</span><br><span class="line">/usr/local/mysql/scripts/mysql_install_db --datadir=/data/mysql --user=mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) 准备启动脚本,以及mysql启动。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line">chkconfig --add mysqld</span><br><span class="line">service mysqld start</span><br><span class="line">echo &apos;PATH=/usr/local/mysql/bin:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">/usr/local/mysql/bin/mysql_secure_installation</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<hr>
-<p>以上步骤可以通过以下 Shell 脚本一键完成：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">MYDB=/tmp/mariadb-10.2.27-linux-x86_64   #二进制包的路径，不带后缀</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#创建mysql用户。</span><br><span class="line">if id mysql &amp;&gt; /dev/null ;then</span><br><span class="line">    echo &quot;Your mysql has exited!!!&quot;</span><br><span class="line">    exit 1</span><br><span class="line">else </span><br><span class="line">    useradd -r -s /sbin/nologin -d /data/mysql/ mysql</span><br><span class="line">    echo &quot;Mysql create successfully!!!&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#解压二进制包到指定位置，并创建软连接。</span><br><span class="line">if [ -e /usr/local/mysql ];then</span><br><span class="line">    echo &quot;Your dir has been created !!! You may be have installed mysql !!! Please check it !!! &quot;</span><br><span class="line">    exit 2</span><br><span class="line">else</span><br><span class="line">    echo &apos;Begin tar -xvf mariadb.tar.gz ...&apos;</span><br><span class="line">    tar -xf $&#123;MYDB&#125;.tar.gz -C /usr/local/</span><br><span class="line">    ln -s /usr/local/`basename $MYDB` /usr/local/mysql</span><br><span class="line">    chown -R mysql:mysql /usr/local/mysql</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#创建数据库的数据存放目录。</span><br><span class="line">if [ -e /data/mysql ];then</span><br><span class="line">    echo &quot;Your dir has been created!!!,please make sure your /data/mysql/ is empty!!!&quot;</span><br><span class="line">    mkdir -p /tmp/mysql/</span><br><span class="line">    mv -a /data/mysql/* /tmp/mysql/</span><br><span class="line">    chown -R mysql:mysql /data/mysql</span><br><span class="line">else</span><br><span class="line">    mkdir /data/mysql -p</span><br><span class="line">    chown -R mysql:mysql /data/mysql</span><br><span class="line">    echo &apos;/data/mysql/ create sucessfully!!!&apos;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#准备mysql的配置文件</span><br><span class="line">mv /etc/my.cnf /etc/my.cnf~</span><br><span class="line">cp /usr/local/mysql/support-files/my-huge.cnf /etc/my.cnf</span><br><span class="line">sed -ri &apos;s@(^\[mysqld\].*)@\1\ndatadir = /data/mysql\ninnodb_file_per_table = on\nskip_name_resolve = on@&apos; /etc/my.cnf</span><br><span class="line">echo &apos;/etc/my.cnf copy sucessfully!!!&apos;</span><br><span class="line"></span><br><span class="line">#初始化数据库</span><br><span class="line">yum install -y libaio -q &amp;&gt; /dev/null</span><br><span class="line">/usr/local/mysql/scripts/mysql_install_db  --user=mysql --datadir=/data/mysql  --basedir=/usr/local/mysql/ &amp;&gt; /dev/null</span><br><span class="line">if [ $? -eq 0 ];then</span><br><span class="line">    echo &quot;Mysql init sucess!!!&quot;</span><br><span class="line">fi</span><br><span class="line">echo &apos;PATH=/usr/local/mysql/bin/:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">cp  /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line">chkconfig --add mysqld                                                                                                               </span><br><span class="line">service mysqld start</span><br><span class="line">echo &quot;Please exec &apos;. /etc/profile.d/app.sh&apos;&quot;</span><br><span class="line">echo &quot;You shoud run &apos;/usr/local/mysql/bin/mysql_secure_installation&apos; ...&quot;</span><br></pre></td></tr></table></figure></p>
-<hr>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/15/MYSQL的二进制安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL的二进制安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </div>

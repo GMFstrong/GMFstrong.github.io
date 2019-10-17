@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>实现实时同步 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) 通过inotify监控指定目录：123456789101112131415161718192021222324251.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify-rw-r--r--">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现实时同步">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/10/17/实现实时同步/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) 通过inotify监控指定目录：123456789101112131415161718192021222324251.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify-rw-r--r--">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-17T11:12:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="实现实时同步">
+<meta name="twitter:description" content="1) 通过inotify监控指定目录：123456789101112131415161718192021222324251.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify-rw-r--r--">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-实现实时同步" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/实现实时同步/" class="article-date">
+  	<time datetime="2019-10-17T11:07:44.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      实现实时同步
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/10/17/实现实时同步/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="实现实时同步">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 通过inotify监控指定目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。</span><br><span class="line">ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_queued_events</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_user_instances</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 6 05:54 max_user_watches</span><br><span class="line">max_queued_events：inotify事件队列最大长度，如值太小会出现 EventQueue Overflow 错误，默认值：16384</span><br><span class="line">max_user_watches：可以监视的文件数量（单进程），默认值：8192</span><br><span class="line">max_user_instances：每个用户创建inotify实例最大值，默认值：128</span><br><span class="line">2.我们需要安装inotify-tools这一用户空间工具对其进行管理。</span><br><span class="line">yum install -y inotify-tools</span><br><span class="line">notify-tools包主要文件：</span><br><span class="line">inotifywait： 在被监控的文件或目录上等待特定文件系统事件（open closedelete等）发生，常用于实时同步的目录监控。</span><br><span class="line">inotifywatch：收集被监控的文件系统使用的统计数据，指文件系统事件发生的次数统计。</span><br><span class="line">inotifywait 命令常见选项</span><br><span class="line"> -m, --monitor 始终保持事件监听</span><br><span class="line"> -d, --daemon 以守护进程方式执行，和-m相似，配合-o使用</span><br><span class="line"> -r, --recursive 递归监控目录数据信息变化</span><br><span class="line"> -q, --quiet 输出少量事件信息</span><br><span class="line"> --exclude &lt;pattern&gt; 指定排除文件或目录，使用扩展的正则表达式匹配的模式实现</span><br><span class="line"> --excludei &lt;pattern&gt; 和exclude相似，不区分大小写</span><br><span class="line"> -o, --outfile &lt;file&gt;打印事件到文件中，相当于标准正确输出</span><br><span class="line"> -s, --syslogOutput 发送错误到syslog相当于标准错误输出</span><br><span class="line"> --timefmt &lt;fmt&gt; 指定时间输出格式</span><br><span class="line"> --format &lt;fmt&gt; 指定的输出格式；即实际监控输出内容</span><br><span class="line"> -e 指定监听指定的事件，如果省略，表示所有事件都进行监听</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 通过rsync服务实现数据同步：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">1.安装rsync的服务端软件：</span><br><span class="line">yum install -y rsync</span><br><span class="line">2.配置rsync：</span><br><span class="line">vim /etc/rsyncd.conf</span><br><span class="line">uid = root</span><br><span class="line">gid = root</span><br><span class="line">use chroot = no</span><br><span class="line">max connections = 0</span><br><span class="line">ignore errors</span><br><span class="line">exclude = lost+found/</span><br><span class="line">log file = /var/log/rsyncd.log</span><br><span class="line">pid file = /var/run/rsyncd.pid</span><br><span class="line">lock file = /var/run/rsyncd.lock</span><br><span class="line">reverse lookup = no</span><br><span class="line">hosts allow = 192.168.8.0/24</span><br><span class="line">[backup]</span><br><span class="line">path = /backup/</span><br><span class="line">comment = backup</span><br><span class="line">read only = no</span><br><span class="line">auth users = rsyncuser</span><br><span class="line">secrets file = /etc/rsync.pass</span><br><span class="line">3.在服务端创建用户密码文件：</span><br><span class="line">echo &quot;rsyncuser:testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">4.创建备份目录：</span><br><span class="line">mkdir /backup</span><br><span class="line">5.启动服务：</span><br><span class="line">systemctl enable --now rsyncd</span><br><span class="line">rsync --daemon 可加入/etc/rc.d/rc.local实现开机启动 Centos6中</span><br><span class="line">6.客户端配置密码文件</span><br><span class="line">echo &quot;testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">7.客户端测试同步数据</span><br><span class="line">rsync -avz --password-file=/etc/rsync.pass /data/ rsyncuser@rsync服务器IP::backup</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过以上实现实时同步数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">SRC=&apos;/data/&apos;</span><br><span class="line">DEST=&apos;rsyncuser@rsync服务器IP::backup&apos;</span><br><span class="line">inotifywait -mrq --timefmt &apos;%Y-%m-%d %H:%M&apos; --format &apos;%T %w %f&apos; -e create,delete,moved_to,close_write,attrib $&#123;SRC&#125; |while read DATE TIME DIR FILE;do</span><br><span class="line">    FILEPATH=$&#123;DIR&#125;$&#123;FILE&#125;</span><br><span class="line">    rsync -az --delete --password-file=/etc/rsync.pass $SRC $DEST &amp;&amp;</span><br><span class="line">    echo &quot;At $&#123;TIME&#125; on $&#123;DATE&#125;, file $FILEPATH was backuped up via rsync&quot; &gt;&gt; /var/log/changelist.log</span><br><span class="line">done</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/10/17/关于Linux日志/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          关于Linux日志
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/10/17/NFS文件系统配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">NFS文件系统配置</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="实现实时同步" data-title="实现实时同步" data-url="http://gmfdevops.com.com/2019/10/17/实现实时同步/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="实现实时同步">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

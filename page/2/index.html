@@ -202,6 +202,376 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-MYSQL多实例配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/22/MYSQL多实例配置/" class="article-date">
+  	<time datetime="2019-09-22T13:16:54.000Z" itemprop="datePublished">2019-09-22</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/22/MYSQL多实例配置/">
+        MYSQL多实例配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>MYSQL基于不同版本的多实例实现：</em></strong></p>
+<blockquote>
+<p>1) 在同一台主机上安装两个或两个以上版本的mysql。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mariadb-server  #默认为5.5.60-MariaDB版本</span><br><span class="line"></span><br><span class="line">#这里又用二进制安装了一个10.2.27-MariaDB版本</span><br><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">#具体的安装过程不再记录。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 规划多个实例的数据库，配置文件等的存放目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql/&#123;3306,3307,3308&#125;/&#123;etc,sock,log,pid,data&#125;/ -pv</span><br><span class="line">chown -R mysql:mysql /data/mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 复制 /etc/my.cnf 到 /data/mysql/3308/etc/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cp /etc/my.cnf /data/mysql/3308/etc/</span><br><span class="line">vim /data/mysql/3308/etc/my.cnf</span><br><span class="line">#添加以下内容：</span><br><span class="line">[mysqld]</span><br><span class="line">port=3308</span><br><span class="line">datadir=/data/mysql/3308/data</span><br><span class="line">socket=/data/mysql/3308/sock/mysql.sock</span><br><span class="line">[mysqld_safe]</span><br><span class="line">log-error=/data/mysql/3308/log/mariadb.log</span><br><span class="line">pid-file=/data/mysql/3308/pid/mariadb.pid</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#二进制安装初始化</span><br><span class="line">yum install -y  libaio</span><br><span class="line">/usr/local/mariadb-10.2.27-linux-x86_64/scripts/mysql_install_db --datadir=/data/mysql/3308/data/ --user=mysql</span><br><span class="line">#yum安装初始化</span><br><span class="line">mysql_install_db --datadir=/data/mysql/3306/data/ --user=mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 配置mysql服务启动脚本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">port=3308                                   #根据实例配置不同端口</span><br><span class="line">mysql_user=&quot;root&quot;</span><br><span class="line">mysql_pwd=&quot;&quot;</span><br><span class="line">cmd_path=&quot;/usr/local/mysql-10.2.27/bin&quot;     #指定mysqld_safe所在的目录</span><br><span class="line">mysql_basedir=&quot;/data/mysql&quot;                 #指定规划的多实例mysql的目录</span><br><span class="line">mysql_sock=&quot;$&#123;mysql_basedir&#125;/$&#123;port&#125;/sock/mysql.sock&quot;</span><br><span class="line"></span><br><span class="line">function_start_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">      printf &quot;Starting MySQL...\n&quot;</span><br><span class="line">      $&#123;cmd_path&#125;/mysqld_safe --defaults-file=$&#123;mysql_basedir&#125;/$&#123;port&#125;/etc/my.cnf  &amp;&gt; /dev/null  &amp;</span><br><span class="line">    else</span><br><span class="line">      printf &quot;MySQL is running...\n&quot;</span><br><span class="line">      exit</span><br><span class="line">    fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_stop_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">       printf &quot;MySQL is stopped...\n&quot;</span><br><span class="line">       exit</span><br><span class="line">    else</span><br><span class="line">       printf &quot;Stoping MySQL...\n&quot;</span><br><span class="line">       $&#123;cmd_path&#125;/mysqladmin -u $&#123;mysql_user&#125; -p$&#123;mysql_pwd&#125; -S $&#123;mysql_sock&#125; shutdown</span><br><span class="line">   fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_restart_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    printf &quot;Restarting MySQL...\n&quot;</span><br><span class="line">    function_stop_mysql</span><br><span class="line">    sleep 2</span><br><span class="line">    function_start_mysql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">start)</span><br><span class="line">    function_start_mysql</span><br><span class="line">;;</span><br><span class="line">stop)</span><br><span class="line">    function_stop_mysql</span><br><span class="line">;;</span><br><span class="line">restart)</span><br><span class="line">    function_restart_mysql</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">    printf &quot;Usage: $&#123;mysql_basedir&#125;/$&#123;port&#125;/bin/mysqld &#123;start|stop|restart&#125;\n&quot;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/22/MYSQL多实例配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MYSQL多实例配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-MYSQL的备份与还原" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/22/MYSQL的备份与还原/" class="article-date">
+  	<time datetime="2019-09-22T13:16:31.000Z" itemprop="datePublished">2019-09-22</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/22/MYSQL的备份与还原/">
+        MYSQL的备份与还原
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>msqldump的 mysql 备份</em></strong></p>
+<blockquote>
+<p>1) 打开mysql的二进制日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/mysql.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">log-bin</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 备份mysql数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -A -F --single-transaction --master-data=2 | gzip &gt; /data/all.sql.gz</span><br><span class="line"># -A 备份所有数据库包括（mysql库,用户自己的数据库）</span><br><span class="line"># -F 滚动二进制日志，方便还原。需要与--single-transaction或-x，--master-data 一起使用，否者会生成多个二进制文件。</span><br><span class="line"># --single-transaction 开启一个备份事务，防止出现备份数据不一致的现象。</span><br><span class="line"># --master-data   记录此备份对应的二进制文件以及位置。</span><br><span class="line"># 建议-q, --quick 不缓存查询，直接输出，加快备份速度。（mysqldump相当于查询数据库，会产生缓存）</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 注意备份二进制日志，最好不要和数据库文件放在一个硬盘上。</p>
+</blockquote>
+<blockquote>
+<p>4) 关于数据还原的注意事项。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">在数据库发生损坏以后，还原数据库时：</span><br><span class="line">1） 通过 iptable 等手段停用用户访问数据库。</span><br><span class="line">2） 关闭二进制日志。</span><br><span class="line">    mysql&gt; set sql_log_bin=off;（临时关闭二进制日志）</span><br><span class="line">3）通过备份还原数据。（数据库回到备份时的状态）</span><br><span class="line">    zip -d  all.sql.gz</span><br><span class="line">    mysql&gt;\. /data/all.sql</span><br><span class="line">4）查看/data/all.sql 中记录的二进制位置，通过mysqlbinlog生成sql文件。（减少数据的丢失）</span><br><span class="line">mysqlbinlog  mariadb-bin.000002 &gt; inc.sql</span><br><span class="line">mysql&gt;\. /data/backup/inc.sql</span><br><span class="line">5）开启二进制日志，恢复iptable规制，接受用户访问。</span><br><span class="line">mysql&gt; set sql_log_bin=on;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>xtrabackup的mysql备份</em></strong></p>
+<blockquote>
+<p>1) 安装xtrabackup。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install percona-xtrabackup-24-2.4.12-1.el7.x86_64.rpm -y</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 完全备份。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup --backup --target-dir=/date/bakup/</span><br><span class="line">#--defaults-file：该选项指定从哪个文件读取MySQL配置，必须放在命令行第一个选项位置，默认读取/etc/my.cnf。若使用其他位置的配置文件，用该选项指定。</span><br><span class="line">#--target-dir：指定备份的目标路径。</span><br><span class="line">xtrabackup --prepare --target-dir=/bakup/   #完全备份恢复</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 默认xtrabackup会生成一下文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">backup-my.cnf   #备份命令用到的配置选项信息</span><br><span class="line">xtrabackup_binlog_info  #该备份发生时使用的二进制日志文件，以及当前日志记录的位置，便于以后利用二进制日志恢复。</span><br><span class="line">xtrabackup_checkpoints  #记录当前的备份类型，以及LSN备份的起始位置，结束为止。便于下次增量备份。</span><br><span class="line">xtrabackup_info     #记录了当前备份详细信息。</span><br><span class="line">xtrabackup_logfile  #备份过程的二进制日志。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 基于以上完全备份的增量备份。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#第一次增量备份：</span><br><span class="line">xtrabackup --backup --target-dir=/date/bakup/inc1 --incremental-basedir=/date/bakup/base</span><br><span class="line">#第二次增量备份：</span><br><span class="line">xtrabackup --backup --target-dir=/date/bakup/inc2 --incremental-basedir=/date/bakup/inc1</span><br><span class="line">#以下为增量备份的原理（LSN日志序列号）：</span><br><span class="line">----------------------------------------------------------------------------</span><br><span class="line">[root@localhost inc1]#cat ../base/xtrabackup_checkpoints</span><br><span class="line">backup_type = full-backuped</span><br><span class="line">from_lsn = 0</span><br><span class="line">to_lsn = 1630179</span><br><span class="line">last_lsn = 1630179</span><br><span class="line">compact = 0</span><br><span class="line">recover_binlog_info = 0</span><br><span class="line">[root@localhost inc1]#cat xtrabackup_checkpoints        </span><br><span class="line">backup_type = incremental</span><br><span class="line">from_lsn = 1630179</span><br><span class="line">to_lsn = 1630824</span><br><span class="line">last_lsn = 1630824</span><br><span class="line">compact = 0</span><br><span class="line">recover_binlog_info = 0</span><br><span class="line">[root@localhost inc1]#cat ../inc2/xtrabackup_checkpoints</span><br><span class="line">backup_type = incremental</span><br><span class="line">from_lsn = 1630824</span><br><span class="line">to_lsn = 1631402</span><br><span class="line">last_lsn = 1631402</span><br><span class="line">compact = 0</span><br><span class="line">recover_binlog_info = 0</span><br><span class="line">----------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 备份的还原。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup --prepare --apply-log-only --target-dir=/date/bakup/base/</span><br><span class="line"># --prepare 预处理。</span><br><span class="line"># --apply-log-only 阻止回滚未完成的事务。</span><br><span class="line"></span><br><span class="line">xtrabackup --prepare --apply-log-only --target-dir=/date/bakup/base --incremental-dir=/date/bakup/inc1</span><br><span class="line"># --incremental-dir 指定合并的增量备份。</span><br><span class="line"></span><br><span class="line">xtrabackup --prepare --target-dir=/date/bakup/base --incremental-dir=/date/bakup/inc2</span><br><span class="line">#最后一次合并不加--apply-log-only，让未完成的事务回滚。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 在恢复备份至数据库目录前，必须停掉mysql服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop mariadb</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>7) 恢复数据库至目标目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup --copy-back --target-dir=/date/bakup/base/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>8) 变更目录属性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown -R mysql:mysql /var/lib/mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>9) 启动服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start mariadb</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/22/MYSQL的备份与还原/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MYSQL的备份与还原">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-MYSQL的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/MYSQL的编译安装/" class="article-date">
+  	<time datetime="2019-09-15T12:05:24.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/MYSQL的编译安装/">
+        MYSQL的编译安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>源码编译安装 mariadb ：</em></strong></p>
+<blockquote>
+<p>1) 安装依赖的包和软件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boost-devel gcc gcc-c++ cmake ncurses-devel gnutls-devel libxml2-devel openssl-devel libevent-devel libaio-devel</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 准备用户，以及数据库文件目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">useradd -r -s /sbin/nologin -d /data/mysql mysql</span><br><span class="line">mkdir -p /data/mysql/</span><br><span class="line">chown -R mysql:mysql /data/mysql/</span><br><span class="line">tar -xvf mariadb-10.2.27.tar.gz -C /tmp/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过 cmake 生成配置选项文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">cd mariadb-10.2.27/</span><br><span class="line">cmake . \</span><br><span class="line">-DCMAKE_INSTALL_PREFIX=/app/mysql \</span><br><span class="line">-DMYSQL_DATADIR=/data/mysql/ \</span><br><span class="line">-DSYSCONFDIR=/etc/ \</span><br><span class="line">-DMYSQL_USER=mysql \</span><br><span class="line">-DWITH_INNOBASE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_ARCHIVE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_PARTITION_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITHOUT_MROONGA_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_DEBUG=0 \</span><br><span class="line">-DWITH_READLINE=1 \</span><br><span class="line">-DWITH_SSL=system \</span><br><span class="line">-DWITH_ZLIB=system \</span><br><span class="line">-DWITH_LIBWRAP=0 \</span><br><span class="line">-DENABLED_LOCAL_INFILE=1 \</span><br><span class="line">-DMYSQL_UNIX_ADDR=/data/mysql/mysql.sock \</span><br><span class="line">-DDEFAULT_CHARSET=utf8 \</span><br><span class="line">-DDEFAULT_COLLATION=utf8_general_ci</span><br><span class="line"></span><br><span class="line">如若以上发生错误，请先执行：</span><br><span class="line">rm -f CMakeCache.txt</span><br><span class="line"></span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 准备配置文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /app/mysql/support-files/my-huge.cnf /etc/my.cnf</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /app/mysql/</span><br><span class="line">scripts/mysql_install_db --datadir=/data/mysql/ --user=mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 准备环境变量，启动脚本，启动服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">echo &apos;PATH=/app/mysql/bin:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">. /etc/profile.d/app.sh</span><br><span class="line"></span><br><span class="line">cp /app/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line"></span><br><span class="line">chkconfig --add mysqld</span><br><span class="line"></span><br><span class="line">service mysqld start</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/MYSQL的编译安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MYSQL的编译安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-MYSQL的二进制安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/MYSQL的二进制安装/" class="article-date">
+  	<time datetime="2019-09-15T12:05:03.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/MYSQL的二进制安装/">
+        MYSQL的二进制安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>关于 mariadb 的二进制安装流程：</em></strong></p>
+<blockquote>
+<p>1) 准备用户。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">useradd -r -s /sbin/nologin -d /data/mysql/ mysql </span><br><span class="line">#建议 /data/mysql/ 目录使用逻辑卷，便于后期扩展。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 准备存放数据库的目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql -p </span><br><span class="line">chown -R mysql:mysql /data/mysql/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) z准备二进制程序。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">cd /usr/local/</span><br><span class="line">ln -s mariadb-VERSION mysql</span><br><span class="line">chown -R mysql:mysql /usr/local/mysql/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 准备配置文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/mysql/</span><br><span class="line">cp support-files/my-large.cnf /etc/mysql/my.cnf</span><br><span class="line">vim  /etc/mysql/my.cnf</span><br><span class="line">在[mysqld]下加入如下三项：</span><br><span class="line">datadir = /data/mysql</span><br><span class="line">innodb_file_per_table = on</span><br><span class="line">skip_name_resolve = on #禁止主机名解析，建议使用</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libaio</span><br><span class="line">/usr/local/mysql/scripts/mysql_install_db --datadir=/data/mysql --user=mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 准备启动脚本,以及mysql启动。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line">chkconfig --add mysqld</span><br><span class="line">service mysqld start</span><br><span class="line">echo &apos;PATH=/usr/local/mysql/bin:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">/usr/local/mysql/bin/mysql_secure_installation</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<hr>
+<p>以上步骤可以通过以下 Shell 脚本一键完成：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">MYDB=/tmp/mariadb-10.2.27-linux-x86_64   #二进制包的路径，不带后缀</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#创建mysql用户。</span><br><span class="line">if id mysql &amp;&gt; /dev/null ;then</span><br><span class="line">    echo &quot;Your mysql has exited!!!&quot;</span><br><span class="line">    exit 1</span><br><span class="line">else </span><br><span class="line">    useradd -r -s /sbin/nologin -d /data/mysql/ mysql</span><br><span class="line">    echo &quot;Mysql create successfully!!!&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#解压二进制包到指定位置，并创建软连接。</span><br><span class="line">if [ -e /usr/local/mysql ];then</span><br><span class="line">    echo &quot;Your dir has been created !!! You may be have installed mysql !!! Please check it !!! &quot;</span><br><span class="line">    exit 2</span><br><span class="line">else</span><br><span class="line">    echo &apos;Begin tar -xvf mariadb.tar.gz ...&apos;</span><br><span class="line">    tar -xf $&#123;MYDB&#125;.tar.gz -C /usr/local/</span><br><span class="line">    ln -s /usr/local/`basename $MYDB` /usr/local/mysql</span><br><span class="line">    chown -R mysql:mysql /usr/local/mysql</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#创建数据库的数据存放目录。</span><br><span class="line">if [ -e /data/mysql ];then</span><br><span class="line">    echo &quot;Your dir has been created!!!,please make sure your /data/mysql/ is empty!!!&quot;</span><br><span class="line">    mkdir -p /tmp/mysql/</span><br><span class="line">    mv -a /data/mysql/* /tmp/mysql/</span><br><span class="line">    chown -R mysql:mysql /data/mysql</span><br><span class="line">else</span><br><span class="line">    mkdir /data/mysql -p</span><br><span class="line">    chown -R mysql:mysql /data/mysql</span><br><span class="line">    echo &apos;/data/mysql/ create sucessfully!!!&apos;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#准备mysql的配置文件</span><br><span class="line">mv /etc/my.cnf /etc/my.cnf~</span><br><span class="line">cp /usr/local/mysql/support-files/my-huge.cnf /etc/my.cnf</span><br><span class="line">sed -ri &apos;s@(^\[mysqld\].*)@\1\ndatadir = /data/mysql\ninnodb_file_per_table = on\nskip_name_resolve = on@&apos; /etc/my.cnf</span><br><span class="line">echo &apos;/etc/my.cnf copy sucessfully!!!&apos;</span><br><span class="line"></span><br><span class="line">#初始化数据库</span><br><span class="line">yum install -y libaio -q &amp;&gt; /dev/null</span><br><span class="line">/usr/local/mysql/scripts/mysql_install_db  --user=mysql --datadir=/data/mysql  --basedir=/usr/local/mysql/ &amp;&gt; /dev/null</span><br><span class="line">if [ $? -eq 0 ];then</span><br><span class="line">    echo &quot;Mysql init sucess!!!&quot;</span><br><span class="line">fi</span><br><span class="line">echo &apos;PATH=/usr/local/mysql/bin/:$PATH&apos; &gt; /etc/profile.d/app.sh</span><br><span class="line">cp  /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld</span><br><span class="line">chkconfig --add mysqld                                                                                                               </span><br><span class="line">service mysqld start</span><br><span class="line">echo &quot;Please exec &apos;. /etc/profile.d/app.sh&apos;&quot;</span><br><span class="line">echo &quot;You shoud run &apos;/usr/local/mysql/bin/mysql_secure_installation&apos; ...&quot;</span><br></pre></td></tr></table></figure></p>
+<hr>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/MYSQL的二进制安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MYSQL的二进制安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-SSH服务简单优化" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -739,398 +1109,9 @@
 
 
   
-    <article id="post-文本处理-awk" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/31/文本处理-awk/" class="article-date">
-  	<time datetime="2019-08-31T08:21:33.000Z" itemprop="datePublished">2019-08-31</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/31/文本处理-awk/">
-        文本处理_awk
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <img src="/2019/08/31/文本处理-awk/1.png">
-<img src="/2019/08/31/文本处理-awk/2.png">
-<blockquote>
-<p>关于变量</p>
-</blockquote>
-<img src="/2019/08/31/文本处理-awk/3.png">
-<img src="/2019/08/31/文本处理-awk/4.png">
-<img src="/2019/08/31/文本处理-awk/5.png">
-<blockquote>
-<p>awk的基本使用格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">awk [options] &apos;program&apos; file</span><br><span class="line">program：表示为pattern&#123;action statements;...&#125;</span><br><span class="line">pattern：表示部分决定动作语句何时触发及触发事件BEGIN、END；</span><br><span class="line">action statements：表示对数据进行处理，放置&#123;&#125;内指明print、printf。</span><br><span class="line"></span><br><span class="line">awk执行时，由分隔符的字段（域）标记$1,$2...$n称为域标识,$0为所有域。</span><br><span class="line">文件的每一行称为记录。</span><br><span class="line">省略action，则默认执行print $0的操作。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: &apos;/^root/&#123;print$1,$3&#125;&apos; /etc/passwd      </span><br><span class="line">root 0</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>不指定action默认“print $0”及所有匹配到的行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: &apos;/^UUID/&apos; /etc/fstab </span><br><span class="line">UUID=63f39645-9ff8-467a-b661-2b01b7c4d904 /                       xfs     defaults        0 0</span><br><span class="line">UUID=47fc0f00-af74-467f-9da3-e666bc8b1f29 /boot                   xfs     defaults        0 0</span><br><span class="line">UUID=da4d0c6b-b89a-4e7b-9d02-e2254fc75737 /date                   xfs     defaults        0 0</span><br><span class="line">UUID=aaef23a7-e6dc-4e1e-9a58-9d9d215fded7 swap                    swap    defaults        0 0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>如下：只有当“{action}”前的表达式为真时，才有后续的处理。</p>
-</blockquote>
-<p><strong><em>真：结果为非0值，非空字符串</em></strong></p>
-<p><strong><em>假：结果为空字符串或0值</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: -v OFS=*** &apos;1&#123;print $1OFS$3&#125;&apos; /etc/passwd</span><br><span class="line">root***0</span><br><span class="line">bin***1</span><br><span class="line">daemon***2</span><br><span class="line">adm***3</span><br><span class="line">lp***4</span><br><span class="line">sync***5</span><br><span class="line">shutdown***6</span><br><span class="line">...</span><br><span class="line">[root@localhost ~]# awk -F: -v OFS=*** &apos;!1&#123;print $1OFS$3&#125;&apos; /etc/passwd</span><br><span class="line">[root@localhost ~]# </span><br><span class="line">[root@localhost ~]# awk -F: &apos;$3&gt;=100&#123;print $1,$3&#125;&apos; /etc/passwd</span><br><span class="line">avahi-autoipd 170</span><br><span class="line">systemd-bus-proxy 999</span><br><span class="line">systemd-network 998</span><br><span class="line">polkitd 997</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>在“i=1”后面默认隐藏了{print $0}。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk  -F: &apos;i=1;j=1&#123;print $1,$3&#125;&apos; /etc/passwd </span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">root 0</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">bin 1</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon 2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>关于awk的一些特殊使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=0&apos;</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=1&apos;</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=!i&apos;</span><br><span class="line">1</span><br><span class="line">3</span><br><span class="line">5</span><br><span class="line">7</span><br><span class="line">9</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=!i;&#123;print i&#125;&apos;</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">3</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">5</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">7</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">9</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">[root@localhost ~]# seq 10 |awk -v i=1 &apos;i=!i&apos;</span><br><span class="line">2</span><br><span class="line">4</span><br><span class="line">6</span><br><span class="line">8</span><br><span class="line">10</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>awk中数组的使用:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(1) 可使用任意字符串；字符串要使用双引号括起来</span><br><span class="line">(2) 如果某数组元素事先不存在，在引用时，awk会自动创建此元素，并将其值</span><br><span class="line">初始化为“空串”</span><br><span class="line">(3) 若要判断数组中是否存在某元素，要使用“index in array”格式进行遍历</span><br></pre></td></tr></table></figure>
-<img src="/2019/08/31/文本处理-awk/6.png">
-<img src="/2019/08/31/文本处理-awk/7.png">
-<img src="/2019/08/31/文本处理-awk/8.png">
-<img src="/2019/08/31/文本处理-awk/9.png">
-<img src="/2019/08/31/文本处理-awk/10.png">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/31/文本处理-awk/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="文本处理_awk">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Centos6-7启动流程" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/31/Centos6-7启动流程/" class="article-date">
-  	<time datetime="2019-08-31T04:32:33.000Z" itemprop="datePublished">2019-08-31</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/31/Centos6-7启动流程/">
-        Centos6_7启动流程
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。"><a href="#了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。" class="headerlink" title="了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。"></a>了解Linux的启动流程，在解决Linux发生故障而引起的启动失败的问题时有很大的帮助。</h2><blockquote>
-<p>首先，关于Centos6和Centos7的的启动流程我这里大致分为3个阶段：</p>
-</blockquote>
-<pre><code>(1)POST加电自检，通过BIOS加载MBR,启动(grub)等引导程序。
-(2)（内核空间启动）加载内核，初始化内核,挂载根文件系统。
-(3)（用户空间启动）启动系统的第一个进程，启动加载一些必要的服务和应用。
-</code></pre><p><strong><em>POST加电自检，通过BIOS加载MBR,启动(grub)等引导程序。</em></strong></p>
-<p>POST加电自检中，，是BIOS功能的一个主要部分。负责完成对CPU、主板、内存、硬盘子系统、显示子系统、串并行接口、键盘等硬件情况的检测。BIOS的程序由CPU直接加载执行（电脑制造商硬件设计）。</p>
-<p>根据BIOS的设定，确定从光盘，U盘，硬盘，网络那种介质中启动系统。</p>
-<p>这里以硬盘启动为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">通过BIOS寻找到装载有OS的硬盘以后，在该硬盘的第一个扇区的446个字节的空间中加载grub等系统引导程序。由于gurb引导程序功能过于强大，造成446个字节无法完全实现grub的功能，故而采用了将grub引导过程分阶段完成的方法。grub引导程序大致分为3个阶段完成：</span><br><span class="line">    （1）stage_1:负责加载start程序，并且记录了Stage_2在硬盘上的位置。</span><br><span class="line">    （2）stage_1.5:由于stage_2的程序在/boot所在的文件系统中，故而该阶段负责通过驱动识别文件系统，并加载stage_2。在安装grub时，会根据/boot所在分区的文件系统安装相应的驱动程序。</span><br><span class="line">    （3）stage_2:负责启动用户交互接口，若装有多个系统内核，选择要加载启动的内核。</span><br></pre></td></tr></table></figure></p>
-<img src="/2019/08/31/Centos6-7启动流程/1.png">
-<p><strong><em>将内核加载进内存以后，需要挂载根文件系统，但是若要挂载根文件系统，需要加载根文件系统所在分区的文件系统驱动，然而，文件系统的驱动程序在根文件系统中。故而产生了矛盾。此时就需要引入第三方来解决矛盾。</em></strong></p>
-<p>为了减轻内核的重量，采用将根文件系统驱动加入内核的方法不适用。毕竟，各个文件系统的驱动程序各不相同，直接加载到内核，会造成内核含有多种无用的驱动，浪费资源。</p>
-<p>为此，采用了在装载系统时，我们通过装载系统时使用的光盘/U盘等扫描识别一些系统启动必须的设备，并将设备启动的驱动程序生成一个文件（initramfs-2.6.32-754.el6.x86_64.img）放在/boot/目录下，以供文件系统启动时加载使用。</p>
-<p>通过加载initramfs-2.6.32-754.el6.x86_64.img文件中的驱动程序，我们找到并且可以进入真正的根文件系统。但是此时我们的系统是通过initramfs-2.6.32-754.el6.x86_64.img文件里的驱动临时启动的。我们处于initramfs这个伪根文件系统里，所以我们此时仅仅是以只读的方式挂载根文件系统，防止因系统启动不稳定造成对根文件系统的破坏。</p>
-<p>然后，通过调用伪根文件里的init/systemd(第一个进程)加载各个模块驱动，初始化系统中的各个设备，包括CPU,磁盘等。 此时由于各个模块驱动加载完成，系统启动稳定，切换到真正的根文件系统中，为内核启动系统的init（/sbin/init）/systemd（/sbin/init -&gt; ../lib/systemd/systemd）进程做准备。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">以上为内核空间的启动及初始化过程。下面开始用户空间的启动以及初始化：</span><br><span class="line"></span><br><span class="line">```---------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-<p>对于用户空间的启动与初始化，根据系统版本的不同有所差别：</p>
-<p>这里先介绍Centos6：</p>
-<blockquote>
-<p>1)  通过 ‘ /etc/inittab ‘文件获取系统的启动级别：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]# cat /etc/inittab</span><br><span class="line">id:3:initdefault:</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2)  通过系统初始化脚本 ‘/etc/rc.sysinit ‘，完成系统初始化。</p>
-</blockquote>
-<blockquote>
-<p>3) 根据自己的启动级别，到’ /etc/rc.d/rc*.d/ ‘目录中启动自己的开机自启服务。（根据/etc/rc.d/rc 文件）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 rc3.d]# ls</span><br><span class="line">K10saslauthd    K89netconsole  S08ip6tables  S11auditd     S25blk-availability  S50kdump    S90crond</span><br><span class="line">K61nfs-rdma     K89rdisc       S08iptables   S12rsyslog    S25netfs             S55sshd     S99local</span><br><span class="line">K87restorecond  S05rdma        S10network    S15mdmonitor  S26udev-post         S80postfix</span><br><span class="line">[root@centos6 rc3.d]# pwd</span><br><span class="line">/etc/rc.d/rc3.d</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>这些其实都是软连接：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 rc3.d]# ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx. 1 root root 19 Jul 17 19:22 K10saslauthd -&gt; ../init.d/saslauthd</span><br><span class="line">lrwxrwxrwx. 1 root root 18 Jul 17 19:23 K61nfs-rdma -&gt; ../init.d/nfs-rdma</span><br><span class="line">lrwxrwxrwx. 1 root root 21 Jul 17 19:22 K87restorecond -&gt; ../init.d/restorecond</span><br><span class="line">lrwxrwxrwx. 1 root root 20 Jul 17 19:22 K89netconsole -&gt; ../init.d/netconsole</span><br><span class="line">lrwxrwxrwx. 1 root root 15 Jul 17 19:22 K89rdisc -&gt; ../init.d/rdisc</span><br><span class="line">lrwxrwxrwx. 1 root root 14 Jul 17 19:23 S05rdma -&gt; ../init.d/rdma</span><br><span class="line">lrwxrwxrwx. 1 root root 19 Jul 17 19:23 S08ip6tables -&gt; ../init.d/ip6tables</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>4) 加载用户自定义的服务’ /etc/local ‘</p>
-</blockquote>
-<p>到此，Centos6的系统用户空间加载完成。<br><img src="/2019/08/31/Centos6-7启动流程/2.jpg"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">以下是Centos7的用户空间启动流程：</span><br><span class="line"></span><br><span class="line">```--------------------------------------------------------</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>1) 启动systemd系统启动和服务器守护进程管理器,负责在系统启动或运行时，激<br>活系统资源，服务器进程和其它进程。</p>
-</blockquote>
-<blockquote>
-<p>2) 与Centos6类似，先到/usr/lib/systemd/system/default.target获取自己的运行级别。</p>
-</blockquote>
-<blockquote>
-<p>3) 根据/usr/lib/systemd/system/sysinit.target完成系统初始化。</p>
-</blockquote>
-<blockquote>
-<p>4) 根据自己的运行级别到相应的的target单元中启动对应的开机自启服务。</p>
-</blockquote>
-<img src="/2019/08/31/Centos6-7启动流程/3.png">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/31/Centos6-7启动流程/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Centos6_7启动流程">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-关于字符串的处理" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/25/关于字符串的处理/" class="article-date">
-  	<time datetime="2019-08-25T02:03:04.000Z" itemprop="datePublished">2019-08-25</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/25/关于字符串的处理/">
-        关于字符串的处理
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>字符串切⽚：<br><img src="/2019/08/25/关于字符串的处理/1.png"><br><img src="/2019/08/25/关于字符串的处理/2.png"><br>一些变量的赋值：<br><img src="/2019/08/25/关于字符串的处理/3.png"></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/shell/">shell</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/25/关于字符串的处理/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="关于字符串的处理">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-计划任务管理" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/22/计划任务管理/" class="article-date">
-  	<time datetime="2019-08-22T04:12:47.000Z" itemprop="datePublished">2019-08-22</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/22/计划任务管理/">
-        计划任务管理
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>###关于计划任务，at,cron：###<br>首先，先来介绍一下at,at所管理的任务仅仅运行一次，在指定的时间点开始运行后，该at定义的任务就结束了。但是，在使用该服务进程管理自己的任务之前，我们首先必须保证自己安装了”at”这个包，其次保证我们的atd处于启动状态。</p>
-<blockquote>
-<p>关于at的常用选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-V 显示版本信息</span><br><span class="line">-t time 时间格式 [[CC]YY]MMDDhhmm[.ss]</span><br><span class="line">-l 列出指定队列中等待运行的作业；相当于atq</span><br><span class="line">-d 删除指定的作业；相当于atrm</span><br><span class="line">-c 查看具体作业任务</span><br><span class="line">-f /path/file 指定的文件中读取任务</span><br><span class="line">-m 当任务被完成之后，将给用户发送邮件，即使没有标准输出</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>注意：作业执行命令的结果中的标准输出和错误以邮件通知给相关用户</em></strong></p>
-<blockquote>
-<p>关于at的使用其实很简单，就是  at 时间，at是一个交互式的命令。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HH:MM [YYYY-mm-dd]</span><br><span class="line">noon, midnight, teatime（4pm）</span><br><span class="line">tomorrow</span><br><span class="line">now+#&#123;minutes,hours,days, OR weeks&#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@gmf data]#at now + 5min</span><br><span class="line">at&gt; tar -Jcvf script.tar.xz script/* &amp;&gt;/dev/null &amp;</span><br><span class="line">at&gt; &lt;EOT&gt;</span><br><span class="line">job 3 at Thu Aug 22 10:39:00 2019</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>at -d 任务号</p>
-</blockquote>
-<pre><code>可以删除一个定义的任务。
-</code></pre><blockquote>
-<p>at 还支持其他的执行方式：</p>
-</blockquote>
-<p>（1）输入重定向<br>（2）at -f 文件</p>
-<p>‘at -c 任务号’所查询的任务，其实就是/etc/spool/at/目录下的文件。</p>
-<blockquote>
-<p>为了安全，at还提供了如下功能：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/etc/at.&#123;allow,deny&#125;控制用户是否能执行at任务</span><br><span class="line"> 白名单：/etc/at.allow 默认不存在，只有该文件中的用户才能执行at命令</span><br><span class="line"> 黑名单：/etc/at.deny 默认存在，拒绝该文件中用户执行at命令，而没有在</span><br><span class="line">at.deny 文件中的使用者则可执行</span><br><span class="line"> 如果两个文件都不存在，只有 root 可以执行 at 命令</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>###下面介绍cron周期性计划任务### </p>
-<blockquote>
-<p>首先，需要保证自己的crond服务启动。由于Linux默认有很多周期性计划任务，所以该服务默认是启动的。<br>crontab的使用选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crontab [-u user] [-l | -r | -e] [-i]</span><br><span class="line">-l 列出所有任务</span><br><span class="line">-e 编辑任务</span><br><span class="line">-r 移除所有任务</span><br><span class="line">-i 同-r一同使用，以交互式模式移除指定任务</span><br><span class="line">-u user 仅root可运行，指定用户管理cron任务</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>每个用户都有专用的cron任务文件：</p>
-</blockquote>
-<pre><code>每个用户都有专用的cron任务文件：/var/spool/cron/USERNAME
-</code></pre><blockquote>
-<p>crontab -e 默认使用vi打开编辑页面，然后以一个工作一行来编辑，编辑完毕之后输入『 :wq 』储存后离开 vi 就可以了！ 而每项工作 (每行) 的格式都是具有六个栏位，这六个栏位的意义为：<br><img src="/2019/08/22/计划任务管理/1.png"><br>另外一些辅助字符：<br><img src="/2019/08/22/计划任务管理/2.png"><br>对于cron任务来讲，%有特殊用途；如果在命令中要使用%，则需要转义，将%<br>放置于单引号中，则可不用转义</p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/22/计划任务管理/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="计划任务管理">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
     </nav>
   
 </div>

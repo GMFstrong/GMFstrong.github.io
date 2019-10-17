@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>HTTPD的编译安装 | ConqUeroR</title>
+  <title>关于Linux日志 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1) 准备安装httpd-2.4依赖的包：1234567891011121314151617181920212223依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 maketar -xvf httpd-2.">
+  <meta name="description" content="1) 各种日志文件的作用：12345671. /var/log/secure：系统安装日志，文本格式，应周期性分析。2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。4. /var/log/lastlog：每一个用户最近">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HTTPD的编译安装">
-<meta property="og:url" content="http://gmfdevops.com.com/2019/10/09/HTTPD的编译安装/index.html">
+<meta property="og:title" content="关于Linux日志">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/10/17/关于Linux日志/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="1) 准备安装httpd-2.4依赖的包：1234567891011121314151617181920212223依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 maketar -xvf httpd-2.">
+<meta property="og:description" content="1) 各种日志文件的作用：12345671. /var/log/secure：系统安装日志，文本格式，应周期性分析。2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。4. /var/log/lastlog：每一个用户最近">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-10-09T13:56:54.000Z">
+<meta property="og:updated_time" content="2019-10-17T11:13:22.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HTTPD的编译安装">
-<meta name="twitter:description" content="1) 准备安装httpd-2.4依赖的包：1234567891011121314151617181920212223依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 maketar -xvf httpd-2.">
+<meta name="twitter:title" content="关于Linux日志">
+<meta name="twitter:description" content="1) 各种日志文件的作用：12345671. /var/log/secure：系统安装日志，文本格式，应周期性分析。2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。4. /var/log/lastlog：每一个用户最近">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -201,11 +201,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-HTTPD的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-关于Linux日志" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/10/09/HTTPD的编译安装/" class="article-date">
-  	<time datetime="2019-10-09T13:54:30.000Z" itemprop="datePublished">2019-10-09</time>
+      <a href="/2019/10/17/关于Linux日志/" class="article-date">
+  	<time datetime="2019-10-17T11:07:58.000Z" itemprop="datePublished">2019-10-17</time>
 </a>
     </div>
   
@@ -218,7 +218,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      HTTPD的编译安装
+      关于Linux日志
       
     </h1>
   
@@ -236,8 +236,8 @@
         
           
 <div class="counter-tag counter">
-    <span id="/2019/10/09/HTTPD的编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HTTPD的编译安装">
+    <span id="/2019/10/17/关于Linux日志/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="关于Linux日志">
          &nbsp;
         view
     </span>
@@ -251,13 +251,13 @@
     <div class="article-entry" itemprop="articleBody">
       
         <blockquote>
-<p>1) 准备安装httpd-2.4依赖的包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。</span><br><span class="line">dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 make</span><br><span class="line">tar -xvf httpd-2.4.41.tar.gz</span><br><span class="line">tar -xvf apr-1.7.0.tar.bz2</span><br><span class="line">tar -xvf apr-util-1.6.1.tar.bz2</span><br><span class="line">mkdir /apps/httpd -pv</span><br><span class="line">mv apr-1.7.0 httpd-2.4.41/srclib/apr</span><br><span class="line">mv apr-util-1.6.1 httpd-2.4.41/srclib/apr-util</span><br><span class="line">cd httpd-2.4.41</span><br><span class="line">./configure \</span><br><span class="line">--prefix=/apps/httpd \</span><br><span class="line">--enable-so \</span><br><span class="line">--enable-ssl \</span><br><span class="line">--enable-cgi \</span><br><span class="line">--enable-rewrite \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-pcre \</span><br><span class="line">--with-included-apr \</span><br><span class="line">--enable-modules=most \</span><br><span class="line">--enable-mpms-shared=all \</span><br><span class="line">--with-mpm=prefork</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">修改环境变量：</span><br></pre></td></tr></table></figure></p>
+<p>1) 各种日志文件的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. /var/log/secure：系统安装日志，文本格式，应周期性分析。</span><br><span class="line">2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。</span><br><span class="line">3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。</span><br><span class="line">4. /var/log/lastlog：每一个用户最近一次的登录信息，二进制格式，lastlog命令可以查看。</span><br><span class="line">5. /var/log/dmesg：系统引导过程中的日志信息，文本格式文本查看工具查看。也可用专用命令dmesg查看。</span><br><span class="line">6. /var/log/messages ：系统中大部分的信息。</span><br><span class="line">7. /var/log/anaconda : anaconda的日志。</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 <blockquote>
-<p>2) 默认用户的更改：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">默认apache在编译安装之后的默认用户是daemon。</span><br><span class="line">可以创建一个专有的系统用户供其使用：</span><br><span class="line">useradd -s /sbin/nologin -r apache</span><br><span class="line">打开以下文件，修改如下两行：</span><br><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br></pre></td></tr></table></figure></p>
+<p>2) 用数据库mysql存储日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. 准备一台mysql服务器用来存放日志信息：</span><br><span class="line">    yum install -y mariadb-server</span><br><span class="line">    systemctl enable --now mariadb</span><br><span class="line">2. 创建一个管理该数据库的用户：</span><br><span class="line">    GRANT ALL ON Syslog.* TO &apos;log&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY &apos;testroot&apos;;</span><br><span class="line">3. 在rsyslog日志服务器上安装与mysql交互的模块：</span><br><span class="line">    yum install -y rsyslog-mysql</span><br><span class="line">    [root@localhost ~]#rpm -ql rsyslog-mysql</span><br><span class="line">    /usr/lib64/rsyslog/ommysql.so</span><br><span class="line">    /usr/share/doc/rsyslog-8.24.0/mysql-createDB.sql</span><br><span class="line">4. 将上面的mysql-createDB.sql传到mysql服务器上运行，生成需要的数据库及表。</span><br><span class="line">    mysql &lt;  mysql-createDB.sql</span><br><span class="line">5. 在日志服务器上修改配置，使其调用ommysql.so与mysql服务器交互。</span><br><span class="line">    #### MODULES ####</span><br><span class="line">    $ModLoad ommysql</span><br><span class="line">    #### RULES ####</span><br><span class="line">    local6.*                                                :ommysql:192.168.38.18,Syslog,log,testroot  #:ommysql:DBHOST,DBNAME,DBUSER, PASSWORD</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 <blockquote>
-<p>3) 设置开机启动的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">方法一：</span><br><span class="line">在以下文件添加如下一行：</span><br><span class="line">vim /etc/rc.d/rc.local</span><br><span class="line">/apps/httpd/bin/apachectl start</span><br><span class="line">为以上文件添加执行权限：</span><br><span class="line">chmod +x /etc/rc.d/rc.local</span><br><span class="line">方法二：</span><br><span class="line">编写systemd的管理脚本：</span><br><span class="line">vim /usr/lib/systemd/system/httpd.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=The Apache HTTP Server</span><br><span class="line">After=network.target remote-fs.target nss-lookup.target</span><br><span class="line">Documentation=man:httpd(8)</span><br><span class="line">Documentation=man:apachectl(8)</span><br><span class="line">[Service]</span><br><span class="line">Type=forking #此行不要为notify，因为在apache编译时没有加载该模块。</span><br><span class="line">#EnvironmentFile=/etc/sysconfig/httpd</span><br><span class="line">ExecStart=/apps/httpd/bin/httpd $OPTIONS -k start</span><br><span class="line">ExecReload=/apps/httpd/bin/httpd $OPTIONS -k graceful</span><br><span class="line">ExecStop=/bin/kill -WINCH $&#123;MAINPID&#125;</span><br><span class="line">KillSignal=SIGCONT</span><br><span class="line">PrivateTmp=true</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">重新加载配置文件：</span><br><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure></p>
+<p>3) 基于loganalyzer管理日志服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install  httpd php php-mysqlnd php-gd</span><br><span class="line">wget http://download.adiscon.com/loganalyzer/loganalyzer-4.1.8.tar.gz</span><br><span class="line">tar xf loganalyzer-4.1.5.tar.gz</span><br><span class="line">cp -a loganalyzer-4.1.5/src /var/www/html/loganalyzer</span><br><span class="line">cd /var/www/html/loganalyzer</span><br><span class="line">touch config.php</span><br><span class="line">chmod 666 config.php</span><br><span class="line">在配置完成以后，要回收config.php权限，为了安全考虑。</span><br><span class="line">chmod 644 config.php</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 
       
@@ -268,18 +268,9 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/10/17/PHP编译安装/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">&lt;</strong>
-      <div class="article-nav-title">
-        
-          PHP编译安装
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/10/09/https的·相关配置/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">https的·相关配置</div>
+    <a href="/2019/10/17/实现实时同步/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">实现实时同步</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -289,7 +280,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="HTTPD的编译安装" data-title="HTTPD的编译安装" data-url="http://gmfdevops.com.com/2019/10/09/HTTPD的编译安装/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="HTTPD的编译安装">
+<div class="ds-share share" data-thread-key="关于Linux日志" data-title="关于Linux日志" data-url="http://gmfdevops.com.com/2019/10/17/关于Linux日志/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="关于Linux日志">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
