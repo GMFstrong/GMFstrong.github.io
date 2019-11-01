@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Nginx的rewrite | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) 关于rewrite的 flag:123456789101112131415161718192021222324252627282930redirect(临时重定向)：状态码：302，重写完成后以临时重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。临时重定向不会在客户端浏览器生成域名的缓存。permanent(永久重定向)：状态码：301，重写完成后以永久重定向方式直接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx的rewrite">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/01/Nginx的rewrite/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) 关于rewrite的 flag:123456789101112131415161718192021222324252627282930redirect(临时重定向)：状态码：302，重写完成后以临时重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。临时重定向不会在客户端浏览器生成域名的缓存。permanent(永久重定向)：状态码：301，重写完成后以永久重定向方式直接">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-01T13:48:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx的rewrite">
+<meta name="twitter:description" content="1) 关于rewrite的 flag:123456789101112131415161718192021222324252627282930redirect(临时重定向)：状态码：302，重写完成后以临时重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。临时重定向不会在客户端浏览器生成域名的缓存。permanent(永久重定向)：状态码：301，重写完成后以永久重定向方式直接">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-Nginx的rewrite" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/01/Nginx的rewrite/" class="article-date">
+  	<time datetime="2019-11-01T13:44:29.000Z" itemprop="datePublished">2019-11-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Nginx的rewrite
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/01/Nginx的rewrite/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Nginx的rewrite">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 关于rewrite的 flag:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">redirect(临时重定向)：状态码：302，重写完成后以临时重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。</span><br><span class="line">临时重定向不会在客户端浏览器生成域名的缓存。</span><br><span class="line">permanent(永久重定向)：状态码：301，重写完成后以永久重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。</span><br><span class="line">永久重定向会在客户端浏览器生成域名的缓存。</span><br><span class="line">----&gt;以上两种flag会让客户端发起两次请求。</span><br><span class="line">----&gt;下面的两种flag会在Nginx内部自动完成重写，直接返回给客户最终结果。</span><br><span class="line">break：最终的结果不会超出break的location而且不会继续匹配当前location后续的write规则，而且直接返回数据给客户端。</span><br><span class="line">last：对某个location的URL匹配成功后会停止当前location的后续rewrite规则，并结束当前location，然后将匹配生成的</span><br><span class="line">新URL跳转至其他location继续匹配，直到没有location可匹配后将最后一次location的数据返回给客户端。</span><br><span class="line">location /rewrite &#123;</span><br><span class="line">    root /data;</span><br><span class="line">    index index.html;</span><br><span class="line">    rewrite ^/rewrite/(.*) /testbr/$1 break;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location /testbr &#123;</span><br><span class="line">    root /data;</span><br><span class="line">    #index index1.html;</span><br><span class="line">    #echo $server_port;</span><br><span class="line">    if ($server_port = 80)&#123;</span><br><span class="line">        echo &apos;testbreak!!!!&apos;;</span><br><span class="line">    &#125;</span><br><span class="line">    #rewrite ^/testbr/(.*) /testbrl/$1 last;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">location /testbrl &#123;</span><br><span class="line">    root /data;</span><br><span class="line">    index index.html;</span><br><span class="line">    return 666 &apos;This is a last page!!!&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) Nginx作http反向代理时的缓存配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">首先，配置Nginx的http反向代理：</span><br><span class="line">    server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name = www.test.com;</span><br><span class="line">    location / &#123;</span><br><span class="line">    proxy_pass http://192.168.38.17;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">配置Nginx的缓存：</span><br><span class="line">    1) 定义缓存（在http字段）：</span><br><span class="line">         proxy_cache_path /var/cache/nginx/proxy_cache levels=1:2:2 keys_zone=gmf:20m inactive=120s  max_size=1g;</span><br><span class="line">            </span><br><span class="line">            proxy_cache_path /var/cache/nginx/proxy_cache #定义缓存保存路径，proxy_cache会自动创建</span><br><span class="line">            levels=1:2:2 #定义缓存目录结构层次，1:2:2可以生成2^4x2^8x2^8=1048576个目录</span><br><span class="line">            keys_zone=gmf:20m #指内存中缓存的大小，主要用于存放key和metadata（如：使用次数）  </span><br><span class="line">            inactive=120s； #缓存有效时间  </span><br><span class="line">            max_size=1g; #最大磁盘占用空间，磁盘存入文件内容的缓存空间最大值</span><br><span class="line">    2）引用以上定义的缓存：（定义在server或者location字段）</span><br><span class="line">            proxy_cache gmf; #引用以上定义缓存中的keys_zone名称。</span><br><span class="line">            proxy_cache_key $request_uri;    #缓存中用于“键”的内容，默认值：proxy_cache_key $scheme$proxy_host$request_uri;</span><br><span class="line">            proxy_cache_valid 200 302 301 10m; #指定的状态码返回的数据缓存多长时间</span><br><span class="line">            proxy_cache_valid any 1m;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 在Nginx的回复报文中添加信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name = www.test.com;</span><br><span class="line">       proxy_cache gmf; </span><br><span class="line">       proxy_cache_key $request_uri; </span><br><span class="line">       proxy_cache_valid 200 302 301 10m; </span><br><span class="line">       proxy_cache_valid any 1m;</span><br><span class="line">    location / &#123;</span><br><span class="line">    proxy_pass http://192.168.38.17;</span><br><span class="line">    add_header X-Via  $server_addr;  #会在响应报文中添加一个键值对。</span><br><span class="line">    add_header X-Cache $upstream_cache_status;  #在客户端查看是否命中Nginx的缓存。  </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) Nginx配置服务器群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">在http字段配置一个服务器群组：</span><br><span class="line">    upstream gmf &#123;</span><br><span class="line">    server 192.168.38.17:80  weight=1 fail_timeout=5s max_fails=3;</span><br><span class="line">    server 192.168.38.57:80  weight=1 fail_timeout=5s max_fails=3;</span><br><span class="line">        &#125;</span><br><span class="line">    weight=number #设置权重，默认为1。</span><br><span class="line">    max_conns=number  #给当前server设置最大活动链接数，默认为0表示没有限制。</span><br><span class="line">    max_fails=number  #对后端服务器连续监测失败多少次就标记为不可用。</span><br><span class="line">    fail_timeout=time #对后端服务器的单次监测超时时间，默认为10秒。</span><br><span class="line">    backup  #设置为备份服务器，当所有服务器不可用时将重新启用次服务器。</span><br><span class="line">    down    #标记为down状态。</span><br><span class="line">    resolve #当server定义的是主机名的时候，当A记录发生变化会自动应用新IP而不用重启Nginx。</span><br><span class="line"></span><br><span class="line">在location中调用上面定义的upstream：</span><br><span class="line">    location /ups &#123;</span><br><span class="line">    proxy_pass http://gmf;   </span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 默认在后端的apache的日志中记录的时Nginx http代理的访问日志，需要开启客户端ip地址透传：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">location /ups &#123;</span><br><span class="line">    proxy_pass http://gmf;    </span><br><span class="line">    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; #将远程客户地址透传给后端的apache等服务器，但是需要在后</span><br><span class="line">    端的apache等服务器配置使其记录该字段的日志信息。</span><br><span class="line">    &#125;</span><br><span class="line">后端apache的日志格式：</span><br><span class="line">LogFormat &quot;\&quot;%&#123;X-Forwarded-For&#125;i\ %h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot; combined</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) Nginx的tcp代理(该配置需要配置在http字段以外)：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">stream&#123;</span><br><span class="line">    upstream mysql &#123;</span><br><span class="line">        server 192.168.38.27:3306 max_fails=3 fail_timeout=30s;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    upstream raids &#123;</span><br><span class="line">        server 192.168.38.17:6379 max_fails=3 fail_timeout=30s;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    server &#123;</span><br><span class="line">        listen 3306;</span><br><span class="line">        proxy_connect_timeout 10s;</span><br><span class="line">        proxy_timeout 10s; </span><br><span class="line">        proxy_pass mysql;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    server &#123;</span><br><span class="line">        listen 6379;</span><br><span class="line">        proxy_connect_timeout 10s;</span><br><span class="line">        proxy_timeout 10s;</span><br><span class="line">        proxy_pass raids;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/11/01/Nginx下配置php/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Nginx下配置php
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/11/01/Nginx的配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Nginx的配置</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="Nginx的rewrite" data-title="Nginx的rewrite" data-url="http://gmfdevops.com.com/2019/11/01/Nginx的rewrite/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Nginx的rewrite">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
