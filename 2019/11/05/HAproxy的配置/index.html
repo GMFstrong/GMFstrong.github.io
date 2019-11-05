@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>HAproxy的配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：1234567891011121314151617global全局配置段中定义以下选项：    global        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。        daemon  #以守护进程的方式运行。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HAproxy的配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/05/HAproxy的配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：1234567891011121314151617global全局配置段中定义以下选项：    global        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。        daemon  #以守护进程的方式运行。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-05T12:07:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HAproxy的配置">
+<meta name="twitter:description" content="HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：1234567891011121314151617global全局配置段中定义以下选项：    global        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。        daemon  #以守护进程的方式运行。">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-HAproxy的配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的配置/" class="article-date">
+  	<time datetime="2019-11-05T12:04:23.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      HAproxy的配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">global全局配置段中定义以下选项：</span><br><span class="line">    global</span><br><span class="line">        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。</span><br><span class="line">        daemon  #以守护进程的方式运行。</span><br><span class="line">        stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">        uid 99 #指定运行HAproxy进程的用户和组。</span><br><span class="line">        gid 99</span><br><span class="line">        nbproc  4     #开启的haproxy进程数，与CPU保持一致。</span><br><span class="line">        cpu-map 1 0   #绑定haproxy 进程至指定CPU核心。</span><br><span class="line">        spread-checks #后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间，防止同时产生大量检测报文。</span><br><span class="line">        pidfile /var/lib/haproxy/haproxy.pid    #指定pid文件路径。</span><br><span class="line">        log 127.0.0.1 local3 info       #定义全局的syslog服务器；最多可以定义两个。</span><br><span class="line">        maxconn    1000000   #每个haproxy进程的最大并发连接数。</span><br><span class="line">        maxsslconn   1000000 #每个haproxy进程ssl最大连接数,用于haproxy配置了证书的场景下。</span><br><span class="line">        maxconnrate   #每个进程每秒创建的最大连接数量。</span><br><span class="line">proxies配置段又包含以下两个字段：</span><br><span class="line">    defaults [name] : 其中定义的内容在frontend、backend和lsiten中没有定义时，为他们的默认选项。及优先级低于frontend、backend和lsiten中的定义。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>1) proxies 中defaults的常见配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">option redispatch     #当server Id对应的服务器挂掉后，强制定向到其他健康的服务器。</span><br><span class="line">option abortonclose   #当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接，根据自己的业务场景，在自己业务处理时间较长时，需要关闭该选项，</span><br><span class="line">否则会出现大量 50X 错误。</span><br><span class="line">option http-keep-alive #开启与客户端的会话保持</span><br><span class="line">mode tcp/http #默认工作类型，一般为了保证HAproxy的性能，设置为TCP模式。http应用层的代理一般由后端Nginx完成。</span><br><span class="line">option forwardfor     #透传客户端真实IP至后端web服务器，便于后端服务器做日志分析。</span><br><span class="line">timeout connect 120s #HAproxy与后端服务器建立TCP三次握手的超时时间，由于是内网，可以适当减小至（3-5秒）。</span><br><span class="line">timeout server 600s  #HAproxy与后端服务器建立TCP三次握手之后，等待后端服务器响应的时长，在一些涉及到写数据库等操作的业务，可能需要很长时间，</span><br><span class="line">所依该值适当调大，否者会出现大量 502 的报错。</span><br><span class="line">timeout client 600s #客户端的最长非活动时间。超过该时间，HAproxy会自动与客户端断开连接。</span><br><span class="line">timeout http-keep-alive 120s #session 会话保持超时时间，范围内会转发到相同的后端服务器。</span><br><span class="line">timeout check   5s   #对后端服务器的检测超时时间。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 通过 listen 配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">listen Apache-PHP1</span><br><span class="line">   bind 192.168.38.57:80    #配置监听的地址与端口，供客户端访问。</span><br><span class="line">   mode http                #配置以http的方式转发给后端服务器。</span><br><span class="line">   option forwardfor        #开启客户端的真实IP透传。</span><br><span class="line">   server web1   192.168.38.26:80   check inter 3000 fall 3 rise 5</span><br><span class="line">   server web2   192.168.38.36:80   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过 frontend + backend 的方式配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">frontend 的配置：</span><br><span class="line">    frontend Apache-PHP1</span><br><span class="line">        bind :80</span><br><span class="line">        bind 192.168.38.57:10080,:8801-8810,:8080</span><br><span class="line">        mode tcp     #指定负载协议类型。</span><br><span class="line">        use_backend Apache-group1 #调用的后端服务器组名称。</span><br><span class="line">backend 的配置：</span><br><span class="line">    backend Apache-group1   #该处定义的name需要被frontenf中的use_backend调用。</span><br><span class="line">        mode tcp</span><br><span class="line">        option forwardfor   #开启客户端的真实IP透传。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80    check inter 3000 fall 3 rise 5</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80    check inter 3000 fall 3 rise 5</span><br><span class="line">关于backend中的后端服务器检查存活性的选项：</span><br><span class="line">    check       #对指定real进行健康状态检查，默认不开启</span><br><span class="line">    addr IP     #可指定的健康状态监测IP</span><br><span class="line">    port num    #指定的健康状态监测端口</span><br><span class="line">    inter num   #健康状态检查间隔时间，默认2000 ms</span><br><span class="line">    fall num    #后端服务器失效检查次数，默认为3</span><br><span class="line">    rise num    #后端服务器从下线恢复检查次数，默认为2</span><br><span class="line">    weight      #默认为1，最大值为256，0表示不参与负载均衡</span><br><span class="line">    backup      #将后端服务器标记为备份状态</span><br><span class="line">    disabled    #将后端服务器标记为不可用状态</span><br><span class="line">    redirect prefix http://www.magedu.net/   #将请求临时重定向至其它URL，只适用于http模式</span><br><span class="line">    maxconn &lt;maxconn&gt;：当前后端server的最大并发连接数</span><br><span class="line">    backlog &lt;backlog&gt;：当server的连接数达到上限后的后援队列长度</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/11/05/HAproxy的高级配置/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          HAproxy的高级配置
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/11/05/HAproxy的编译安装/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">HAproxy的编译安装</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="HAproxy的配置" data-title="HAproxy的配置" data-url="http://gmfdevops.com.com/2019/11/05/HAproxy的配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="HAproxy的配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

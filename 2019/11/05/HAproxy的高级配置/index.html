@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>HAproxy的高级配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) 基于Cookie的会话保持：1234567891011121314151617181920在frontend-backend中实现：    frontend Apache-PHP        bind :80        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。        use_backend Apache">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HAproxy的高级配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/05/HAproxy的高级配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) 基于Cookie的会话保持：1234567891011121314151617181920在frontend-backend中实现：    frontend Apache-PHP        bind :80        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。        use_backend Apache">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-05T12:08:51.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HAproxy的高级配置">
+<meta name="twitter:description" content="1) 基于Cookie的会话保持：1234567891011121314151617181920在frontend-backend中实现：    frontend Apache-PHP        bind :80        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。        use_backend Apache">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-HAproxy的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的高级配置/" class="article-date">
+  	<time datetime="2019-11-05T12:04:37.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      HAproxy的高级配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的高级配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的高级配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 基于Cookie的会话保持：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">在frontend-backend中实现：</span><br><span class="line">    frontend Apache-PHP</span><br><span class="line">        bind :80</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        use_backend Apache-group1</span><br><span class="line"></span><br><span class="line">    backend Apache-group1</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        option forwardfor</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache    #定义Cookie的键名。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80   check inter 3000 fall 3 rise 5 cookie web1  #为后端服务定义Cookie的值。</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80   check inter 3000 fall 3 rise 5 cookie web2</span><br><span class="line"></span><br><span class="line">在Listen模式下实现：</span><br><span class="line">    listen web_port</span><br><span class="line">        bind 192.168.38.57:80</span><br><span class="line">        mode http</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache</span><br><span class="line">        server web1 192.168.38.26:80 check cookie WEB1 </span><br><span class="line">        server web2 192.168.38.36:80 check cookie WEB2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 关于HAproxy状态页的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen status_Page</span><br><span class="line">    mode http                    #必须制定为http，必须项</span><br><span class="line">    stats enable                 #开启状态页，必须项</span><br><span class="line">    stats uri /haproxy           #指定状态页的URI，必须项</span><br><span class="line">    bind 192.168.38.57:9969      #绑定端口</span><br><span class="line">    stats auth admin:996941      #设置认证，非必须项</span><br><span class="line">    stats admin true             #启用stats page中的管理功能</span><br><span class="line">    stats refresh 2s             #设定自动刷新时间间隔</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 修改经过HAproxy的报文信息：</p>
+</blockquote>
+<p>在http模式下，基于实际需求修改客户端的请求报文与响应报文，通过reqadd和reqdel在请求报文添加删除字段，<br>通过rspadd与rspidel在响应报文中添加与删除字段。支持正则表达式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在响应报文中添加一个字段：</span><br><span class="line">    rspadd X-Via:\ HAPorxy  #注意转义空格。</span><br><span class="line">    rspdel server:\ .*      #删除响应报文中的后端Server的信息。</span><br><span class="line">一般不会修改请求报文：</span><br><span class="line">    reqadd &lt;string&gt;</span><br><span class="line">    reqdel &lt;search&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 关于HAproxy的日志配置：</p>
+</blockquote>
+<p>出于对HAproxy的性能考虑，一般不会在HAproxy上记录日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1. 开启Rsyslog：</span><br><span class="line">    vim  /etc/rsyslog.conf</span><br><span class="line">    $ModLoad imudp</span><br><span class="line">    $UDPServerRun 514</span><br><span class="line">    local3.*        /var/log/haproxy.log</span><br><span class="line">    systemctl restart rsyslog</span><br><span class="line">2.在global配置项定义：</span><br><span class="line">    log 127.0.0.1 local&#123;1-7&#125; info #基于syslog记录日志到指定设备，级别有(err、warning、info、debug)</span><br><span class="line">    log 127.0.0.1 local3 info</span><br><span class="line">3.在自己的群组中引用global定义的日志：</span><br><span class="line">    log global</span><br><span class="line">4.默认的日志格式非常简陋，可以自定义日志格式：</span><br><span class="line">    capture cookie &lt;name&gt; len &lt;length&gt; #捕获请求和响应报文中的 cookie并记录日志</span><br><span class="line">    capture request header &lt;name&gt; len &lt;length&gt; #捕获请求报文中指定的首部内容和长度并记录日志</span><br><span class="line">    capture response header &lt;name&gt; len &lt;length&gt; #捕获响应报文中指定的内容和长度首部并记录日志</span><br><span class="line">    示例：</span><br><span class="line">    capture request header Host len 256</span><br><span class="line">    capture request header User-Agent len 512</span><br><span class="line">    capture request header Referer len 15</span><br><span class="line">    引用自定义的日志格式时：</span><br><span class="line">        log global</span><br><span class="line">        option httplog  </span><br><span class="line">        capture request header User-Agent len 512</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>5) 开启HAproxy的压缩功能：</p>
+</blockquote>
+<p>对响应给客户端的报文进行压缩，以节省网络带宽，但是会占用部分CPU性能。<br>出于对HAproxy的性能考虑，一般不会在HAproxy上启用压缩功能，会在后端的Nginx或者Apache上开启。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">compression algo   #启用http协议中的压缩机制，常用算法有gzip deflate</span><br><span class="line">   identity #调试使用的压缩方式</span><br><span class="line">   gzip #常用的压缩方式，与各浏览器兼容较好</span><br><span class="line">   deflate #有些浏览器不支持</span><br><span class="line">   raw-deflate #新出的压缩方式</span><br><span class="line">compression type #要压缩的文件类型</span><br><span class="line">在自己需要开启压缩的群组中添加以下两行：</span><br><span class="line">    compression algo gzip deflate</span><br><span class="line">    compression type compression type text/plain text/html text/css text/xml</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>6) 对后端服务器的三种检测方式：</p>
+</blockquote>
+<p>1.基于四层的传输端口做状态监测。</p>
+<p>2.基于指定URI做状态监测。</p>
+<p>3.基于指定URI的request请求头部内容做状态监测。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.默认是基于四层的方式对后端服务器进行存活性检查，但是该方式，在服务进程僵死，但是服务端口存在时，检测不出来后端服务器的存活情况。</span><br><span class="line">2.下面配置基于URI的状态检测。</span><br><span class="line">在listen字段配置：</span><br><span class="line">    option httpchk GET /monitor/index.html HTTP/1.0  #后端服务器的页面的根，是相对于代码的存放根路径。</span><br><span class="line">    该检测方式有一个弊端，就是完全将测试页面访问下来，在后端服务器数量庞大时，浪费HAproxy的带宽。</span><br><span class="line">3.基于指定URI的request请求头部内容做状态监测。</span><br><span class="line">    option httpchk HEAD /monitor/index.html HTTP/1.0\r\nHost:\ 192.168.38.57</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>7) 定义HAproxy的报错页面：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">在default的字段配置：</span><br><span class="line">    no option http-use-htx</span><br><span class="line">    errorfile 502 /apps/haproxy/html/502.html  #该状态码时针对HAProxy所产生的基于回应，报错页面在HAproxy中定义。</span><br><span class="line"></span><br><span class="line">在HAproxy中实现重定向功能：</span><br><span class="line">no option http-use-htx</span><br><span class="line">errorloc 503 http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>8) 基于四层的负载：</p>
+</blockquote>
+<p>适用于：Memcache Redis MySQL RabbitMQ<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen mysql</span><br><span class="line">   bind 192.168.38.57:3306</span><br><span class="line">   mode tcp</span><br><span class="line">   balance leastconn</span><br><span class="line">   server mysql 192.168.38.36:3306 check</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>9) IP地址透传：</p>
+</blockquote>
+<p>web服务器中需要记录客户端的真实IP地址，用于做访问统计、安全防护、行为分析、区域排行等场景。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1.四层透传：</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">2.七层透传：</span><br><span class="line">    在HAproxy的defaults字段：</span><br><span class="line">        option forwardfor</span><br><span class="line">    然后在后端服务器的配置文件中的日志格式引用透传过来的日志：</span><br><span class="line">3.后端服务器在配置文件中的日志格式配置：</span><br><span class="line">    #apache 配置：</span><br><span class="line">    LogFormat &quot;%&#123;X-Forwarded-For&#125;i %a %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;UserAgent&#125;i\&quot;&quot; combined</span><br><span class="line">    #tomcat 配置：</span><br><span class="line">    pattern=&apos;%&#123;X-Forwarded-For&#125;i %l %T %t &amp;quot;%r&amp;quot; %s %b &amp;quot;%&#123;UserAgent&#125;i&amp;quot;&apos;/&gt;</span><br><span class="line">    #nginx 日志格式：</span><br><span class="line">    log_format main &apos;&quot;$proxy_protocol_addr&quot; - $remote_user [$time_local] &quot;$request&quot;&apos;</span><br><span class="line">                        &apos;$status $body_bytes_sent &quot;$http_referer&quot;&apos;</span><br><span class="line">                        &apos;&quot;$http_user_agent&quot;&apos;;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>10) 通过 socat 动态修改某些算法的权重（多用于后端服务器动态上下线）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install socat</span><br><span class="line">echo &quot;show info&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">echo &quot;get weight web_host/web1&quot; | socat stdio /var/lib/haproxy/haproxy.sock </span><br><span class="line">echo &quot;set weight web_host/web1 2&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">在多进程的情况下，注意更改不同进程的信息。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/11/05/HAproxy的配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">HAproxy的配置</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="HAproxy的高级配置" data-title="HAproxy的高级配置" data-url="http://gmfdevops.com.com/2019/11/05/HAproxy的高级配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="HAproxy的高级配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
