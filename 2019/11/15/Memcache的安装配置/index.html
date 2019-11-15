@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Memcache的安装配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重新加入到集群的时候可以自动从有数据的memcache当中自动">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Memcache的安装配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/15/Memcache的安装配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重新加入到集群的时候可以自动从有数据的memcache当中自动">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-15T13:02:43.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Memcache的安装配置">
+<meta name="twitter:description" content="memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重新加入到集群的时候可以自动从有数据的memcache当中自动">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-Memcache的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/15/Memcache的安装配置/" class="article-date">
+  	<time datetime="2019-11-15T12:09:24.000Z" itemprop="datePublished">2019-11-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Memcache的安装配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/15/Memcache的安装配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Memcache的安装配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方<br>式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使<br>有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重<br>新加入到集群的时候可以自动从有数据的memcache当中自动获取数据并提供服务。Memcache支持最大的内存存储对象为1M，Memcache借助了操作系统的libevent工具做高效的读写，memcache最适合保存用户的session实现session共享。</em></strong></p>
+<blockquote>
+<p>1) 安装 memcached:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y memcached</span><br><span class="line"></span><br><span class="line">vim /etc/sysconfig/memcached</span><br><span class="line">    PORT=&quot;11211&quot; #监听端口</span><br><span class="line">    USER=&quot;memcached&quot; #启动用户</span><br><span class="line">    MAXCONN=&quot;1024&quot; #最大连接数</span><br><span class="line">    CACHESIZE=&quot;1024&quot; #最大使用内存</span><br><span class="line">    OPTIONS=&quot;&quot; #其他选项</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 编译安装：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget http://memcached.org/files/memcached-1.5.20.tar.gz</span><br><span class="line">tar -xvf memcached-1.5.20.tar.gz </span><br><span class="line">./configure --prefix=/apps/memcached</span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/memcached</span><br><span class="line">/apps/memcached/bin/memcached -u memcached -p 11211 -m 2048 -c 65536 &amp;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 通过repcached实现memcached集群部署架构:</p>
+</blockquote>
+<p>从这方案的技术实现来看，其实它是一个单 master单 slave的方案，但它的 master/slave都是可读写的，而且可<br>以相互同步，所以从功能上看，也可以认为它是双机 master-master方案。直接通过负载均衡连接之memcached，任<br>然有两台memcached做高可用，memcached会自动同步数据保持数据一致性，即使一台memcached故障也不影响业务<br>正常运行，故障的memcached修复上线后再自动从另外一台同步数据即可保持数据一致性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget https://sourceforge.net/projects/repcached/files/repcached/2.2.1-1.2.8/memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">tar -xvf memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">cd  memcached-1.2.8-repcached-2.2.1</span><br><span class="line">./configure --prefix=/apps/repcached --enable-replication</span><br><span class="line">在Centos7上make会报错，修改代码：</span><br><span class="line">vim memcached.c</span><br><span class="line">    56 #ifndef IOV_MAX</span><br><span class="line">    57 #if defined(__FreeBSD__) || defined(__APPLE__)</span><br><span class="line">    58 # define IOV_MAX 1024</span><br><span class="line">    59 #endif</span><br><span class="line">    60 #endif</span><br><span class="line">将以上内容删除，修改为如下代码：</span><br><span class="line">     #ifndef IOV_MAX</span><br><span class="line">     # define IOV_MAX 1024</span><br><span class="line">     #endif</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/repcached</span><br><span class="line"></span><br><span class="line">测试能否运行：</span><br><span class="line">/apps/repcached/bin/memcached  -h</span><br><span class="line"></span><br><span class="line">启动该集群：</span><br><span class="line">    67:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.57 -X 6666 (-x 对端的ip)</span><br><span class="line">    57:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.67 -X 6666</span><br><span class="line"></span><br><span class="line">连接与测试：</span><br><span class="line">[root@localhost ~]#telnet 192.168.38.57 11211</span><br><span class="line">Trying 192.168.38.57...</span><br><span class="line">Connected to 192.168.38.57.</span><br><span class="line">Escape character is &apos;^]&apos;.</span><br><span class="line">set sss 0 0 4</span><br><span class="line">dddd</span><br><span class="line">STORED  #符合长度后自动保存</span><br><span class="line">get sss</span><br><span class="line">VALUE sss 0 4</span><br><span class="line">dddd</span><br><span class="line">END</span><br><span class="line">quit</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/11/13/Redis集群维护/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Redis集群维护</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="Memcache的安装配置" data-title="Memcache的安装配置" data-url="http://gmfdevops.com.com/2019/11/15/Memcache的安装配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Memcache的安装配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

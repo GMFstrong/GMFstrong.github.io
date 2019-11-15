@@ -202,6 +202,359 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-记一次拿服务器失败的测试" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/11/记一次拿服务器失败的测试/" class="article-date">
+  	<time datetime="2018-12-10T23:24:17.000Z" itemprop="datePublished">2018-12-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/11/记一次拿服务器失败的测试/">
+        记一次拿服务器失败的测试
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <pre><code>随着天气逐渐变凉，实在不想再去图书馆充实自己的精神领域！！！但又不想荒废这大好时光，于是乎就搞搞中国宝岛的小站吧！！！
+</code></pre><p>首先打开网站主页。<br><img src="/2018/12/11/记一次拿服务器失败的测试/zy.png"><br>    如图就是一个一般的门户网站，炸一看除了产品介绍，和新闻这两项可能存在SQL注入，基本上没有什么可测得。<br>    于是乎打开Nmap，这款号称扫描之王的神器，扫了一波，扫描同时再手动测试一波看看有没有SQl注入漏洞，Nmap得到如下结果：<br><img src="/2018/12/11/记一次拿服务器失败的测试/dk.png"><br>    发现扫描结果中，只开启80和81端口。80端口就不用说了，好奇81端口是啥？于是乎打开Google，发现有点二小惊喜！哈！哈！哈！<br>    如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/phpmyadmin.png"><br>    惊不惊喜，意不意外！<br>    打开御剑开始扫描，看看能不能扫出后台，或者前辈留下的shell，亦或者开发人员遗留下来的测试文件等！基础字典没发现后台，也没发现shell。但是一个“aa.php”成功的吸引了我。没想到又是一个小惊喜！<br><img src="/2018/12/11/记一次拿服务器失败的测试/aa.png"><br>    正在为如何爆破PHPMyadmin纠结时，又发现更惊喜的了！！！主页竟然存在一个SQL注入漏洞。哈！哈！哈！<br>    于是乎就又拿出了，另一款神器SQLmap,忽然发现竟是root用户！！！今天还真是惊喜连连啊！！！毕竟MYsql的root用户在Linux中是很少见的。心想今天难道要拿到Linux的服务器了？通过SQL注入漏洞拿到MYSQL的root用户的密码，很自然的通过phpMyadmin进入数据库。<br>    如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/sql.png"><br>    经过一阵Google操作发现还是可以通过phpmyadmin拿到shell的，但是这种操作都是别的：<br><img src="/2018/12/11/记一次拿服务器失败的测试/cs.png"><br>    将“general log”改为“ON”，这一步很顺利，毫无疑问！但是在更改“general log file”时。开始衰了！！！本想通过“aa.php”获得的信息更改，可是，可是…<br><img src="/2018/12/11/记一次拿服务器失败的测试/xk.png"><br>竟然不让更改！于是乎进行另一种利用phpMyadmin拿shell的方法。结果如图：<br><img src="/2018/12/11/记一次拿服务器失败的测试/hq.png"><br>经过Google发现原来是管理员更改了配置，可以执行“show variables like ‘%secure%’”查看“secure-file_priv”的当前值。<br><img src="/2018/12/11/记一次拿服务器失败的测试/sec.png"><br>导出的数据必须是这个值得路径才可以。默认有可能是Null代表禁止导出若需要可以在my.ini中更改！更改后需要重启数据库！<br><img src="/2018/12/11/记一次拿服务器失败的测试/1.png"><br>但是不能访问啊！好气，看来运气前期用完了啊！！！<br><img src="/2018/12/11/记一次拿服务器失败的测试/2.png"><br>但是，还是学到了好多…</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/11/记一次拿服务器失败的测试/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="记一次拿服务器失败的测试">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-火狐浏览器优化" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/07/火狐浏览器优化/" class="article-date">
+  	<time datetime="2018-12-06T23:40:01.000Z" itemprop="datePublished">2018-12-07</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/07/火狐浏览器优化/">
+        火狐优化
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>无意间看到一篇博客，是关于渗透测试过程中，火狐浏览器常见插件配置的，所以在闲来无事之际，亲身实践了一波，并记录以下过程，方便以后配置安装。</p>
+<p>在渗透测试过程中，有以下插件比较常用：<br>（1）Wappalyzer<br>（2）Foxyproxy<br>（3）Cookies Manager+<br>（4）HackBar<br>（5）HtppRequester<br>（6）RESTClient<br>（7）User—Agent Swittcher<br>（8）Tampermonkey<br>（9）Tamper Data<br>（10）Tamper Icon Redux</p>
+<p>这些插件的用途如下：</p>
+<p>HackBar:一个非常简单的插件，可以帮助我们尝试不同的输入值，而无需更改或重写完整的URL。在手工检查跨站点脚本编写和注入时，我们将经常使用这种方法。它可以使用F9键激活。<br>cookie Manager+:这个附加组件允许我们查看和修改浏览器从应用程序接收到的cookie的值。<br>User-Agent Switcher:此插件允许我们修改用户代理字符串(浏览器标识符)，该字符串在发送到服务器的所有请求中。应用程序有时使用这个字符串显示或隐藏某些元素，这取决于所使用的浏览器和操作系统。<br>Tamper Data:这个附加组件能够捕获浏览器发送给服务器的任何请求，让我们有机会在应用程序的表单中引入数据并到达服务器之前修改数据。<br>Tamper Data Icon Redux只添加一个图标。<br>FoxyProxy Standard:一个非常有用的插件，允许我们使用用户提供的预设，在一次点击中改变浏览器的代理设置。Wappalyzer:这是一个用来识别网站中使用的平台和开发工具的工具。这对于提取web服务器及其使用的软件非常有用。<br>HttpRequester:使用这个插件，可以处理HTTP请求，包括get、post和put方法，并观察来自服务器的原始响应。<br>RESTClient:这基本上是一个像HTTP请求者一样的请求生成器，但主要关注REST web服务。它包括添加标题、不同的身份验证模式以及get、post、put和delete方法的选项。<br>Tampermonkey:这个插件允许我们在浏览器中安装用户脚本，并在加载之前或之后对web页面内容进行动态更改。从渗透测试的角度来看，这有助于绕过客户端控件和其他客户端代码操作。</p>
+<p>附上图片一张：<br><img src="/2018/12/07/火狐浏览器优化/1.png"></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/07/火狐浏览器优化/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="火狐优化">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-python扫描脚本" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/11/python扫描脚本/" class="article-date">
+  	<time datetime="2018-09-11T08:51:51.000Z" itemprop="datePublished">2018-09-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/11/python扫描脚本/">
+        python扫描脚本
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>端口扫描：</code><br>最近学习python闲来无事，决定写一个Python扫描器实践一下最近的学习成果：<br>最初因为不会控制线程个数，在代码上查错了好久：<br><img src="/2018/09/11/python扫描脚本/3.png"><br>最后估计是生成线程太多，导致系统崩溃。（毕竟，底层不太了解暂时这么认为。）<br><img src="/2018/09/11/python扫描脚本/4.png"><br><img src="/2018/09/11/python扫描脚本/5.png"><br>后来改变扫描的端口数量，程序不再报错：<br><img src="/2018/09/11/python扫描脚本/6.png"><br><img src="/2018/09/11/python扫描脚本/7.png"><br>最初过于单纯，不了解多线程的可怕之处，导致自己不小心踩了坑。可是经过半天搜索学习，解决了自己这半天的单纯。<br>这次引入线程池，控制线程数量，从而解决了问题：<br>附上代码：<br><img src="/2018/09/11/python扫描脚本/1.png"><br>运行结果如下：<br><img src="/2018/09/11/python扫描脚本/2.png"></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/python/">python</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/09/11/python扫描脚本/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="python扫描脚本">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Linex的简单安全配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/07/Linex的简单安全配置/" class="article-date">
+  	<time datetime="2018-09-07T11:27:25.000Z" itemprop="datePublished">2018-09-07</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/07/Linex的简单安全配置/">
+        Linex的简单安全配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于阻止地址伪装：</code>（基于iptable）<br>IP地址伪装常用于攻击者向服务器发送恶意数据包，它利用虚假地址发送构造数据包，从而发动DDos攻击。<br>首先，如果希望阻止IP伪装我们就要从以往尝试的虚假连接中得到一个IP地址或域名的列表，然后通过IPtable规则集限制除必须入站流量包以外的数据包。<br>步骤如下：<br>（1）设定允许数据包进入loopback接口的规则，从而满足本系统各个服务之间的正常通信。<br>iptables -A INPUT -i lo -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/1.png"><br>（2）为本地系统发起的连接创建规则，该规则将允许所有外出流量包通过，包括远程服务器的响应，如web站点的访问：<br>iptables -A INPUT -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT<br><img src="/2018/09/07/Linex的简单安全配置/2.png"><br>（3）创建一个新链，用来存放阻止IP伪装的规则。<br>iptables -N blocked_ip<br>（4）将生成的新链插入到INPUT链中；<br>iptables -I INPUT 2 -j blocked_ip<br><img src="/2018/09/07/Linex的简单安全配置/3.png"><br><img src="/2018/09/07/Linex的简单安全配置/4.png"><br>（5）将需要阻止的虚假IP地址规则插入到blocked_ip中,通过该规则可以阻塞该地址的连接。<br>iptables -A blocked_ip -s 192.168.1.2 -j DROP<br><img src="/2018/09/07/Linex的简单安全配置/5.png"><br>其次，通过/etc/host.conf文件阻止IP欺骗。打开该文件在文件中添加一下几行内容：<br>order hosts,bind<br>multi on<br>nospoof on<br>这里 “nospoof on”选项表示开启IP地址的比较操作，本地主机通过主机名查找对应的ip地址，并将查到的IP地址与数据包中的源IP比较，如果不一致，这说明<br>该IP为伪造ip，系统会发出虚假IP地址警告！</p>
+<blockquote>
+<p>关于history的一些简单优化：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HISTSIZE：命令历史记录的条数</span><br><span class="line">HISTFILE：指定历史文件，默认为~/.bash_history</span><br><span class="line">HISTFILESIZE：命令历史文件记录历史的条数</span><br><span class="line">HISTTIMEFORMAT=“%F %T “ 显示时间</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p></p>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/09/07/Linex的简单安全配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Linex的简单安全配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-代码执行" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/07/14/代码执行/" class="article-date">
+  	<time datetime="2018-07-14T15:55:34.000Z" itemprop="datePublished">2018-07-14</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/14/代码执行/">
+        代码执行
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>关于代码执行漏洞</code>：<br>定义:<br>由于应用程序本身过滤不严，用户可以通过请求把代码注入到应用中执行。直白一点，就是类似于SQL注入，可以把SQL语句注入到SQL服务中执行，<br>在PHP代码中执行漏洞则是可以把代码注入到应用中最终Webserver去执行。<br>这样的漏洞如果没有过滤，相当于一个web后门，相当严重。<br>成因；<br>该漏洞主要是由于eval(),assert(),preg_replace(),call_user_func(),call_user_func_array(),array_map()等函数过滤不严导致的。另外，PHP<br>的动态函数（$a($b)）也是目前出现比较多的。<br><code>挖掘经验</code>：<br>eval(),assert()函数导致的代码执行漏洞大多数是因为载入模块或者缓存亦或者是对变量过滤不严导致的。例如：直接把外部可控的参数直接拼接到<br>模板里面，然后调用这两个函授去当成PHP代码执行。<br>preg_replace()函数的代码执行漏洞需要满足’/e‘参数存在，因为这个函数是处理字符串的，所以漏洞出现最多的是在对字符串处理上。比如在对URL<br>HTML标签以及文章内容过滤功能。<br>call_user_func()和call_user_func_array()函数的功能是调用函数，多用在框架里面动态调用函数，故而比较小的程序出现这种代码执行漏洞的机会<br>比较少。<br>array_map()函数的作用是调用函数并且除第一个参数外其他参数为数组，通常会写死第一个参数（调用的函数），类似的这类函数还有很多。除此引发<br>的代码执行漏洞，还有一种常见的动态函数的代码执行漏洞，例如：<br>$_GET($_POST[“XX”])基于这种写法变形出来的各种异形，经常被当做后门来使用。<br>PHP代码执行有多种利用方式，但目前最多的还是函数使用不当导致的，比如：eval(),assert(),preg_replace(),call_user_func(),call_user_func_array()<br>array_map()等。<br><code>eval()和assert()</code>:<br>这两个函数本来就是用来动态执行PHP代码的，所以他们的参数直接就是PHP代码。<br><code>preg_replace()</code>：<br>preg_replace($pattern,$replacement,$subject)<br>该函数的作用是对字符串进行正则处理，但是在它的第一个参数$pattern存在e修饰时，$replacement的值会被当成PHP代码来执行。<br>例如：<br>&lt;?php<br>preg_replace(“/[(.*)]/e”,’\1’,$_GET[‘str’]);<br>?&gt;<br><code>调用函数过滤不严</code>：<br>call_user_func()和call_user_func_array()的十个函数有调用其它函数的功能，其中一个参数作为要调用的函数名，如果传入的函数名可控，那就可以调用<br>意外的函数来执行我们想知道的代码，也就存在代码执行漏洞了。<br>例如：<br>&lt;?php<br>$b  = “phpinfo()”;<br>call_user_func($_GET[‘a’],$b);<br>?&gt;<br>当我们传入X.php?a=assert时候，则调用assert函数，并且将phpinfo()作为参数传入。<br><code>动态函数执行</code>：<br>由于PHP特性的原因，PHP函数可以由字符串直接拼接，这导致了PHP在安全控制上增大了难度，比如增加了漏洞数量并且增加了后门的查找难度。他们的初衷<br>和call_user_func()的初衷是一样的，都是为了更方便的调用函数，但是一旦过滤不严就会导致代码执行漏洞。<br>PHP动态函数写法为“变量（参数）”的形式。例如：<br>&lt;?php<br>$_GET[‘a’]（$_GET[‘b’]）;<br>?&gt;<br>即‘a’接收的为函数，‘b’接收的为参数。故而在‘a’参数为assert时，‘b’参数为phpinfo()时，为assert(phpinfo())。<br>在挖掘这种形式的漏洞时，需要寻找可控的动态函数名。<br><code>漏洞防范</code>：<br>采用白名单过滤的方式，在满足业务的前提下，这是非常实用的方式，这里的白名单不是完全固定参数，而是结合正则表达式来进行白名单限制，例如如果我<br>们事先知道参数位数字型的就可瞒住业务要求，那么在正则里面只需要用/d+来限制即可！！！这样相对更加安全。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/07/14/代码执行/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="代码执行">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-文件读取（下载，上传）" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -547,162 +900,9 @@
 
 
   
-    <article id="post-SQL注入" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/03/07/SQL注入/" class="article-date">
-  	<time datetime="2018-03-07T06:11:39.000Z" itemprop="datePublished">2018-03-07</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/07/SQL注入/">
-        SQL注入
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><code>SQL注入原理：</code>由于开发者编辑操作数据库的代码时，直接将外部可控的参数拼接到SQL语句中，没有经过过滤直接放入数据库引擎中执行。<br>由于SQL注入直接面向数据库进行攻击的，所以其危害最大。<br><code>SQL注入的攻击方式：</code><br>（1）权限较大的情况下，通过SQL注入直接写入webSell，或者直接执行系统命令。<br>（2）权限较小的情况下，可以通过SQL注入获取管理员密码等信息，或者修改数据库内容进行一些钓鱼或者其它间接利用。<br>由于SQL注入是利用最多的漏洞，因此界内对其研究也最深，其分类有：<br>（1）普通注入（2）盲注（3）报错注入（4）宽字节注入（5）二次注入<br>     而在自动化利用工具中，sqlmap几乎能测试以上任意一种注入漏洞。<br><code>SQL注入漏洞经常出现的地方</code>：<br>（1）登录页面<br>（2）HTTP头<br>（3）订单处理的地方<br>因为以上几个地方业务逻辑相对比较复杂，页面登录的注入一般发生在HTTP头里面的Client-ip和X-forword-for中，一般用来记录IP地址。<br>而在订单系统里面，由于订单涉及购物车等多个交互，经常会发生二次注入。<br><code>关于普通注入</code>：<br>普通注入是最容易利用的SQL注入漏洞，比如直接通过union查询就可以查询数据库，普通注入有int型和string型，其中<br>string型需要用单引号或者双引号闭合。<br><code>关于编码注入</code>：<br>程序在进行操作之前经常进行一些编码操作，而这些编码处理的函数也是存在问题的，若输入编码函数不兼容的特殊字符，<br>可导致输出的字符变为有害数据。在SQL注入里面，常见的编码注入有Mysql宽字节注入，以及urldecode/rawurldecode函数导致的。<br><code>宽字节注入的形成条件</code>：<br>使用PHP连接Mysql时，当设置‘set character_set_client=gbk’会导致一个编码转换的注入问题，及宽字节注入。<br>只要注入参数中代入‘%df%27’即可把程序中过滤的‘\’，（%5c）合并掉。‘%df%5c’&lt;===&gt;‘緷’，故而完成闭合。<br><code>其原因就是</code>:<br>当set character_set_client=’gbk’时，就是告诉Mysql服务器，客户端来源数据的编码为GBK，然后Mysql服务器对查询语句进行GBK编码，导<br>致‘\’被‘%df’合并掉。<br>通常在开发过程中，不直接设置set character_set_client=gbk,而是设置SET NAMES ‘gbk’,其实后者不过比前者多干了两件事，后者等同于：<br>SET<br>character_set_connection=’gbk’,<br>character_set_results=’gbk’,<br>character_set_client=’gbk’<br>这样同样存在漏洞，另外使用mysql_set_charset的方式同样存在漏洞，因为它也是调用了 SET NAMES。不过mysql_set_charsset调用SET NAMES<br>之后记录当前的编码方式，留个后面mysql_real_escape_string处理字符串的时候使用。<br><code>如何解决宽字节注入</code>：<br>（1）在执行查询前，先执行SET NAMES ‘gbk’;character_set_client=’binary’。<br>（2）使用mysql_set_charset(‘gbk’)设置编码，然后使用mysql_real_escape_string()函数过滤。<br>（3）使用PDO方式进行预处理。<br><code>关于二次URLdecode注入</code>：如果某处使用了 urldecode()或者rawurldecode()则会导致二次解码生成单引号引发注入。<br><code>原理</code>：当我们提交参数到webserver时，Webserver会自动解码一次，假设目标程序开启了GPC，我们提交了1.php?id=1%2527，因为提交的参数<br>里面没有单引号，第一次解码后的结果为：1%27。%25的编码为%，若程序里面使用了urldecode()或者rawurldecode()来解码id参数，故解码后的<br>参数为：id=1’从而引发了注入。<br><code>漏洞防范</code>：<br>（1）对于string型注入，通常开启GPC中的magic_quotes_gpc&lt;负责对GET，POST，COOKIE的 值进行过滤&gt;和magic_quotes_runtime&lt;负责对从数据<br>库或者文件中获取的数据进行过滤&gt;可以防止。因为这两个选项仅仅对’,”,\,NULL进行过滤，故不能防范int型注入。<br>（2）通过过滤函数和类进行过滤，在框架中可在程序入口运用类统一过滤，在SQL语句中可用PHP内置函数进行过滤。也有一些开源类可对union，<br>select等关键字进行过滤。<code>addslashes()</code>的过滤范围和GPC一样，若没有开启GPC，可用它来过滤，但是他的参数必须是string类型的。当传入的值<br>是一个数组时，可能存在绕过。<code>mysql[_real]_escape_string()</code>这两个函数都是对字符串进行过滤，两者的不同在于 mysql_real_escape_string()<br>接收的是一个连接句柄，并根据当前字符集进行转义。故推荐使用mysql_real_escape_string()。<code>intval()</code>在以上过滤方式中，对int型的注入效果<br>并不好，可以通过报错，或者盲注的方式绕过。可以通过intval()将其转换为int型。其原理相当于白名单方式，对应的还有floatval()等。<br>例如：<br>&lt;?php<br>    $id=intval(“1 union select “);<br>    echo $id;<br>?&gt;<br>输出结果：1。<br>（3）也可用PDO预处理防范注入。若PHP&lt;5.3.6还是存在宽字节注入漏洞的。原因在于使用了PHP本地模拟prepare，再把完整的SQL语句发送给Mysql服务<br>器，并且使用了SET NAMES GBK的语句，所以就有PHP和MYsql编码不一致导致注入问题。应该使用ATTR_EMULATE_PREPARES来禁用PHP本地模拟prepare。<br><code>导出目标主机某文件到已知目录下</code>：<br>（1）使用条件：<br> A、必须有权限读取并且文件必须完全可读<br>and(select count(<em>)from mysql.user)&gt;0/</em> 如果结果返回正常,说明具有读写权限。<br>and(select count(<em>)from mysql.user)&gt;0/</em> 返回错误，应该是管理员给数据库帐户降权<br>B、欲读取文件必须在服务器上<br>C、必须指定文件完整的路径<br>D、欲读取文件必须小于 max_allowed_packet<br><code>导入文件</code>：<br>SELECT…..INTOOUTFILE’file_name’<br>可以把被选择的行写入一个文件中。该文件被创建到服务器主机上，因此您必须拥有 FILE 权限，才能使用此语法。file_name 不能是一个已经存<br>在的文件。<br>第一种直接将 select 内容导入到文件中：<br>Selectversion()intooutfile“c:\phpnow\htdocs\test.php”此处将 version()替换成一句话，&lt;?php@eval($_post[“mima”])?&gt;也即<br>Select &lt;?php@eval($_post[“mima”])?&gt; intooutfile“c:\phpnow\htdocs\test.php”<br>直接连接一句话就可以了，其实在 select 内容中不仅仅是可以上传一句话的，也可以上传很多的内容。第二种修改文件结尾：<br>Selectversion()Intooutfile“c:\phpnow\htdocs\test.php”LINESTERMINATEDBY0x16进制文件<br>解释：通常是用‘\r\n’结尾，此处我们修改为自己想要的任何文件。同时可以用 FIELDS TERMINATED BY 16进制可以为一句话或者其他任何的代码，<br>可自行构造。<br>上述我们提到了load_file(),但是当前台无法导出数据的时候，我们可以利用下面的语句：<br>selectload_file(‘c:\wamp\bin\mysql\mysql5.6.17\my.ini’)intooutfile ‘c:\wamp\www\test.php’<br>可以利用该语句将服务器当中的内容导入到 web 服务器下的目录，这样就可以得到数据了。<br>上述 my.ini当中存在 password 项（不过默认被注释），当然会有很多的内容可以被导出来， 这个要平时积累。</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/websec/">Web安全</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/03/07/SQL注入/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="SQL注入">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-博客常用语法语法" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/01/01/博客常用语法语法/" class="article-date">
-  	<time datetime="2017-12-31T17:25:22.000Z" itemprop="datePublished">2018-01-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/01/博客常用语法语法/">
-        博客常用语法
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>经过一番波折终于把自己的博客搭建起来了，以后也算有了自己的一片小天地….<br>连接：ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a><br>创建项目：hexo new post “***”<br>部署到远程：hexo d -g<br>文字超链接：<a href="http://www.baidu.com" target="_blank" rel="noopener">百度</a><br>更改主题：git clone <a href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">https://github.com/iissnan/hexo-theme-next</a> themes/next<br>          hexo clean 清空之前的主题<br>          hexo g 生成静态文件<br>          hexo s 在本地运行<br>          hexo d 发布到github上<br>部分文字高亮：You a <code>Strong</code> boy!!!</p>
-<ul>
-<li>姓名：小飞飞</li>
-<li>性别：男</li>
-<li><p>爱好：8866</p>
-</li>
-<li><p>编程语言</p>
-<ul>
-<li>脚本语言<ul>
-<li>php</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<img src="/2018/01/01/博客常用语法语法/456.png" title="这是一个博客的图片说明">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/01/01/博客常用语法语法/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="博客常用语法">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span>
+      <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
     </nav>
   
 </div>

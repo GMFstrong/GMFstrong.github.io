@@ -202,6 +202,416 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-HAproxy的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的高级配置/" class="article-date">
+  	<time datetime="2019-11-05T12:04:37.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/05/HAproxy的高级配置/">
+        HAproxy的高级配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 基于Cookie的会话保持：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">在frontend-backend中实现：</span><br><span class="line">    frontend Apache-PHP</span><br><span class="line">        bind :80</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        use_backend Apache-group1</span><br><span class="line"></span><br><span class="line">    backend Apache-group1</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        option forwardfor</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache    #定义Cookie的键名。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80   check inter 3000 fall 3 rise 5 cookie web1  #为后端服务定义Cookie的值。</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80   check inter 3000 fall 3 rise 5 cookie web2</span><br><span class="line"></span><br><span class="line">在Listen模式下实现：</span><br><span class="line">    listen web_port</span><br><span class="line">        bind 192.168.38.57:80</span><br><span class="line">        mode http</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache</span><br><span class="line">        server web1 192.168.38.26:80 check cookie WEB1 </span><br><span class="line">        server web2 192.168.38.36:80 check cookie WEB2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 关于HAproxy状态页的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen status_Page</span><br><span class="line">    mode http                    #必须制定为http，必须项</span><br><span class="line">    stats enable                 #开启状态页，必须项</span><br><span class="line">    stats uri /haproxy           #指定状态页的URI，必须项</span><br><span class="line">    bind 192.168.38.57:9969      #绑定端口</span><br><span class="line">    stats auth admin:996941      #设置认证，非必须项</span><br><span class="line">    stats admin true             #启用stats page中的管理功能</span><br><span class="line">    stats refresh 2s             #设定自动刷新时间间隔</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 修改经过HAproxy的报文信息：</p>
+</blockquote>
+<p>在http模式下，基于实际需求修改客户端的请求报文与响应报文，通过reqadd和reqdel在请求报文添加删除字段，<br>通过rspadd与rspidel在响应报文中添加与删除字段。支持正则表达式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在响应报文中添加一个字段：</span><br><span class="line">    rspadd X-Via:\ HAPorxy  #注意转义空格。</span><br><span class="line">    rspdel server:\ .*      #删除响应报文中的后端Server的信息。</span><br><span class="line">一般不会修改请求报文：</span><br><span class="line">    reqadd &lt;string&gt;</span><br><span class="line">    reqdel &lt;search&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 关于HAproxy的日志配置：</p>
+</blockquote>
+<p>出于对HAproxy的性能考虑，一般不会在HAproxy上记录日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1. 开启Rsyslog：</span><br><span class="line">    vim  /etc/rsyslog.conf</span><br><span class="line">    $ModLoad imudp</span><br><span class="line">    $UDPServerRun 514</span><br><span class="line">    local3.*        /var/log/haproxy.log</span><br><span class="line">    systemctl restart rsyslog</span><br><span class="line">2.在global配置项定义：</span><br><span class="line">    log 127.0.0.1 local&#123;1-7&#125; info #基于syslog记录日志到指定设备，级别有(err、warning、info、debug)</span><br><span class="line">    log 127.0.0.1 local3 info</span><br><span class="line">3.在自己的群组中引用global定义的日志：</span><br><span class="line">    log global</span><br><span class="line">4.默认的日志格式非常简陋，可以自定义日志格式：</span><br><span class="line">    capture cookie &lt;name&gt; len &lt;length&gt; #捕获请求和响应报文中的 cookie并记录日志</span><br><span class="line">    capture request header &lt;name&gt; len &lt;length&gt; #捕获请求报文中指定的首部内容和长度并记录日志</span><br><span class="line">    capture response header &lt;name&gt; len &lt;length&gt; #捕获响应报文中指定的内容和长度首部并记录日志</span><br><span class="line">    示例：</span><br><span class="line">    capture request header Host len 256</span><br><span class="line">    capture request header User-Agent len 512</span><br><span class="line">    capture request header Referer len 15</span><br><span class="line">    引用自定义的日志格式时：</span><br><span class="line">        log global</span><br><span class="line">        option httplog  </span><br><span class="line">        capture request header User-Agent len 512</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>5) 开启HAproxy的压缩功能：</p>
+</blockquote>
+<p>对响应给客户端的报文进行压缩，以节省网络带宽，但是会占用部分CPU性能。<br>出于对HAproxy的性能考虑，一般不会在HAproxy上启用压缩功能，会在后端的Nginx或者Apache上开启。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">compression algo   #启用http协议中的压缩机制，常用算法有gzip deflate</span><br><span class="line">   identity #调试使用的压缩方式</span><br><span class="line">   gzip #常用的压缩方式，与各浏览器兼容较好</span><br><span class="line">   deflate #有些浏览器不支持</span><br><span class="line">   raw-deflate #新出的压缩方式</span><br><span class="line">compression type #要压缩的文件类型</span><br><span class="line">在自己需要开启压缩的群组中添加以下两行：</span><br><span class="line">    compression algo gzip deflate</span><br><span class="line">    compression type compression type text/plain text/html text/css text/xml</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>6) 对后端服务器的三种检测方式：</p>
+</blockquote>
+<p>1.基于四层的传输端口做状态监测。</p>
+<p>2.基于指定URI做状态监测。</p>
+<p>3.基于指定URI的request请求头部内容做状态监测。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.默认是基于四层的方式对后端服务器进行存活性检查，但是该方式，在服务进程僵死，但是服务端口存在时，检测不出来后端服务器的存活情况。</span><br><span class="line">2.下面配置基于URI的状态检测。</span><br><span class="line">在listen字段配置：</span><br><span class="line">    option httpchk GET /monitor/index.html HTTP/1.0  #后端服务器的页面的根，是相对于代码的存放根路径。</span><br><span class="line">    该检测方式有一个弊端，就是完全将测试页面访问下来，在后端服务器数量庞大时，浪费HAproxy的带宽。</span><br><span class="line">3.基于指定URI的request请求头部内容做状态监测。</span><br><span class="line">    option httpchk HEAD /monitor/index.html HTTP/1.0\r\nHost:\ 192.168.38.57</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>7) 定义HAproxy的报错页面：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">在default的字段配置：</span><br><span class="line">    no option http-use-htx</span><br><span class="line">    errorfile 502 /apps/haproxy/html/502.html  #该状态码时针对HAProxy所产生的基于回应，报错页面在HAproxy中定义。</span><br><span class="line"></span><br><span class="line">在HAproxy中实现重定向功能：</span><br><span class="line">no option http-use-htx</span><br><span class="line">errorloc 503 http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>8) 基于四层的负载：</p>
+</blockquote>
+<p>适用于：Memcache Redis MySQL RabbitMQ<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen mysql</span><br><span class="line">   bind 192.168.38.57:3306</span><br><span class="line">   mode tcp</span><br><span class="line">   balance leastconn</span><br><span class="line">   server mysql 192.168.38.36:3306 check</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>9) IP地址透传：</p>
+</blockquote>
+<p>web服务器中需要记录客户端的真实IP地址，用于做访问统计、安全防护、行为分析、区域排行等场景。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1.四层透传：</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">2.七层透传：</span><br><span class="line">    在HAproxy的defaults字段：</span><br><span class="line">        option forwardfor</span><br><span class="line">    然后在后端服务器的配置文件中的日志格式引用透传过来的日志：</span><br><span class="line">3.后端服务器在配置文件中的日志格式配置：</span><br><span class="line">    #apache 配置：</span><br><span class="line">    LogFormat &quot;%&#123;X-Forwarded-For&#125;i %a %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;UserAgent&#125;i\&quot;&quot; combined</span><br><span class="line">    #tomcat 配置：</span><br><span class="line">    pattern=&apos;%&#123;X-Forwarded-For&#125;i %l %T %t &amp;quot;%r&amp;quot; %s %b &amp;quot;%&#123;UserAgent&#125;i&amp;quot;&apos;/&gt;</span><br><span class="line">    #nginx 日志格式：</span><br><span class="line">    log_format main &apos;&quot;$proxy_protocol_addr&quot; - $remote_user [$time_local] &quot;$request&quot;&apos;</span><br><span class="line">                        &apos;$status $body_bytes_sent &quot;$http_referer&quot;&apos;</span><br><span class="line">                        &apos;&quot;$http_user_agent&quot;&apos;;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>10) 通过 socat 动态修改某些算法的权重（多用于后端服务器动态上下线）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install socat</span><br><span class="line">echo &quot;show info&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">echo &quot;get weight web_host/web1&quot; | socat stdio /var/lib/haproxy/haproxy.sock </span><br><span class="line">echo &quot;set weight web_host/web1 2&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">在多进程的情况下，注意更改不同进程的信息。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的高级配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的高级配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-HAproxy的配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的配置/" class="article-date">
+  	<time datetime="2019-11-05T12:04:23.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/05/HAproxy的配置/">
+        HAproxy的配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">global全局配置段中定义以下选项：</span><br><span class="line">    global</span><br><span class="line">        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。</span><br><span class="line">        daemon  #以守护进程的方式运行。</span><br><span class="line">        stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">        uid 99 #指定运行HAproxy进程的用户和组。</span><br><span class="line">        gid 99</span><br><span class="line">        nbproc  4     #开启的haproxy进程数，与CPU保持一致。</span><br><span class="line">        cpu-map 1 0   #绑定haproxy 进程至指定CPU核心。</span><br><span class="line">        spread-checks #后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间，防止同时产生大量检测报文。</span><br><span class="line">        pidfile /var/lib/haproxy/haproxy.pid    #指定pid文件路径。</span><br><span class="line">        log 127.0.0.1 local3 info       #定义全局的syslog服务器；最多可以定义两个。</span><br><span class="line">        maxconn    1000000   #每个haproxy进程的最大并发连接数。</span><br><span class="line">        maxsslconn   1000000 #每个haproxy进程ssl最大连接数,用于haproxy配置了证书的场景下。</span><br><span class="line">        maxconnrate   #每个进程每秒创建的最大连接数量。</span><br><span class="line">proxies配置段又包含以下两个字段：</span><br><span class="line">    defaults [name] : 其中定义的内容在frontend、backend和lsiten中没有定义时，为他们的默认选项。及优先级低于frontend、backend和lsiten中的定义。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>1) proxies 中defaults的常见配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">option redispatch     #当server Id对应的服务器挂掉后，强制定向到其他健康的服务器。</span><br><span class="line">option abortonclose   #当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接，根据自己的业务场景，在自己业务处理时间较长时，需要关闭该选项，</span><br><span class="line">否则会出现大量 50X 错误。</span><br><span class="line">option http-keep-alive #开启与客户端的会话保持</span><br><span class="line">mode tcp/http #默认工作类型，一般为了保证HAproxy的性能，设置为TCP模式。http应用层的代理一般由后端Nginx完成。</span><br><span class="line">option forwardfor     #透传客户端真实IP至后端web服务器，便于后端服务器做日志分析。</span><br><span class="line">timeout connect 120s #HAproxy与后端服务器建立TCP三次握手的超时时间，由于是内网，可以适当减小至（3-5秒）。</span><br><span class="line">timeout server 600s  #HAproxy与后端服务器建立TCP三次握手之后，等待后端服务器响应的时长，在一些涉及到写数据库等操作的业务，可能需要很长时间，</span><br><span class="line">所依该值适当调大，否者会出现大量 502 的报错。</span><br><span class="line">timeout client 600s #客户端的最长非活动时间。超过该时间，HAproxy会自动与客户端断开连接。</span><br><span class="line">timeout http-keep-alive 120s #session 会话保持超时时间，范围内会转发到相同的后端服务器。</span><br><span class="line">timeout check   5s   #对后端服务器的检测超时时间。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 通过 listen 配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">listen Apache-PHP1</span><br><span class="line">   bind 192.168.38.57:80    #配置监听的地址与端口，供客户端访问。</span><br><span class="line">   mode http                #配置以http的方式转发给后端服务器。</span><br><span class="line">   option forwardfor        #开启客户端的真实IP透传。</span><br><span class="line">   server web1   192.168.38.26:80   check inter 3000 fall 3 rise 5</span><br><span class="line">   server web2   192.168.38.36:80   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过 frontend + backend 的方式配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">frontend 的配置：</span><br><span class="line">    frontend Apache-PHP1</span><br><span class="line">        bind :80</span><br><span class="line">        bind 192.168.38.57:10080,:8801-8810,:8080</span><br><span class="line">        mode tcp     #指定负载协议类型。</span><br><span class="line">        use_backend Apache-group1 #调用的后端服务器组名称。</span><br><span class="line">backend 的配置：</span><br><span class="line">    backend Apache-group1   #该处定义的name需要被frontenf中的use_backend调用。</span><br><span class="line">        mode tcp</span><br><span class="line">        option forwardfor   #开启客户端的真实IP透传。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80    check inter 3000 fall 3 rise 5</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80    check inter 3000 fall 3 rise 5</span><br><span class="line">关于backend中的后端服务器检查存活性的选项：</span><br><span class="line">    check       #对指定real进行健康状态检查，默认不开启</span><br><span class="line">    addr IP     #可指定的健康状态监测IP</span><br><span class="line">    port num    #指定的健康状态监测端口</span><br><span class="line">    inter num   #健康状态检查间隔时间，默认2000 ms</span><br><span class="line">    fall num    #后端服务器失效检查次数，默认为3</span><br><span class="line">    rise num    #后端服务器从下线恢复检查次数，默认为2</span><br><span class="line">    weight      #默认为1，最大值为256，0表示不参与负载均衡</span><br><span class="line">    backup      #将后端服务器标记为备份状态</span><br><span class="line">    disabled    #将后端服务器标记为不可用状态</span><br><span class="line">    redirect prefix http://www.magedu.net/   #将请求临时重定向至其它URL，只适用于http模式</span><br><span class="line">    maxconn &lt;maxconn&gt;：当前后端server的最大并发连接数</span><br><span class="line">    backlog &lt;backlog&gt;：当server的连接数达到上限后的后援队列长度</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-HAproxy的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的编译安装/" class="article-date">
+  	<time datetime="2019-11-05T12:04:01.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/05/HAproxy的编译安装/">
+        HAproxy的编译安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 准备Lua环境，默认版本的Lua不支持HAproxy2.0版本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libtermcap-devel ncurses-devel libevent-devel readline-devel gcc</span><br><span class="line">wget http://www.lua.org/ftp/lua-5.3.5.tar.gz</span><br><span class="line">tar -xvf lua-5.3.5.tar.gz </span><br><span class="line">cd lua-5.3.5</span><br><span class="line">make linux test</span><br><span class="line">cd src</span><br><span class="line">[root@localhost src]#./lua -v</span><br><span class="line">Lua 5.3.5  Copyright (C) 1994-2018 Lua.org, PUC-Rio</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 编译安装HAproxy：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">yum install -y gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel net-tools vim iotop bc zip unzip zlib-devel lrzsz tree screen lsof tcpdump wget ntpdate</span><br><span class="line">tar -xvf haproxy-2.0.8.tar.gz</span><br><span class="line">cd haproxy-2.0.8 </span><br><span class="line">make ARCH=x86_64 TARGET=linux-glibc USE_PCRE=1 USE_ZLIB=1 USE_SYSTEMD=1 USE_CPU_AFFINITY=1  USE_OPENSSL=1   USE_LUA=1 LUA_INC=/root/lua-5.3.5/src LUA_LIB=/root/lua-5.3.5/src PREFIX=/apps/haproxy</span><br><span class="line">#或者make install PREFIX=/apps/haproxy</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vim  /usr/lib/systemd/system/haproxy.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg -c -q</span><br><span class="line">ExecStart=/apps/haproxy/sbin/haproxy -Ws -f /apps/haproxy/haproxy.cfg -p /var/lib/haproxy/haproxy.pid</span><br><span class="line">ExecReload=/bin/kill -USR2 $MAINPID</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.targe</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vim /apps/haproxy/haproxy.cfg </span><br><span class="line">global</span><br><span class="line">maxconn 100000</span><br><span class="line">chroot /apps/haproxy</span><br><span class="line">stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">uid 99</span><br><span class="line">gid 99</span><br><span class="line">daemon</span><br><span class="line">#nbproc 4</span><br><span class="line">#cpu-map 1 0</span><br><span class="line">#cpu-map 2 1</span><br><span class="line">#cpu-map 3 2</span><br><span class="line">#cpu-map 4 3</span><br><span class="line">pidfile /var/lib/haproxy/haproxy.pid</span><br><span class="line">log 127.0.0.1 local3 info</span><br><span class="line">defaults</span><br><span class="line">option http-keep-alive</span><br><span class="line">option forwardfor</span><br><span class="line">maxconn 100000</span><br><span class="line">mode http</span><br><span class="line">timeout connect 300000ms</span><br><span class="line">timeout client 300000ms</span><br><span class="line">timeout server 300000ms</span><br><span class="line">listen stats</span><br><span class="line"> mode http</span><br><span class="line"> bind 0.0.0.0:9999</span><br><span class="line"> stats enable</span><br><span class="line"> log global</span><br><span class="line"> stats uri     /haproxy-status</span><br><span class="line"> stats auth   haadmin:q1w2e3r4ys</span><br><span class="line">listen web_port</span><br><span class="line"> bind 192.168.38.67:80</span><br><span class="line"> mode http</span><br><span class="line"> log global</span><br><span class="line"> server web1 127.0.0.1:8080 check inter 3000 fall 2 rise 5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> mkdir /var/lib/haproxy</span><br><span class="line"> chown 99.99 /var/lib/haproxy/ -R</span><br><span class="line"> systemctl start haproxy</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) RPM安装HAproxy:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">wget https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64//haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br><span class="line">#系统默认的Lua版本太低。</span><br><span class="line">wget https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64//lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm</span><br><span class="line">yum install lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm</span><br><span class="line">rpm -qpl lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm </span><br><span class="line">yum install -y haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br><span class="line">rpm -qpl haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的编译安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的编译安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Tengine的安装与配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/01/Tengine的安装与配置/" class="article-date">
+  	<time datetime="2019-11-01T13:44:55.000Z" itemprop="datePublished">2019-11-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/01/Tengine的安装与配置/">
+        Tengine的安装与配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 编译安装tengine：</p>
+</blockquote>
+<p>在安装编译tengine时，tengine编译选项的支持取决于底层Nginx的版本。(例如Nginx1.18版本刚刚支持的一些编译选项，在基于1.16<br>版本的Tengine中不支持。)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1. 编译安装tengine:</span><br><span class="line">    ./configure --prefix=/apps/tengine --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-file-aio</span><br><span class="line">    make &amp;&amp; make install</span><br><span class="line">2. tengine 支持不停服务动态加载模块的功能：</span><br><span class="line">    ./configure --prefix=/apps/tengine --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-file-aio --with-http_concat_module=shared</span><br><span class="line">    make dso_install</span><br><span class="line">   以上操作后默认会在/apps/tengine/modules/目录下添加一个模块：ngx_http_concat_module.so</span><br><span class="line">   之后需要在tengine的主配置文件conf/nginx.conf中加载该模块：</span><br><span class="line">    dso &#123;</span><br><span class="line">     load ngx_http_concat_module.so;       </span><br><span class="line">        &#125;</span><br><span class="line">    最后可以在location中引用以上模块。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>2) Tengine模块中的concat模块使用：</p>
+</blockquote>
+<p>网站中的css、js等文件都是小文件，单个文件大小几k甚至几个字节，所以文件的特点是小而多，会造成网站加载<br>时http请求较多，且网络传输时间比较短，甚至有时候请求时间比传输时间还长，当公司网站中的这类小文件很多<br>时，大量的http请求就会造成传输效率低，影响网站的访问速度和客户端体验，这时合并http请求就非常有必要<br>了，concat模块就提供了合并文件http请求的功能，这个模块由淘宝开发，功能和apache的mod_concat模块类<br>似。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">也可以在编译Tengine中直接添加编译选项：--with-http_concat_module</span><br></pre></td></tr></table></figure></p>
+<p>在Tengine中启用Lua相关功能需要安装一下两个包：<br>yum install lua lua-devel</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/01/Tengine的安装与配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tengine的安装与配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Nginx下配置php" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/01/Nginx下配置php/" class="article-date">
+  	<time datetime="2019-11-01T13:44:41.000Z" itemprop="datePublished">2019-11-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/01/Nginx下配置php/">
+        Nginx下配置php
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Nginx 通过fastCGI 调用php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1) 通过调用本机的php-fpm解析php请求：</span><br><span class="line">    </span><br><span class="line">    location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; #主要通过该配置将请求的URI通过变量传递给后端PHP。</span><br><span class="line">        include fastcgi_params;     #该配置包含大量传递到php-fpm的变量。</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    location ~ ^/(ping|status) &#123;</span><br><span class="line">        include fastcgi_params;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_script_name;    </span><br><span class="line">    &#125;</span><br><span class="line">2) 通过调用其它服务器的PHP解析PHP请求：</span><br><span class="line">    1.安装remi源：</span><br><span class="line">        wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    2.安装epel源后，安装该rpm包：</span><br><span class="line">        yum install -y wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    3.安装php7.2版本的php:</span><br><span class="line">        yum install -y php72-php-fpm  </span><br><span class="line">    4.PHP启动需要至少3个配置文件在/opt/remi/php72/root/usr/etc下：</span><br><span class="line">        php.ini    #该文件不是php72-php-fpm安装，而是由php72-php-common安装的。</span><br><span class="line">        php-fpm.conf    #该文件默认包含了include=/etc/opt/remi/php72/php-fpm.d/*.conf，故而www.conf不用动。</span><br><span class="line">        www.conf #该文件在yum安装后默认在/etc/opt/remi/php72/php-fpm.d/www.conf。</span><br><span class="line">    5.默认php72监听在本机回环地址的9000端口，需要更改：</span><br><span class="line">        listen = 0.0.0.0:9000</span><br><span class="line">        listen.allowed_clients = 192.168.38.67</span><br><span class="line">    6.配置nginx:</span><br><span class="line">        location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 192.168.38.57:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; </span><br><span class="line">        include fastcgi_params;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/01/Nginx下配置php/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Nginx下配置php">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Nginx的rewrite" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -710,409 +1120,9 @@
 
 
   
-    <article id="post-关于Linux日志" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/关于Linux日志/" class="article-date">
-  	<time datetime="2019-10-17T11:07:58.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/关于Linux日志/">
-        关于Linux日志
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 各种日志文件的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. /var/log/secure：系统安装日志，文本格式，应周期性分析。</span><br><span class="line">2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。</span><br><span class="line">3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。</span><br><span class="line">4. /var/log/lastlog：每一个用户最近一次的登录信息，二进制格式，lastlog命令可以查看。</span><br><span class="line">5. /var/log/dmesg：系统引导过程中的日志信息，文本格式文本查看工具查看。也可用专用命令dmesg查看。</span><br><span class="line">6. /var/log/messages ：系统中大部分的信息。</span><br><span class="line">7. /var/log/anaconda : anaconda的日志。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 用数据库mysql存储日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. 准备一台mysql服务器用来存放日志信息：</span><br><span class="line">    yum install -y mariadb-server</span><br><span class="line">    systemctl enable --now mariadb</span><br><span class="line">2. 创建一个管理该数据库的用户：</span><br><span class="line">    GRANT ALL ON Syslog.* TO &apos;log&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY &apos;testroot&apos;;</span><br><span class="line">3. 在rsyslog日志服务器上安装与mysql交互的模块：</span><br><span class="line">    yum install -y rsyslog-mysql</span><br><span class="line">    [root@localhost ~]#rpm -ql rsyslog-mysql</span><br><span class="line">    /usr/lib64/rsyslog/ommysql.so</span><br><span class="line">    /usr/share/doc/rsyslog-8.24.0/mysql-createDB.sql</span><br><span class="line">4. 将上面的mysql-createDB.sql传到mysql服务器上运行，生成需要的数据库及表。</span><br><span class="line">    mysql &lt;  mysql-createDB.sql</span><br><span class="line">5. 在日志服务器上修改配置，使其调用ommysql.so与mysql服务器交互。</span><br><span class="line">    #### MODULES ####</span><br><span class="line">    $ModLoad ommysql</span><br><span class="line">    #### RULES ####</span><br><span class="line">    local6.*                                                :ommysql:192.168.38.18,Syslog,log,testroot  #:ommysql:DBHOST,DBNAME,DBUSER, PASSWORD</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 基于loganalyzer管理日志服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install  httpd php php-mysqlnd php-gd</span><br><span class="line">wget http://download.adiscon.com/loganalyzer/loganalyzer-4.1.8.tar.gz</span><br><span class="line">tar xf loganalyzer-4.1.5.tar.gz</span><br><span class="line">cp -a loganalyzer-4.1.5/src /var/www/html/loganalyzer</span><br><span class="line">cd /var/www/html/loganalyzer</span><br><span class="line">touch config.php</span><br><span class="line">chmod 666 config.php</span><br><span class="line">在配置完成以后，要回收config.php权限，为了安全考虑。</span><br><span class="line">chmod 644 config.php</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/关于Linux日志/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="关于Linux日志">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-实现实时同步" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/实现实时同步/" class="article-date">
-  	<time datetime="2019-10-17T11:07:44.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/实现实时同步/">
-        实现实时同步
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 通过inotify监控指定目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。</span><br><span class="line">ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_queued_events</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_user_instances</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 6 05:54 max_user_watches</span><br><span class="line">max_queued_events：inotify事件队列最大长度，如值太小会出现 EventQueue Overflow 错误，默认值：16384</span><br><span class="line">max_user_watches：可以监视的文件数量（单进程），默认值：8192</span><br><span class="line">max_user_instances：每个用户创建inotify实例最大值，默认值：128</span><br><span class="line">2.我们需要安装inotify-tools这一用户空间工具对其进行管理。</span><br><span class="line">yum install -y inotify-tools</span><br><span class="line">notify-tools包主要文件：</span><br><span class="line">inotifywait： 在被监控的文件或目录上等待特定文件系统事件（open closedelete等）发生，常用于实时同步的目录监控。</span><br><span class="line">inotifywatch：收集被监控的文件系统使用的统计数据，指文件系统事件发生的次数统计。</span><br><span class="line">inotifywait 命令常见选项</span><br><span class="line"> -m, --monitor 始终保持事件监听</span><br><span class="line"> -d, --daemon 以守护进程方式执行，和-m相似，配合-o使用</span><br><span class="line"> -r, --recursive 递归监控目录数据信息变化</span><br><span class="line"> -q, --quiet 输出少量事件信息</span><br><span class="line"> --exclude &lt;pattern&gt; 指定排除文件或目录，使用扩展的正则表达式匹配的模式实现</span><br><span class="line"> --excludei &lt;pattern&gt; 和exclude相似，不区分大小写</span><br><span class="line"> -o, --outfile &lt;file&gt;打印事件到文件中，相当于标准正确输出</span><br><span class="line"> -s, --syslogOutput 发送错误到syslog相当于标准错误输出</span><br><span class="line"> --timefmt &lt;fmt&gt; 指定时间输出格式</span><br><span class="line"> --format &lt;fmt&gt; 指定的输出格式；即实际监控输出内容</span><br><span class="line"> -e 指定监听指定的事件，如果省略，表示所有事件都进行监听</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 通过rsync服务实现数据同步：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">1.安装rsync的服务端软件：</span><br><span class="line">yum install -y rsync</span><br><span class="line">2.配置rsync：</span><br><span class="line">vim /etc/rsyncd.conf</span><br><span class="line">uid = root</span><br><span class="line">gid = root</span><br><span class="line">use chroot = no</span><br><span class="line">max connections = 0</span><br><span class="line">ignore errors</span><br><span class="line">exclude = lost+found/</span><br><span class="line">log file = /var/log/rsyncd.log</span><br><span class="line">pid file = /var/run/rsyncd.pid</span><br><span class="line">lock file = /var/run/rsyncd.lock</span><br><span class="line">reverse lookup = no</span><br><span class="line">hosts allow = 192.168.8.0/24</span><br><span class="line">[backup]</span><br><span class="line">path = /backup/</span><br><span class="line">comment = backup</span><br><span class="line">read only = no</span><br><span class="line">auth users = rsyncuser</span><br><span class="line">secrets file = /etc/rsync.pass</span><br><span class="line">3.在服务端创建用户密码文件：</span><br><span class="line">echo &quot;rsyncuser:testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">4.创建备份目录：</span><br><span class="line">mkdir /backup</span><br><span class="line">5.启动服务：</span><br><span class="line">systemctl enable --now rsyncd</span><br><span class="line">rsync --daemon 可加入/etc/rc.d/rc.local实现开机启动 Centos6中</span><br><span class="line">6.客户端配置密码文件</span><br><span class="line">echo &quot;testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">7.客户端测试同步数据</span><br><span class="line">rsync -avz --password-file=/etc/rsync.pass /data/ rsyncuser@rsync服务器IP::backup</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 通过以上实现实时同步数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">SRC=&apos;/data/&apos;</span><br><span class="line">DEST=&apos;rsyncuser@rsync服务器IP::backup&apos;</span><br><span class="line">inotifywait -mrq --timefmt &apos;%Y-%m-%d %H:%M&apos; --format &apos;%T %w %f&apos; -e create,delete,moved_to,close_write,attrib $&#123;SRC&#125; |while read DATE TIME DIR FILE;do</span><br><span class="line">    FILEPATH=$&#123;DIR&#125;$&#123;FILE&#125;</span><br><span class="line">    rsync -az --delete --password-file=/etc/rsync.pass $SRC $DEST &amp;&amp;</span><br><span class="line">    echo &quot;At $&#123;TIME&#125; on $&#123;DATE&#125;, file $FILEPATH was backuped up via rsync&quot; &gt;&gt; /var/log/changelist.log</span><br><span class="line">done</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/实现实时同步/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="实现实时同步">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-NFS文件系统配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/NFS文件系统配置/" class="article-date">
-  	<time datetime="2019-10-17T11:07:21.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/NFS文件系统配置/">
-        NFS文件系统配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 安装nfs：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nfs-utils</span><br><span class="line">systemct enable --now nfs-server</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 该服务依赖于rpcbind服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpcbind监听在tcp,udp的111端口。</span><br><span class="line">rpcinfo -p hostname</span><br><span class="line">rpcinfo –s hostname 查看RPC注册程序</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3)关于nfs服务的选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exportfs</span><br><span class="line">–v 查看本机所有NFS共享</span><br><span class="line">–r 重读配置文件，并共享目录</span><br><span class="line">–a 输出本机所有共享</span><br><span class="line">–au 停止本机所有共享</span><br><span class="line">showmount -e hostname</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 默认的配置文件：/etc/exports    /etc/exports.d/*.exports<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/exports</span><br><span class="line">/data/www1/  *</span><br><span class="line">/data/www2/  *</span><br><span class="line">fg（默认）前台挂载，bg后台挂载</span><br><span class="line">hard（默认）持续请求，soft 非持续请求</span><br><span class="line">intr 和hard配合，请求可中断</span><br><span class="line">rsize和wsize 一次读和写数据最大字节数，rsize=32768</span><br><span class="line">_netdev 无网络不挂载</span><br><span class="line">基于安全考虑，建议使用nosuid,nodev,noexec挂载选项</span><br><span class="line">vim /etc/fstab</span><br><span class="line">172.16.0.1:/public /mnt/nfs nfs defaults,_netdev 0 0</span><br><span class="line">vim /etc/auto.misc</span><br><span class="line">nfs2    -fstype=nfs,rw                  192.168.38.47:/data/www2</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) nfs权限的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">• 默认选项：(ro,sync,root_squash,no_all_squash)</span><br><span class="line">• ro,rw 只读和读写</span><br><span class="line">• async 异步，数据变化后不立即写磁盘，性能高</span><br><span class="line">• sync（1.0.0后为默认）同步，数据在请求时立即写入共享</span><br><span class="line">• no_all_squash （默认）保留共享文件的UID和GID</span><br><span class="line">• all_squash 所有远程用户(包括root)都变成nfsnobody</span><br><span class="line">• root_squash （默认）远程root映射为nfsnobody,UID为65534，早期版本是4294967294 (nfsnobody)</span><br><span class="line">• no_root_squash 远程root映射成root用户</span><br><span class="line">• anonuid和anongid 指明匿名用户映射为特定用户UID和组GID，而非nfsnobody,可配合all_squash使用</span><br><span class="line">setfacl -m u:nfsnobody:rwx /data/www1/</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/NFS文件系统配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="NFS文件系统配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-PHP编译安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/PHP编译安装/" class="article-date">
-  	<time datetime="2019-10-17T11:06:49.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/PHP编译安装/">
-        PHP编译安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 关于安装LAMP:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">安装清华的epel源：</span><br><span class="line">yum install https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">yum install  httpd  php73-php-fpm php73-php-mysqlnd  php73-php-opcache -y</span><br><span class="line">vim  /etc/httpd/conf.d/test.conf </span><br><span class="line">DirectoryIndex index.php</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/var/www/html/$1</span><br><span class="line">UDS模式：</span><br><span class="line">vi /etc/opt/remi/php73/php-fpm.d/www.conf</span><br><span class="line">listen=/var/run/php.sock </span><br><span class="line">listen.owner = apache</span><br><span class="line">listen.group = apache</span><br><span class="line">listen.mode = 0660   </span><br><span class="line"></span><br><span class="line">vim /etc/httpd/conf.d/test.conf </span><br><span class="line">DirectoryIndex index.php</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ unix:/var/run/php.sock|fcgi://localhost/var/www/html/$1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 关于PHP的加速器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">在Centos7上编译安装Xcache，实现PHP加速。</span><br><span class="line">1. 安装需要的工具包：</span><br><span class="line">yum install gcc php-devel</span><br><span class="line">2. 编译安装xcache：</span><br><span class="line">tar xvf xcache-3.2.0.tar.gz</span><br><span class="line">phpize --clean &amp;&amp; phpize</span><br><span class="line">cd xcache-3.2.0</span><br><span class="line">./configure --enable-xcache</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp xcache.ini /etc/php.d/</span><br><span class="line">systemctl restart httpd.service</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 编译安装php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">yum install libxml2-devel bzip2-devel libmcrypt-devel</span><br><span class="line">tar xvf php-7.3.10.tar.xz</span><br><span class="line">cd php-7.3.10</span><br><span class="line">./configure --prefix=/apps/php \</span><br><span class="line">--enable-mysqlnd \</span><br><span class="line">--with-mysqli=mysqlnd \</span><br><span class="line">--with-pdo-mysql=mysqlnd \</span><br><span class="line">--with-openssl \</span><br><span class="line">--with-freetype-dir \</span><br><span class="line">--with-jpeg-dir \</span><br><span class="line">--with-png-dir \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-libxml-dir=/usr \</span><br><span class="line">--with-config-file-path=/etc \</span><br><span class="line">--with-config-file-scan-dir=/etc/php.d \</span><br><span class="line">--enable-mbstring \</span><br><span class="line">--enable-xml \</span><br><span class="line">--enable-sockets \</span><br><span class="line">--enable-fpm \</span><br><span class="line">--enable-maintainer-zts \</span><br><span class="line">--disable-fileinfo</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp php.ini-production /etc/php.ini</span><br><span class="line">cp sapi/fpm/php-fpm.service  /usr/lib/systemd/system/</span><br><span class="line">cp /app/php/etc/php-fpm.conf.default /app/php/etc/php-fpm.conf </span><br><span class="line">cp /app/php/etc/php-fpm.d/www.conf.default /app/php/etc/php-fpm.d/www.conf</span><br><span class="line">vim /app/php/etc/php-fpm.d/www.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br><span class="line">useradd -r -s /sbin/nologin apache</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl status php-fpm.service </span><br><span class="line">systemctl enable --now  php-fpm.service</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 修改httpd使其支持php-fpm：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so</span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so</span><br><span class="line">修改下面行</span><br><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line">DirectoryIndex index.php index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line">加下面四行</span><br><span class="line">AddType application/x-httpd-php .php</span><br><span class="line">AddType application/x-httpd-php-source .phps</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd/htdocs/$1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 支持opcache:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/php.ini</span><br><span class="line">[opcache]</span><br><span class="line">zend_extension=/app/php/lib/php/extensions/no-debug-zts-20180731/opcache.so                               </span><br><span class="line">opcache.enable=1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) 实现虚拟主机：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">servername wordpress.magedu.net</span><br><span class="line">documentroot /data/wordpress</span><br><span class="line">&lt;directory /data/wordpress&gt;</span><br><span class="line">require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/data/wordpress/$1</span><br><span class="line">CustomLog &quot;logs/access_wordpress_log&quot; common</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">servername discuz.magedu.net</span><br><span class="line">documentroot /app/httpd24/htdocs/</span><br><span class="line">&lt;directory /app/httpd24/htdocs/&gt;</span><br><span class="line">require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd24/htdocs/$1</span><br><span class="line">CustomLog &quot;logs/access_discuz_log&quot; common</span><br><span class="line">&lt;/virtualhost&gt;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/PHP编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="PHP编译安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-HTTPD的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/09/HTTPD的编译安装/" class="article-date">
-  	<time datetime="2019-10-09T13:54:30.000Z" itemprop="datePublished">2019-10-09</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/09/HTTPD的编译安装/">
-        HTTPD的编译安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 准备安装httpd-2.4依赖的包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。</span><br><span class="line">dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 make</span><br><span class="line">tar -xvf httpd-2.4.41.tar.gz</span><br><span class="line">tar -xvf apr-1.7.0.tar.bz2</span><br><span class="line">tar -xvf apr-util-1.6.1.tar.bz2</span><br><span class="line">mkdir /apps/httpd -pv</span><br><span class="line">mv apr-1.7.0 httpd-2.4.41/srclib/apr</span><br><span class="line">mv apr-util-1.6.1 httpd-2.4.41/srclib/apr-util</span><br><span class="line">cd httpd-2.4.41</span><br><span class="line">./configure \</span><br><span class="line">--prefix=/apps/httpd \</span><br><span class="line">--enable-so \</span><br><span class="line">--enable-ssl \</span><br><span class="line">--enable-cgi \</span><br><span class="line">--enable-rewrite \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-pcre \</span><br><span class="line">--with-included-apr \</span><br><span class="line">--enable-modules=most \</span><br><span class="line">--enable-mpms-shared=all \</span><br><span class="line">--with-mpm=prefork</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">修改环境变量：</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 默认用户的更改：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">默认apache在编译安装之后的默认用户是daemon。</span><br><span class="line">可以创建一个专有的系统用户供其使用：</span><br><span class="line">useradd -s /sbin/nologin -r apache</span><br><span class="line">打开以下文件，修改如下两行：</span><br><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 设置开机启动的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">方法一：</span><br><span class="line">在以下文件添加如下一行：</span><br><span class="line">vim /etc/rc.d/rc.local</span><br><span class="line">/apps/httpd/bin/apachectl start</span><br><span class="line">为以上文件添加执行权限：</span><br><span class="line">chmod +x /etc/rc.d/rc.local</span><br><span class="line">方法二：</span><br><span class="line">编写systemd的管理脚本：</span><br><span class="line">vim /usr/lib/systemd/system/httpd.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=The Apache HTTP Server</span><br><span class="line">After=network.target remote-fs.target nss-lookup.target</span><br><span class="line">Documentation=man:httpd(8)</span><br><span class="line">Documentation=man:apachectl(8)</span><br><span class="line">[Service]</span><br><span class="line">Type=forking #此行不要为notify，因为在apache编译时没有加载该模块。</span><br><span class="line">#EnvironmentFile=/etc/sysconfig/httpd</span><br><span class="line">ExecStart=/apps/httpd/bin/httpd $OPTIONS -k start</span><br><span class="line">ExecReload=/apps/httpd/bin/httpd $OPTIONS -k graceful</span><br><span class="line">ExecStop=/bin/kill -WINCH $&#123;MAINPID&#125;</span><br><span class="line">KillSignal=SIGCONT</span><br><span class="line">PrivateTmp=true</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">重新加载配置文件：</span><br><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/09/HTTPD的编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HTTPD的编译安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
     </nav>
   
 </div>

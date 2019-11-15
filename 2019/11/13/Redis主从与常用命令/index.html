@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Redis主从与常用命令 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) Redis 的常用命令：  12345678910111213141516171819查看key的过期时间: TTL key设置key的过期时间:EXPIRE key 86400取消key的过期时间：PERSIST keyconfig 命令用于查看当前redis配置、以及不重启服务的情况下更改redis配置等。CONFIG set maxmemory 8589934592CONFIG ge">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis主从与常用命令">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/13/Redis主从与常用命令/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) Redis 的常用命令：  12345678910111213141516171819查看key的过期时间: TTL key设置key的过期时间:EXPIRE key 86400取消key的过期时间：PERSIST keyconfig 命令用于查看当前redis配置、以及不重启服务的情况下更改redis配置等。CONFIG set maxmemory 8589934592CONFIG ge">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-15T12:59:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis主从与常用命令">
+<meta name="twitter:description" content="1) Redis 的常用命令：  12345678910111213141516171819查看key的过期时间: TTL key设置key的过期时间:EXPIRE key 86400取消key的过期时间：PERSIST keyconfig 命令用于查看当前redis配置、以及不重启服务的情况下更改redis配置等。CONFIG set maxmemory 8589934592CONFIG ge">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-Redis主从与常用命令" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/Redis主从与常用命令/" class="article-date">
+  	<time datetime="2019-11-13T12:06:25.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Redis主从与常用命令
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/13/Redis主从与常用命令/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Redis主从与常用命令">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Redis 的常用命令：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">查看key的过期时间: TTL key</span><br><span class="line">设置key的过期时间:EXPIRE key 86400</span><br><span class="line">取消key的过期时间：PERSIST key</span><br><span class="line"></span><br><span class="line">config 命令用于查看当前redis配置、以及不重启服务的情况下更改redis配置等。</span><br><span class="line">CONFIG set maxmemory 8589934592</span><br><span class="line">CONFIG get maxmemory</span><br><span class="line">CONFIG get maxmemory</span><br><span class="line">CONFIG SET requirepass 123456   #临时设置密码。</span><br><span class="line"></span><br><span class="line">select [1-16] #更换使用当前库，默认为16个。</span><br><span class="line"></span><br><span class="line">BGSAVE  #手动在后台执行RDB持久化操作。</span><br><span class="line"></span><br><span class="line">DBSIZE  #返回当前库下的所有key 数量。</span><br><span class="line"></span><br><span class="line">FLUSHDB #强制清空当前库中的所有key。</span><br><span class="line"></span><br><span class="line">FLUSHALL #强制清空当前redis服务器所有数据库中的所有key，即删除所有数据。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 配置Redis主从：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">注意事项：</span><br><span class="line">    1.在设置主从时确保Redis大版本一致。</span><br><span class="line">    2.在开启安全模式但是没有bind地址，没有设置密码。</span><br><span class="line">    3.最好保持主从节点的密码一致，否则在主节点宕机后，前端应用会因为密码不一致连接Redis失败。</span><br><span class="line">具体步骤：</span><br><span class="line">    1) 主节点：</span><br><span class="line">        vim /apps/redis/etc/redis.conf </span><br><span class="line">            bind 0.0.0.0    </span><br><span class="line">            requirepass testroot</span><br><span class="line">            appendonly yes</span><br><span class="line">            dir /apps/redis/data</span><br><span class="line">    2) 从节点：</span><br><span class="line">        vim /apps/redis/etc/redis.conf</span><br><span class="line">            bind 0.0.0.0    </span><br><span class="line">            requirepass testroot</span><br><span class="line">            appendonly yes</span><br><span class="line">            dir /apps/redis/data</span><br><span class="line">            slaveof 192.168.38.105 6379 #主节点IP和端口</span><br><span class="line">            masterauth testroot         #主节点密码</span><br><span class="line">    3) 动态添加（在slave节点）：</span><br><span class="line">            slaveof 192.168.38.105 6379</span><br><span class="line">            config  set masterauth testroot</span><br><span class="line"></span><br><span class="line">主从同步的具体过程：</span><br><span class="line">    1）从服务器连接主服务器，发送SYNC命令；</span><br><span class="line">    2）主服务器接收到SYNC命名后，开始执行BGSAVE命令生成RDB快照文件并使用缓冲区记录此后执行的所有写命令；</span><br><span class="line">    3）主服务器BGSAVE执行完后，向所有从服务器发送快照文件，并在发送期间继续记录被执行的写命令；</span><br><span class="line">    4）从服务器收到快照文件后丢弃所有旧数据，载入收到的快照；</span><br><span class="line">    5）主服务器快照发送完毕后开始向从服务器发送缓冲区中的写命令；</span><br><span class="line">    6）从服务器完成对快照的载入，开始接收命令请求，并执行来自主服务器缓冲区的写命令；</span><br><span class="line">    7）后期同步会先发送自己slave_repl_offset位置，只同步新增加的数据，不再全量同步。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 主从同步优化：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1. repl-diskless-sync no #是否使用无盘同步RDB文件，默认为no，no为不使用无盘，需要将RDB文件保存到磁盘后</span><br><span class="line">再发送给slave，yes为支持无盘，支持无盘就是RDB文件不需要保存至本地磁盘，而且直接通过socket文件发送给slave。</span><br><span class="line">2. repl-diskless-sync-delay 5 #Master准备好RDB文件后等待传输时间。 </span><br><span class="line">3. repl-ping-slave-period 10 #slave端向server端发送ping的时间区间设置，默认为10秒 。</span><br><span class="line">4. repl-timeout 60 #设置超时时间一定大于repl-ping-slave-period的设置时间。</span><br><span class="line">5.repl-disable-tcp-nodelay no #是否启用TCP_NODELAY，如设置成yes，则redis会合并小的TCP包从而节省带宽，</span><br><span class="line">但会增加同步延迟（40ms），造成master与slave数据不一致，假如设置成no，则redis master会立即发送同步数</span><br><span class="line">据，没有延迟，前者关注性能，后者关注redis服务中的数据一致性。</span><br><span class="line">6. repl-backlog-size 1mb #master的写入数据缓冲区，用于记录自上一次同步后到下一次同步过程中间的写入命</span><br><span class="line">令，计算公式：repl-backlog-size = 允许从节点最大中断时长 * 主实例offset每秒写入量，比如master每秒最大写</span><br><span class="line">入64mb，最大允许60秒，那么就要设置为64mb*60秒=3840MB(3.8G)。</span><br><span class="line">7. repl-backlog-ttl 3600 #如果一段时间后没有slave连接到master，则backlog size的内存将会被释放。如果值为0则</span><br><span class="line">表示永远不释放这部份内存。</span><br><span class="line">8. slave-priority 100 #slave端的优先级设置，值是一个整数，数字越小表示优先级越高。当master故障时将会按照优先</span><br><span class="line">级来选择slave端进行恢复，如果值设置为0，则表示该slave永远不会被选择。</span><br><span class="line">9.  #min-slaves-to-write 1 #设置一个master端的可用slave少于多少个。</span><br><span class="line">10. #min-slaves-max-lag 20 #设置所有slave延迟时间都大于多少秒时，master不接收写操作(拒绝写入)，该时间如果设置</span><br><span class="line">要设置的长一点，否则在网络拥堵时可能会引起master不能写，引起服务不可用。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) Master节点宕机后，提升从节点为主节点：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1. 首先清理slave节点的从节点的相关信息，因为默认从节点是不能写入数据的。</span><br><span class="line">    127.0.0.1:6379&gt; INFO replication</span><br><span class="line">                    # Replication</span><br><span class="line">                    role:slave</span><br><span class="line">                    master_host:192.168.38.106</span><br><span class="line">                    master_port:6379</span><br><span class="line">                    master_link_status:up</span><br><span class="line">                    master_last_io_seconds_ago:3</span><br><span class="line">                    master_sync_in_progress:0</span><br><span class="line">                    slave_repl_offset:5188</span><br><span class="line">                    slave_priority:100</span><br><span class="line">                    slave_read_only:1</span><br><span class="line">                    connected_slaves:0</span><br><span class="line">                    master_replid:489bf4401fc81f179c52c80b84a6dc51006c364f</span><br><span class="line">                    master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">                    master_repl_offset:5188</span><br><span class="line">                    second_repl_offset:-1</span><br><span class="line">                    repl_backlog_active:1</span><br><span class="line">                    repl_backlog_size:1048576</span><br><span class="line">                    repl_backlog_first_byte_offset:3831</span><br><span class="line">                    repl_backlog_histlen:1358</span><br><span class="line">    127.0.0.1:6379&gt; SLAVEOF no one          #清理slave节点的从节点的相关信息，在重启服务以后会回到从节点配置，需要修改配置文件。</span><br><span class="line">                    OK</span><br><span class="line">    127.0.0.1:6379&gt; INFO replication</span><br><span class="line">                    # Replication</span><br><span class="line">                    role:master</span><br><span class="line">                    connected_slaves:0</span><br><span class="line">                    master_replid:68a2bba1477df0b7e564835147da806447a1e7a0</span><br><span class="line">                    master_replid2:489bf4401fc81f179c52c80b84a6dc51006c364f</span><br><span class="line">                    master_repl_offset:5216</span><br><span class="line">                    second_repl_offset:5217</span><br><span class="line">                    repl_backlog_active:1</span><br><span class="line">                    repl_backlog_size:1048576</span><br><span class="line">                    repl_backlog_first_byte_offset:3831</span><br><span class="line">                    repl_backlog_histlen:1386</span><br><span class="line">2.测试是否具有写权限。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/11/13/Redis哨兵机制/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Redis哨兵机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/11/13/Redis的安装及简单配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Redis的安装及简单配置</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="Redis主从与常用命令" data-title="Redis主从与常用命令" data-url="http://gmfdevops.com.com/2019/11/13/Redis主从与常用命令/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Redis主从与常用命令">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
