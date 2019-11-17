@@ -16,10 +16,12 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="该架构是小型网站的基本实现：1234前端由Haproxy实现基本的调度功能，考虑到单点故障的问题，配合Keepalived实现调度器的高可用。中间为Nginx + PHP 的应用层，为了应对并发·单点故障，需要配置多台后端服务器。后端的存储层，需要注意数据的备份。这里的Mysql使用基本的主从复制架构，NFS实现了基本的实时同步。NFS存放了网站的大量图片。  1) 安装Nginx + PHP：">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://gmfdevops.com.com/2019/11/17/web高可用入门架构/web.png">
 <meta property="og:updated_time" content="2019-11-17T11:01:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="web高可用入门架构">
 <meta name="twitter:description" content="该架构是小型网站的基本实现：1234前端由Haproxy实现基本的调度功能，考虑到单点故障的问题，配合Keepalived实现调度器的高可用。中间为Nginx + PHP 的应用层，为了应对并发·单点故障，需要配置多台后端服务器。后端的存储层，需要注意数据的备份。这里的Mysql使用基本的主从复制架构，NFS实现了基本的实时同步。NFS存放了网站的大量图片。  1) 安装Nginx + PHP：">
+<meta name="twitter:image" content="http://gmfdevops.com.com/2019/11/17/web高可用入门架构/web.png">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -250,7 +252,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <img src="/2019/11/17/web高可用入门架构/web.png">
 <p><strong><em>该架构是小型网站的基本实现：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">前端由Haproxy实现基本的调度功能，考虑到单点故障的问题，配合Keepalived实现调度器的高可用。</span><br><span class="line">中间为Nginx + PHP 的应用层，为了应对并发·单点故障，需要配置多台后端服务器。</span><br><span class="line">后端的存储层，需要注意数据的备份。这里的Mysql使用基本的主从复制架构，NFS实现了基本的实时同步。</span><br><span class="line">NFS存放了网站的大量图片。</span><br></pre></td></tr></table></figure></p>
 <blockquote>
 <p>1) 安装Nginx + PHP：</p>
