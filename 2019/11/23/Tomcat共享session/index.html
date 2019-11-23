@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Tomcat共享session | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。  1)使用MSM管理Tomcat的session，需要以下三种类：  1231.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。2.Session数据的序列化、反序列化类。3.驱动类，用于">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat共享session">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/23/Tomcat共享session/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。  1)使用MSM管理Tomcat的session，需要以下三种类：  1231.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。2.Session数据的序列化、反序列化类。3.驱动类，用于">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-23T13:19:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tomcat共享session">
+<meta name="twitter:description" content="msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。  1)使用MSM管理Tomcat的session，需要以下三种类：  1231.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。2.Session数据的序列化、反序列化类。3.驱动类，用于">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-Tomcat共享session" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Tomcat共享session/" class="article-date">
+  	<time datetime="2019-11-22T17:25:24.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Tomcat共享session
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Tomcat共享session/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tomcat共享session">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。</em></strong></p>
+<blockquote>
+<p>1)使用MSM管理Tomcat的session，需要以下三种类：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。</span><br><span class="line">2.Session数据的序列化、反序列化类。</span><br><span class="line">3.驱动类，用于连接Reids和memcached的客户端。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于memcache的session共享配置(sticky模式)：</p>
+</blockquote>
+<p><strong><em>当请求结束时Tomcat的session会送给memcached备份。即Tomcat session为主session，memcached session为备session，使用memcached相当于备份了一份Session。查询Session时Tomcat会优先使用自己内存的Session，Tomcat通过jvmRoute发现不是自己的Session，便从memcached中找到该Session，更新本机Session，请求完成后更新memcached。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">1.安装memcached：  </span><br><span class="line">    yum install -y memcached</span><br><span class="line">        关于memcache的运行参数：</span><br><span class="line">            -u username memcached运行的用户身份，必须普通用户</span><br><span class="line">            -p 绑定的端口，默认11211</span><br><span class="line">            -m num 最大内存，单位MB，默认64MB</span><br><span class="line">            -c num 最大连接数，缺省1024</span><br><span class="line">            -d 守护进程方式运行</span><br><span class="line">            -f 增长因子Growth Factor，默认1.25</span><br><span class="line">            -v 详细信息，-vv能看到详细信息</span><br><span class="line">            -M 内存耗尽，不许LRU</span><br><span class="line">            -U 设置UDP监听端口，0表示禁用UDP</span><br><span class="line">2.把需要的三种类放到全局的 lib 目录下。</span><br><span class="line">    asm-5.2.jar</span><br><span class="line">    kryo-3.0.3.jar</span><br><span class="line">    kryo-serializers-0.45.jar</span><br><span class="line">    memcached-session-manager-2.3.2.jar</span><br><span class="line">    memcached-session-manager-tc8-2.3.2.jar</span><br><span class="line">    minlog-1.3.1.jar</span><br><span class="line">    msm-kryo-serializer-2.3.2.jar</span><br><span class="line">    objenesis-2.6.jar</span><br><span class="line">    reflectasm-1.11.9.jar</span><br><span class="line">    spymemcached-2.12.3.jar</span><br><span class="line">3.配置Tomcat的全局context.xml文件（放到&lt;Context&gt;内）：</span><br><span class="line">    vim /usr/local/tomcat/conf/context.xml</span><br><span class="line">        &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">                memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">                failoverNodes=&quot;m105&quot;            #配置备用的memcached，在sticky模式下是自己。</span><br><span class="line">                requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">                transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">        /&gt;</span><br><span class="line">    memcached的节点们；n1、n2只是别名，可以重新命名。</span><br><span class="line">    failoverNodes故障转移节点，n1是备用节点，n2是主存储节点。另一台Tomcat将n1改为n2，其主节点是n1，备用节点是n2。</span><br><span class="line">    配置成功会在日志显示如下信息：</span><br><span class="line">        de.javakaffee.web.msm.MemcachedSessionService.startInternal --------</span><br><span class="line">        - finished initialization:</span><br><span class="line">        - sticky: true</span><br><span class="line">        - operation timeout: 1000</span><br><span class="line">        - node ids: [m105]</span><br><span class="line">        - failover node ids: [m104]</span><br><span class="line">        - storage key prefix: null</span><br><span class="line">        - locking mode: null (expiration: 5s)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 配置non-sticky模式：</p>
+</blockquote>
+<p><strong><em>从msm 1.4.0之后开始支持non-sticky模式。Tomcat session为中转Session，如果n1为主session，n2为备session。产生的新的Session会发送给主、备memcached，并清除本地Session。n1下线，n2转正。n1再次上线，n2依然是主Session存储节点。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">仅仅需要修改全局context.xml文件中的内容，其它需要的类保持不变。</span><br><span class="line"> &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">        memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">        sticky=&quot;false&quot;</span><br><span class="line">        sessionBackupAsync=&quot;false&quot;</span><br><span class="line">        lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">        requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">        transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line"> /&gt;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 配置Redis的Session共享：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">       memcachedNodes=&quot;redis://192.168.38.105:6379&quot;</span><br><span class="line">       sticky=&quot;false&quot;</span><br><span class="line">       sessionBackupAsync=&quot;false&quot;</span><br><span class="line">       lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">       requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">       transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/11/23/Tomcat的反向代理/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Tomcat的反向代理</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="Tomcat共享session" data-title="Tomcat共享session" data-url="http://gmfdevops.com.com/2019/11/23/Tomcat共享session/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Tomcat共享session">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

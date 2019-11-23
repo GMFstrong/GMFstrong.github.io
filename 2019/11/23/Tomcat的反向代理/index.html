@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Tomcat的反向代理 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) Nginx 实现Tomcat的动静分离：  1234567891011server&amp;#123;        server_name www.test.com;        listen 80;        location / &amp;#123;                root /var/www/html;                index index.html;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat的反向代理">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/11/23/Tomcat的反向代理/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) Nginx 实现Tomcat的动静分离：  1234567891011server&amp;#123;        server_name www.test.com;        listen 80;        location / &amp;#123;                root /var/www/html;                index index.html;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-23T13:18:37.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tomcat的反向代理">
+<meta name="twitter:description" content="1) Nginx 实现Tomcat的动静分离：  1234567891011server&amp;#123;        server_name www.test.com;        listen 80;        location / &amp;#123;                root /var/www/html;                index index.html;">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-Tomcat的反向代理" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Tomcat的反向代理/" class="article-date">
+  	<time datetime="2019-11-22T17:25:23.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Tomcat的反向代理
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Tomcat的反向代理/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tomcat的反向代理">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Nginx 实现Tomcat的动静分离：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">        server_name www.test.com;</span><br><span class="line">        listen 80;</span><br><span class="line">        location / &#123;</span><br><span class="line">                root /var/www/html;</span><br><span class="line">                index index.html;</span><br><span class="line">        &#125;</span><br><span class="line">        location ~* \.jsp$ &#123;</span><br><span class="line">                proxy_pass http://www.test.com:8080;  #在使用域名是注意修改本机的/etc/hosts文件。</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) httpd 代理Tomcat:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">需要Httpd安装相应的代理模块：</span><br><span class="line">    [root@localhost ~]# httpd -M | grep proxy</span><br><span class="line">        proxy_module (shared)</span><br><span class="line">        proxy_ajp_module (shared)</span><br><span class="line">        proxy_balancer_module (shared)</span><br><span class="line">        proxy_connect_module (shared)</span><br><span class="line">        proxy_express_module (shared)</span><br><span class="line">        proxy_fcgi_module (shared)</span><br><span class="line">        proxy_fdpass_module (shared)</span><br><span class="line">        proxy_ftp_module (shared)</span><br><span class="line">        proxy_http_module (shared)</span><br><span class="line">        proxy_scgi_module (shared)</span><br><span class="line">        proxy_wstunnel_module (shared)</span><br><span class="line">    vim /etc/httpd/conf.d/proxy.conf</span><br><span class="line">        &lt;VirtualHost *:80&gt;</span><br><span class="line">            ServerName      www.test.com</span><br><span class="line">            ProxyRequests   off         #正向代理必须关闭。</span><br><span class="line">            Proxyvia        on          #在响应报文的head部分添加一个‘Via: 1.1 www.test.com’。</span><br><span class="line">            ProxyPreserveHost on        #该项将请求报文中head部分的Host通过代理传递到后端的Tomcat。</span><br><span class="line">            ProxyPass / http://127.0.0.1:8080/  #反向代理指令。</span><br><span class="line">            ProxyPassReverse / http://127.0.0.1:8080/   #保留代理的响应头不被重写。</span><br><span class="line">        &lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) htppd中的ajp协议的使用：</p>
+</blockquote>
+<p><strong><em>ajp是一个二进制协议，效率比较高，但是仅仅httpd支持。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">        ServerName      www.test.com</span><br><span class="line">        ProxyRequests   off</span><br><span class="line">        Proxyvia        on</span><br><span class="line">        ProxyPreserveHost on</span><br><span class="line">        ProxyPass / ajp://127.0.0.1:8009/   #注意端口和协议。</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 使用 Nginx 代理后端多台Tomcat:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">（1）以下为index.jsp调试代码：</span><br><span class="line">    &lt;%@ page import=&quot;java.util.*&quot; %&gt;</span><br><span class="line">    &lt;!DOCTYPE html&gt;</span><br><span class="line">    &lt;html lang=&quot;en&quot;&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">    &lt;meta charset=&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;title&gt;lbjsptest&lt;/title&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">    &lt;div&gt;On &lt;%=request.getServerName() %&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div&gt;&lt;%=request.getLocalAddr() + &quot;:&quot; + request.getLocalPort() %&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div&gt;SessionID = &lt;span style=&quot;color:blue&quot;&gt;&lt;%=session.getId() %&gt;&lt;/span&gt;&lt;/div&gt;</span><br><span class="line">    &lt;%=new Date()%&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">    &lt;/html&gt;</span><br><span class="line">（2）配置Nginx：</span><br><span class="line">    vim /etc/nginx/nginx.con</span><br><span class="line">            upstream tomcats &#123;          #在http字段配置。</span><br><span class="line">                #ip_hash;  #仅仅做原地址hash，不做session共享，在服务器宕机后关于session的数据同样丢失。</span><br><span class="line">                server www.test104.com:8080;</span><br><span class="line">                server www.test105.com:8080;</span><br><span class="line">            &#125;</span><br><span class="line">            location ~* \.(jsp|do)$ &#123;   #在server字段引用。</span><br><span class="line">                proxy_pass http://tomcats;</span><br><span class="line">                &#125;</span><br><span class="line">需要在Nginx主机上修改/etc/hosts文件，在重启Nginx。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 使用httpd代理Tomcat：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">httpd必须含有proxy_balancer_module该模块，用来实现负载均衡。</span><br><span class="line">（1）关闭httpd默认的主机：</span><br><span class="line">    vim /etc/httpd/confhttpd.conf</span><br><span class="line">        #DocumentRoot &quot;/var/www/html&quot;</span><br><span class="line">（2）配置代理：</span><br><span class="line">    vim /etc/httpd/conf.d/proxy.conf </span><br><span class="line">        &lt;VirtualHost *:80&gt;</span><br><span class="line">        ServerName www.test.com</span><br><span class="line">        ProxyRequests Off</span><br><span class="line">        ProxyVia On</span><br><span class="line">        ProxyPreserveHost On</span><br><span class="line">        ProxyPass / balancer://lbtomcats/</span><br><span class="line">        ProxyPassReverse / balancer://lbtomcats/</span><br><span class="line">        &lt;/VirtualHost&gt;</span><br><span class="line">        &lt;Proxy balancer://lbtomcats&gt;</span><br><span class="line">        BalancerMember http://www.test105.com:8080 loadfactor=1 route=jvm5</span><br><span class="line">        BalancerMember http://www.test104.com:8080 loadfactor=1 route=jvm4</span><br><span class="line">        &lt;/Proxy&gt;</span><br><span class="line">（3）其中的参数含义：</span><br><span class="line">    loadfactor：定义负载均衡后端服务器权重，取值范围1 - 100。</span><br><span class="line">    lbmethod负载均衡调度方法：</span><br><span class="line">                byrequests （默认）基于权重的统计请求个数进行调度；</span><br><span class="line">                bytrafficz 执行基于权重的流量计数调度；</span><br><span class="line">                bybusyness 通过考量每个后端服务器当前负载进行调度。</span><br><span class="line">    maxattempts：放弃请求前实现故障转移的次数，默认为1，其最大值不应该大于总的节点数。</span><br><span class="line">    nofailover：如果后端服务器没有Session副本，可以设置为On不允许故障转移，Off（默认）故障可以转移。</span><br><span class="line">    stickysession：调度器的sticky session名字，根据web后台编程语言不同，可以设置为JSESSIONID或PHPSESSIONID。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) httpd调度的session粘性：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Header add Set-Cookie &quot;ROUTEID=.%&#123;BALANCER_WORKER_ROUTE&#125;e; path=/&quot;</span><br><span class="line">env=BALANCER_ROUTE_CHANGED</span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">ServerName node1.magedu.com</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyVia On</span><br><span class="line">ProxyPreserveHost On</span><br><span class="line">ProxyPass / balancer://lbtomcats/</span><br><span class="line">ProxyPassReverse / balancer://lbtomcats/</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line">&lt;Proxy balancer://lbtomcats&gt;</span><br><span class="line">BalancerMember http://t1.magedu.com:8080 loadfactor=1 route=Tomcat1</span><br><span class="line">BalancerMember http://t2.magedu.com:8080 loadfactor=2 route=Tomcat2</span><br><span class="line">ProxySet stickysession=ROUTEID</span><br><span class="line">&lt;/Proxy&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>7) Tomcat集群的创建：</p>
+</blockquote>
+<p><strong><em>在客户端无论是基于源IP哈希，还是基于sessionID的哈希，都没有在后端服务器做到Session共享，因此当后端的服务器宕机，都会引起请求的转移此时因为没有session共享，还是会引起数据的丢失及sessionID的改变。</em></strong></p>
+<p><strong><em>Tomcat 集群就是让多个tomcat节点之间的Session信息相互传递。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">1.将以下配置放入server.xml配置文件中。</span><br><span class="line">        &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;</span><br><span class="line">                 channelSendOptions=&quot;8&quot;&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Manager className=&quot;org.apache.catalina.ha.session.DeltaManager&quot;</span><br><span class="line">                   expireSessionsOnShutdown=&quot;false&quot;</span><br><span class="line">                   notifyListenersOnReplication=&quot;true&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Channel className=&quot;org.apache.catalina.tribes.group.GroupChannel&quot;&gt;</span><br><span class="line">            &lt;Membership className=&quot;org.apache.catalina.tribes.membership.McastService&quot;</span><br><span class="line">                        address=&quot;228.0.0.4&quot;</span><br><span class="line">                        port=&quot;45564&quot;</span><br><span class="line">                        frequency=&quot;500&quot;</span><br><span class="line">                        dropTime=&quot;3000&quot;/&gt;</span><br><span class="line">            &lt;Receiver className=&quot;org.apache.catalina.tribes.transport.nio.NioReceiver&quot;</span><br><span class="line">                      address=&quot;auto&quot;</span><br><span class="line">                      port=&quot;4000&quot;</span><br><span class="line">                      autoBind=&quot;100&quot;</span><br><span class="line">                      selectorTimeout=&quot;5000&quot;</span><br><span class="line">                      maxThreads=&quot;6&quot;/&gt;</span><br><span class="line"></span><br><span class="line">            &lt;Sender className=&quot;org.apache.catalina.tribes.transport.ReplicationTransmitter&quot;&gt;</span><br><span class="line">              &lt;Transport className=&quot;org.apache.catalina.tribes.transport.nio.PooledParallelSender&quot;/&gt;</span><br><span class="line">            &lt;/Sender&gt;</span><br><span class="line">            &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.TcpFailureDetector&quot;/&gt;</span><br><span class="line">            &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.MessageDispatchInterceptor&quot;/&gt;</span><br><span class="line">          &lt;/Channel&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Valve className=&quot;org.apache.catalina.ha.tcp.ReplicationValve&quot;</span><br><span class="line">                 filter=&quot;&quot;/&gt;</span><br><span class="line">          &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Deployer className=&quot;org.apache.catalina.ha.deploy.FarmWarDeployer&quot;</span><br><span class="line">                    tempDir=&quot;/tmp/war-temp/&quot;</span><br><span class="line">                    deployDir=&quot;/tmp/war-deploy/&quot;</span><br><span class="line">                    watchDir=&quot;/tmp/war-listen/&quot;</span><br><span class="line">                    watchEnabled=&quot;false&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;ClusterListener className=&quot;org.apache.catalina.ha.session.ClusterSessionListener&quot;/&gt;</span><br><span class="line">        &lt;/Cluster&gt;</span><br><span class="line">            Cluster 集群配置</span><br><span class="line">            Manager 会话管理器配置</span><br><span class="line">            Channel 信道配置</span><br><span class="line">            Membership 成员判定。使用什么多播地址、端口多少、间隔时长ms、超时时长ms。同一个多播地址和端口认为同属一个组。</span><br><span class="line">            使用时修改这个多播地址，以防冲突。</span><br><span class="line">            Receiver 接收器，多线程接收多个其他节点的心跳、会话信息。默认会从4000到4100依次尝试可用端口。</span><br><span class="line">            address=&quot;auto&quot;，auto可能绑定到127.0.0.1上，所以一定要改为可以用的IP上去。</span><br><span class="line">            Sender 多线程发送器，内部使用了tcp连接池。</span><br><span class="line">            Interceptor 拦截器。</span><br><span class="line">            Valve</span><br><span class="line">            ReplicationValve 检测哪些请求需要检测Session，Session数据是否有了变化，需要启动复制过程。</span><br><span class="line">            ClusterListener</span><br><span class="line">            ClusterSessionListener 集群session侦听器。</span><br><span class="line"></span><br><span class="line">            使用 &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;/&gt;</span><br><span class="line">            添加到 &lt;Engine&gt; 所有虚拟主机都可以启用Session复制</span><br><span class="line">            添加到 &lt;Host&gt; ，该虚拟主机可以启用Session复制</span><br><span class="line">            最后，在应用程序内部启用了才可以使用</span><br><span class="line">2. cp /usr/local/tomcat/conf/web.xml /data/webapp/ROOT/WEB-INF/</span><br><span class="line">   为web.xml的 &lt;web-app&gt; 标签增加子标签 &lt;distributable/&gt; 来开启该应用程序的分布式。</span><br><span class="line">   重启全部Tomcat，通过负载均衡调度到不同节点，返回的SessionID不变了。</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/11/23/Tomcat共享session/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Tomcat共享session
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/11/23/Jdk和Tomcat的安装及配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Jdk和Tomcat的安装及配置</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="Tomcat的反向代理" data-title="Tomcat的反向代理" data-url="http://gmfdevops.com.com/2019/11/23/Tomcat的反向代理/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Tomcat的反向代理">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

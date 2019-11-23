@@ -202,6 +202,287 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Tomcat共享session" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Tomcat共享session/" class="article-date">
+  	<time datetime="2019-11-22T17:25:24.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/23/Tomcat共享session/">
+        Tomcat共享session
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。</em></strong></p>
+<blockquote>
+<p>1)使用MSM管理Tomcat的session，需要以下三种类：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。</span><br><span class="line">2.Session数据的序列化、反序列化类。</span><br><span class="line">3.驱动类，用于连接Reids和memcached的客户端。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于memcache的session共享配置(sticky模式)：</p>
+</blockquote>
+<p><strong><em>当请求结束时Tomcat的session会送给memcached备份。即Tomcat session为主session，memcached session为备session，使用memcached相当于备份了一份Session。查询Session时Tomcat会优先使用自己内存的Session，Tomcat通过jvmRoute发现不是自己的Session，便从memcached中找到该Session，更新本机Session，请求完成后更新memcached。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">1.安装memcached：  </span><br><span class="line">    yum install -y memcached</span><br><span class="line">        关于memcache的运行参数：</span><br><span class="line">            -u username memcached运行的用户身份，必须普通用户</span><br><span class="line">            -p 绑定的端口，默认11211</span><br><span class="line">            -m num 最大内存，单位MB，默认64MB</span><br><span class="line">            -c num 最大连接数，缺省1024</span><br><span class="line">            -d 守护进程方式运行</span><br><span class="line">            -f 增长因子Growth Factor，默认1.25</span><br><span class="line">            -v 详细信息，-vv能看到详细信息</span><br><span class="line">            -M 内存耗尽，不许LRU</span><br><span class="line">            -U 设置UDP监听端口，0表示禁用UDP</span><br><span class="line">2.把需要的三种类放到全局的 lib 目录下。</span><br><span class="line">    asm-5.2.jar</span><br><span class="line">    kryo-3.0.3.jar</span><br><span class="line">    kryo-serializers-0.45.jar</span><br><span class="line">    memcached-session-manager-2.3.2.jar</span><br><span class="line">    memcached-session-manager-tc8-2.3.2.jar</span><br><span class="line">    minlog-1.3.1.jar</span><br><span class="line">    msm-kryo-serializer-2.3.2.jar</span><br><span class="line">    objenesis-2.6.jar</span><br><span class="line">    reflectasm-1.11.9.jar</span><br><span class="line">    spymemcached-2.12.3.jar</span><br><span class="line">3.配置Tomcat的全局context.xml文件（放到&lt;Context&gt;内）：</span><br><span class="line">    vim /usr/local/tomcat/conf/context.xml</span><br><span class="line">        &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">                memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">                failoverNodes=&quot;m105&quot;            #配置备用的memcached，在sticky模式下是自己。</span><br><span class="line">                requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">                transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">        /&gt;</span><br><span class="line">    memcached的节点们；n1、n2只是别名，可以重新命名。</span><br><span class="line">    failoverNodes故障转移节点，n1是备用节点，n2是主存储节点。另一台Tomcat将n1改为n2，其主节点是n1，备用节点是n2。</span><br><span class="line">    配置成功会在日志显示如下信息：</span><br><span class="line">        de.javakaffee.web.msm.MemcachedSessionService.startInternal --------</span><br><span class="line">        - finished initialization:</span><br><span class="line">        - sticky: true</span><br><span class="line">        - operation timeout: 1000</span><br><span class="line">        - node ids: [m105]</span><br><span class="line">        - failover node ids: [m104]</span><br><span class="line">        - storage key prefix: null</span><br><span class="line">        - locking mode: null (expiration: 5s)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 配置non-sticky模式：</p>
+</blockquote>
+<p><strong><em>从msm 1.4.0之后开始支持non-sticky模式。Tomcat session为中转Session，如果n1为主session，n2为备session。产生的新的Session会发送给主、备memcached，并清除本地Session。n1下线，n2转正。n1再次上线，n2依然是主Session存储节点。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">仅仅需要修改全局context.xml文件中的内容，其它需要的类保持不变。</span><br><span class="line"> &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">        memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">        sticky=&quot;false&quot;</span><br><span class="line">        sessionBackupAsync=&quot;false&quot;</span><br><span class="line">        lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">        requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">        transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line"> /&gt;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 配置Redis的Session共享：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">       memcachedNodes=&quot;redis://192.168.38.105:6379&quot;</span><br><span class="line">       sticky=&quot;false&quot;</span><br><span class="line">       sessionBackupAsync=&quot;false&quot;</span><br><span class="line">       lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">       requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">       transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Tomcat共享session/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tomcat共享session">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Tomcat的反向代理" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Tomcat的反向代理/" class="article-date">
+  	<time datetime="2019-11-22T17:25:23.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/23/Tomcat的反向代理/">
+        Tomcat的反向代理
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Nginx 实现Tomcat的动静分离：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">        server_name www.test.com;</span><br><span class="line">        listen 80;</span><br><span class="line">        location / &#123;</span><br><span class="line">                root /var/www/html;</span><br><span class="line">                index index.html;</span><br><span class="line">        &#125;</span><br><span class="line">        location ~* \.jsp$ &#123;</span><br><span class="line">                proxy_pass http://www.test.com:8080;  #在使用域名是注意修改本机的/etc/hosts文件。</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) httpd 代理Tomcat:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">需要Httpd安装相应的代理模块：</span><br><span class="line">    [root@localhost ~]# httpd -M | grep proxy</span><br><span class="line">        proxy_module (shared)</span><br><span class="line">        proxy_ajp_module (shared)</span><br><span class="line">        proxy_balancer_module (shared)</span><br><span class="line">        proxy_connect_module (shared)</span><br><span class="line">        proxy_express_module (shared)</span><br><span class="line">        proxy_fcgi_module (shared)</span><br><span class="line">        proxy_fdpass_module (shared)</span><br><span class="line">        proxy_ftp_module (shared)</span><br><span class="line">        proxy_http_module (shared)</span><br><span class="line">        proxy_scgi_module (shared)</span><br><span class="line">        proxy_wstunnel_module (shared)</span><br><span class="line">    vim /etc/httpd/conf.d/proxy.conf</span><br><span class="line">        &lt;VirtualHost *:80&gt;</span><br><span class="line">            ServerName      www.test.com</span><br><span class="line">            ProxyRequests   off         #正向代理必须关闭。</span><br><span class="line">            Proxyvia        on          #在响应报文的head部分添加一个‘Via: 1.1 www.test.com’。</span><br><span class="line">            ProxyPreserveHost on        #该项将请求报文中head部分的Host通过代理传递到后端的Tomcat。</span><br><span class="line">            ProxyPass / http://127.0.0.1:8080/  #反向代理指令。</span><br><span class="line">            ProxyPassReverse / http://127.0.0.1:8080/   #保留代理的响应头不被重写。</span><br><span class="line">        &lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) htppd中的ajp协议的使用：</p>
+</blockquote>
+<p><strong><em>ajp是一个二进制协议，效率比较高，但是仅仅httpd支持。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">        ServerName      www.test.com</span><br><span class="line">        ProxyRequests   off</span><br><span class="line">        Proxyvia        on</span><br><span class="line">        ProxyPreserveHost on</span><br><span class="line">        ProxyPass / ajp://127.0.0.1:8009/   #注意端口和协议。</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 使用 Nginx 代理后端多台Tomcat:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">（1）以下为index.jsp调试代码：</span><br><span class="line">    &lt;%@ page import=&quot;java.util.*&quot; %&gt;</span><br><span class="line">    &lt;!DOCTYPE html&gt;</span><br><span class="line">    &lt;html lang=&quot;en&quot;&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">    &lt;meta charset=&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;title&gt;lbjsptest&lt;/title&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">    &lt;div&gt;On &lt;%=request.getServerName() %&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div&gt;&lt;%=request.getLocalAddr() + &quot;:&quot; + request.getLocalPort() %&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div&gt;SessionID = &lt;span style=&quot;color:blue&quot;&gt;&lt;%=session.getId() %&gt;&lt;/span&gt;&lt;/div&gt;</span><br><span class="line">    &lt;%=new Date()%&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">    &lt;/html&gt;</span><br><span class="line">（2）配置Nginx：</span><br><span class="line">    vim /etc/nginx/nginx.con</span><br><span class="line">            upstream tomcats &#123;          #在http字段配置。</span><br><span class="line">                #ip_hash;  #仅仅做原地址hash，不做session共享，在服务器宕机后关于session的数据同样丢失。</span><br><span class="line">                server www.test104.com:8080;</span><br><span class="line">                server www.test105.com:8080;</span><br><span class="line">            &#125;</span><br><span class="line">            location ~* \.(jsp|do)$ &#123;   #在server字段引用。</span><br><span class="line">                proxy_pass http://tomcats;</span><br><span class="line">                &#125;</span><br><span class="line">需要在Nginx主机上修改/etc/hosts文件，在重启Nginx。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 使用httpd代理Tomcat：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">httpd必须含有proxy_balancer_module该模块，用来实现负载均衡。</span><br><span class="line">（1）关闭httpd默认的主机：</span><br><span class="line">    vim /etc/httpd/confhttpd.conf</span><br><span class="line">        #DocumentRoot &quot;/var/www/html&quot;</span><br><span class="line">（2）配置代理：</span><br><span class="line">    vim /etc/httpd/conf.d/proxy.conf </span><br><span class="line">        &lt;VirtualHost *:80&gt;</span><br><span class="line">        ServerName www.test.com</span><br><span class="line">        ProxyRequests Off</span><br><span class="line">        ProxyVia On</span><br><span class="line">        ProxyPreserveHost On</span><br><span class="line">        ProxyPass / balancer://lbtomcats/</span><br><span class="line">        ProxyPassReverse / balancer://lbtomcats/</span><br><span class="line">        &lt;/VirtualHost&gt;</span><br><span class="line">        &lt;Proxy balancer://lbtomcats&gt;</span><br><span class="line">        BalancerMember http://www.test105.com:8080 loadfactor=1 route=jvm5</span><br><span class="line">        BalancerMember http://www.test104.com:8080 loadfactor=1 route=jvm4</span><br><span class="line">        &lt;/Proxy&gt;</span><br><span class="line">（3）其中的参数含义：</span><br><span class="line">    loadfactor：定义负载均衡后端服务器权重，取值范围1 - 100。</span><br><span class="line">    lbmethod负载均衡调度方法：</span><br><span class="line">                byrequests （默认）基于权重的统计请求个数进行调度；</span><br><span class="line">                bytrafficz 执行基于权重的流量计数调度；</span><br><span class="line">                bybusyness 通过考量每个后端服务器当前负载进行调度。</span><br><span class="line">    maxattempts：放弃请求前实现故障转移的次数，默认为1，其最大值不应该大于总的节点数。</span><br><span class="line">    nofailover：如果后端服务器没有Session副本，可以设置为On不允许故障转移，Off（默认）故障可以转移。</span><br><span class="line">    stickysession：调度器的sticky session名字，根据web后台编程语言不同，可以设置为JSESSIONID或PHPSESSIONID。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) httpd调度的session粘性：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Header add Set-Cookie &quot;ROUTEID=.%&#123;BALANCER_WORKER_ROUTE&#125;e; path=/&quot;</span><br><span class="line">env=BALANCER_ROUTE_CHANGED</span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">ServerName node1.magedu.com</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyVia On</span><br><span class="line">ProxyPreserveHost On</span><br><span class="line">ProxyPass / balancer://lbtomcats/</span><br><span class="line">ProxyPassReverse / balancer://lbtomcats/</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line">&lt;Proxy balancer://lbtomcats&gt;</span><br><span class="line">BalancerMember http://t1.magedu.com:8080 loadfactor=1 route=Tomcat1</span><br><span class="line">BalancerMember http://t2.magedu.com:8080 loadfactor=2 route=Tomcat2</span><br><span class="line">ProxySet stickysession=ROUTEID</span><br><span class="line">&lt;/Proxy&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>7) Tomcat集群的创建：</p>
+</blockquote>
+<p><strong><em>在客户端无论是基于源IP哈希，还是基于sessionID的哈希，都没有在后端服务器做到Session共享，因此当后端的服务器宕机，都会引起请求的转移此时因为没有session共享，还是会引起数据的丢失及sessionID的改变。</em></strong></p>
+<p><strong><em>Tomcat 集群就是让多个tomcat节点之间的Session信息相互传递。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">1.将以下配置放入server.xml配置文件中。</span><br><span class="line">        &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;</span><br><span class="line">                 channelSendOptions=&quot;8&quot;&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Manager className=&quot;org.apache.catalina.ha.session.DeltaManager&quot;</span><br><span class="line">                   expireSessionsOnShutdown=&quot;false&quot;</span><br><span class="line">                   notifyListenersOnReplication=&quot;true&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Channel className=&quot;org.apache.catalina.tribes.group.GroupChannel&quot;&gt;</span><br><span class="line">            &lt;Membership className=&quot;org.apache.catalina.tribes.membership.McastService&quot;</span><br><span class="line">                        address=&quot;228.0.0.4&quot;</span><br><span class="line">                        port=&quot;45564&quot;</span><br><span class="line">                        frequency=&quot;500&quot;</span><br><span class="line">                        dropTime=&quot;3000&quot;/&gt;</span><br><span class="line">            &lt;Receiver className=&quot;org.apache.catalina.tribes.transport.nio.NioReceiver&quot;</span><br><span class="line">                      address=&quot;auto&quot;</span><br><span class="line">                      port=&quot;4000&quot;</span><br><span class="line">                      autoBind=&quot;100&quot;</span><br><span class="line">                      selectorTimeout=&quot;5000&quot;</span><br><span class="line">                      maxThreads=&quot;6&quot;/&gt;</span><br><span class="line"></span><br><span class="line">            &lt;Sender className=&quot;org.apache.catalina.tribes.transport.ReplicationTransmitter&quot;&gt;</span><br><span class="line">              &lt;Transport className=&quot;org.apache.catalina.tribes.transport.nio.PooledParallelSender&quot;/&gt;</span><br><span class="line">            &lt;/Sender&gt;</span><br><span class="line">            &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.TcpFailureDetector&quot;/&gt;</span><br><span class="line">            &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.MessageDispatchInterceptor&quot;/&gt;</span><br><span class="line">          &lt;/Channel&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Valve className=&quot;org.apache.catalina.ha.tcp.ReplicationValve&quot;</span><br><span class="line">                 filter=&quot;&quot;/&gt;</span><br><span class="line">          &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Deployer className=&quot;org.apache.catalina.ha.deploy.FarmWarDeployer&quot;</span><br><span class="line">                    tempDir=&quot;/tmp/war-temp/&quot;</span><br><span class="line">                    deployDir=&quot;/tmp/war-deploy/&quot;</span><br><span class="line">                    watchDir=&quot;/tmp/war-listen/&quot;</span><br><span class="line">                    watchEnabled=&quot;false&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;ClusterListener className=&quot;org.apache.catalina.ha.session.ClusterSessionListener&quot;/&gt;</span><br><span class="line">        &lt;/Cluster&gt;</span><br><span class="line">            Cluster 集群配置</span><br><span class="line">            Manager 会话管理器配置</span><br><span class="line">            Channel 信道配置</span><br><span class="line">            Membership 成员判定。使用什么多播地址、端口多少、间隔时长ms、超时时长ms。同一个多播地址和端口认为同属一个组。</span><br><span class="line">            使用时修改这个多播地址，以防冲突。</span><br><span class="line">            Receiver 接收器，多线程接收多个其他节点的心跳、会话信息。默认会从4000到4100依次尝试可用端口。</span><br><span class="line">            address=&quot;auto&quot;，auto可能绑定到127.0.0.1上，所以一定要改为可以用的IP上去。</span><br><span class="line">            Sender 多线程发送器，内部使用了tcp连接池。</span><br><span class="line">            Interceptor 拦截器。</span><br><span class="line">            Valve</span><br><span class="line">            ReplicationValve 检测哪些请求需要检测Session，Session数据是否有了变化，需要启动复制过程。</span><br><span class="line">            ClusterListener</span><br><span class="line">            ClusterSessionListener 集群session侦听器。</span><br><span class="line"></span><br><span class="line">            使用 &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;/&gt;</span><br><span class="line">            添加到 &lt;Engine&gt; 所有虚拟主机都可以启用Session复制</span><br><span class="line">            添加到 &lt;Host&gt; ，该虚拟主机可以启用Session复制</span><br><span class="line">            最后，在应用程序内部启用了才可以使用</span><br><span class="line">2. cp /usr/local/tomcat/conf/web.xml /data/webapp/ROOT/WEB-INF/</span><br><span class="line">   为web.xml的 &lt;web-app&gt; 标签增加子标签 &lt;distributable/&gt; 来开启该应用程序的分布式。</span><br><span class="line">   重启全部Tomcat，通过负载均衡调度到不同节点，返回的SessionID不变了。</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Tomcat的反向代理/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tomcat的反向代理">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Jdk和Tomcat的安装及配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Jdk和Tomcat的安装及配置/" class="article-date">
+  	<time datetime="2019-11-22T17:25:22.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/23/Jdk和Tomcat的安装及配置/">
+        Jdk和Tomcat的安装及配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装配置JDK：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.使用rpm包安装：</span><br><span class="line">    yum install -y jdk-8u191-linux-x64.rpm </span><br><span class="line">2.配置全局的环境变量（默认安装在/usr/java）：</span><br><span class="line">    [root@localhost]# vim /etc/profile.djdk.sh</span><br><span class="line">        export JAVA_HOME=/usr/java/default</span><br><span class="line">        export PATH=$JAVA_HOME/bin:$PATH</span><br><span class="line">    [root@localhost]# source /etc/profile.djdk.sh</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 关于JSP程序的执行过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">JSP需要首先转化为.java文件，然后编译为字节码.class文件，最后将.class文件放到JVM上运行。</span><br><span class="line">（1）首先，关于JSP文件的由来，起初基于servlet的.java代码前端后端混在一起不宜与快速的版本迭代，所以就在servlet</span><br><span class="line">的基础之上建立了.jsp文件，实现前后端的分离开发。</span><br><span class="line">（2）故而出现了以下的流程：.jsp---&gt; .java ---&gt; .class 三种格式的文件出现在服务器端。</span><br><span class="line">（3）.jsp到.java的转换是由Tomcat中的jasper工具自动转换，.java到.class有JDK中的编译组件完成。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 安装Tomcat:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tar -xvf apache-tomcat-8.5.42.tar.gz -C /usr/local/</span><br><span class="line">ln -sv /usr/local/apache-tomcat-8.5.42/ /usr/local/tomcat</span><br><span class="line">vim /etc/profile.d/tomcat.sh</span><br><span class="line">    export PATH=/usr/local/tomcat/bin:$PATH</span><br><span class="line">. /etc/profile.d/tomcat.sh  </span><br><span class="line">useradd  -r java</span><br><span class="line">chown -R java:java apache-tomcat-8.5.42</span><br><span class="line">su - java -c &apos;/usr/local/apache-tomcat-8.5.42/bin/catalina.sh start&apos;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 关于Tomcat的各个组件：</p>
+</blockquote>
+<img src="/2019/11/23/Jdk和Tomcat的安装及配置/tomcat.png">
+<p><strong><em>上图中的组件配置在Tomcat的主配置文件server.xml中。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">（1）其中的service组件主要封装connector 和 engine。</span><br><span class="line">（2）在一个Engine中可以定义多个虚拟主机（host）。</span><br><span class="line">    例如：</span><br><span class="line">        &lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;&lt;/Host&gt;</span><br><span class="line">    我们需要在appBase定义的目录中定义 ROOT 目录作为主站目录。</span><br><span class="line">（3）一个webapp目录下的文件结构：</span><br><span class="line">    lib/ 当前应用说依赖的jar包。</span><br><span class="line">    class/ 类文件，当前应用说需要的类。</span><br><span class="line">    WEB-INF/ 当前应用的私有配置，通常会覆盖Tomcat默认的全局配置,包含web.xml，contest.xml。</span><br><span class="line">    MATE-INF/ 类似于WEB-INF。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>5) Tomcat 8005端口的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Server port=&quot;8005&quot; shutdown=&quot;SHUTDOWN&quot;&gt;</span><br><span class="line">该端口默认是监听在127.0.0.1，在 telnet 连接之后，接收到‘SHUTDOWN’字符串之后会会关闭Tomcat服务。</span><br><span class="line">    可以将‘SHUTDOWN’改为一串随机字符串。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) Tomcat管理页面的认证配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">（1）修改配置文件 conf/tomcat-users.xml：</span><br><span class="line">    &lt;role rolename=&quot;manager-gui&quot;/&gt;</span><br><span class="line">    &lt;role rolename=&quot;admin-gui&quot;/&gt;</span><br><span class="line">    &lt;user username=&quot;gmf&quot; password=&quot;testroot&quot; roles=&quot;manager-gui,admin-gui&quot;/&gt;</span><br><span class="line">（2）修改host-manager和manager的配置文件context.xml：</span><br><span class="line">      &lt;Valve className=&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span><br><span class="line">         allow=&quot;192\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1&quot; /&gt;</span><br><span class="line">重启Tomcat服务。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>7) Tomcat 虚拟主机的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;&lt;/Host&gt;</span><br><span class="line">    unpackWARs:是否自动解压WAR格式的应用包。</span><br><span class="line">    autoDeploy:是否自动部署。</span><br><span class="line">mkdir -pv /data/webapp/ROOT</span><br><span class="line">重启Tomcat。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>8) context配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    &lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br><span class="line">            &lt;Context path=&quot;/app&quot; docBase=&quot;/data/app&quot; reloadable=&quot;false&quot;/&gt;</span><br><span class="line">    &lt;/Host&gt;</span><br><span class="line">[root@localhost data]# pwd</span><br><span class="line">/data</span><br><span class="line">[root@localhost data]# ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root  5 Nov 20 21:18 app -&gt; appv2</span><br><span class="line">drwxr-xr-x 2 root root 24 Nov 20 21:11 appv1</span><br><span class="line">drwxr-xr-x 2 root root 24 Nov 20 21:13 appv2</span><br><span class="line">drwxr-x--- 5 root root 44 Nov 20 21:04 webapp</span><br><span class="line">以上配置便于版本的回滚及发布。(需要重启Tomcat)</span><br><span class="line">以上配置生产中reloadable=&quot;false&quot;，否则会在MATE-INF/ 类似于WEB-INF中的配置文件变化后自动加载，影响效率。</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Jdk和Tomcat的安装及配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Jdk和Tomcat的安装及配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-web高可用入门架构" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -764,258 +1045,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/13/Redis的安装及简单配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Redis的安装及简单配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Keepalived的VRRP-script使用" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/08/Keepalived的VRRP-script使用/" class="article-date">
-  	<time datetime="2019-11-08T12:45:41.000Z" itemprop="datePublished">2019-11-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/08/Keepalived的VRRP-script使用/">
-        Keepalived的VRRP script使用
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 通过VRRP script 监控HAproxy进程：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.定义VRRP script 脚本，通常放在global_defs &#123;&#125; 与 vrrp_instance VI_1 &#123;&#125; 之间。</span><br><span class="line">vrrp_script chk_haproxy &#123;</span><br><span class="line">    script &quot;/etc/keepalived/chk_haproxy.sh&quot;</span><br><span class="line">    interval 1</span><br><span class="line">    weight -80</span><br><span class="line">    fall 3</span><br><span class="line">    rise 5</span><br><span class="line">    timeout 2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.在 vrrp_instance VI_1 &#123;&#125; 中引用脚本：</span><br><span class="line">track_script &#123;</span><br><span class="line">    chk_haproxy</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">3.创建VRRP script 脚本中的sh脚本：</span><br><span class="line">yum install psmisc -y</span><br><span class="line"></span><br><span class="line">vim chk_haproxy.sh </span><br><span class="line">#!/bin/bash</span><br><span class="line">/usr/bin/killall -0 haproxy</span><br><span class="line"></span><br><span class="line">chmod a+x /etc/keepalived/chk_haproxy.sh</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 通过VRRP script 监控Nginx进程：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.定义VRRP script 脚本，通常放在global_defs &#123;&#125; 与 vrrp_instance VI_1 &#123;&#125; 之间。</span><br><span class="line">vrrp_script chk_nginx &#123;</span><br><span class="line">    script &quot;/etc/keepalived/chk_nginx.sh&quot;</span><br><span class="line">    interval 1</span><br><span class="line">    weight -80</span><br><span class="line">    fall 3</span><br><span class="line">    rise 5</span><br><span class="line">    timeout 2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.在 vrrp_instance VI_1 &#123;&#125; 中引用脚本：</span><br><span class="line">track_script &#123;</span><br><span class="line">    chk_nginx</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">3.创建VRRP script 脚本中的sh脚本：</span><br><span class="line">yum install psmisc -y</span><br><span class="line"></span><br><span class="line">vim chk_nginx.sh </span><br><span class="line">#!/bin/bash</span><br><span class="line">/usr/bin/killall -0 nginx</span><br><span class="line"></span><br><span class="line">chmod a+x /etc/keepalived/chk_nginx.sh</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 通过VRRP script 监控LVS：</p>
-</blockquote>
-<p><strong><em>由于LVS为内核级的，故而没有服务进程也没有端口号，所以需要借助于第三方的仲裁设备。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">1.在Master节点配置：</span><br><span class="line">vrrp_script chk_down &#123; </span><br><span class="line">    script &quot;/bin/bash -c &apos;[[ -f /data/test/down ]]&apos; &amp;&amp; exit 1 || exit 0&quot;</span><br><span class="line">    interval 1</span><br><span class="line">    weight -130</span><br><span class="line">    fall 3</span><br><span class="line">    rise 5</span><br><span class="line">    timeout 2</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">track_script &#123;</span><br><span class="line">    chk_down</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">2.用NFS模拟仲裁设备：</span><br><span class="line">    yum install -y nfs-utils</span><br><span class="line">    mkdir -pv /data/check</span><br><span class="line">    vim /etc/exports</span><br><span class="line">        /data/check * (rw,no_root_squash)</span><br><span class="line">    systemctl start nfs</span><br><span class="line">    exportfs -v</span><br><span class="line">3.在两台LVS服务器挂载该NFS:</span><br><span class="line">    showmount -e 192.168.38.47</span><br><span class="line">    mkdir -pv /data/chk_lvs/</span><br><span class="line">    mount 192.168.38.47:/data/check  /data/chk_lvs/down</span><br><span class="line">4. 在另一台机器挂载NFS，并探测VIP提供的http服务，如果中断，则在NFS创建down文件。</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/08/Keepalived的VRRP-script使用/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Keepalived的VRRP script使用">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Keepalived的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/08/Keepalived的高级配置/" class="article-date">
-  	<time datetime="2019-11-08T12:45:28.000Z" itemprop="datePublished">2019-11-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/08/Keepalived的高级配置/">
-        Keepalived的高级配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 多个VIP互为主备：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line">1.  在第一节点：</span><br><span class="line">[root@localhost keepalived]#ls</span><br><span class="line">conf.d  keepalived.conf</span><br><span class="line">[root@localhost keepalived]#cat keepalived.conf </span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     acassen@firewall.loc</span><br><span class="line">     failover@firewall.loc</span><br><span class="line">     sysadmin@firewall.loc</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from Alexandre.Cassen@firewall.loc</span><br><span class="line">   smtp_server 192.168.200.1</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">   vrrp_skip_check_adv_addr</span><br><span class="line">   #vrrp_strict</span><br><span class="line">   vrrp_garp_interval 0</span><br><span class="line">   vrrp_gna_interval 0</span><br><span class="line">   vrrp_iptables</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    #nopreempt</span><br><span class="line">    preempt_delay 60s</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51    #全局唯一的虚拟路由id</span><br><span class="line">    priority 50</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.67</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        192.168.38.57</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.66 dev eth0 label eth0:0</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">include /etc/keepalived/conf.d/*.conf</span><br><span class="line">[root@localhost keepalived]#cat conf.d/VI_2.conf </span><br><span class="line">vrrp_instance VI_2 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    #nopreempt</span><br><span class="line">    #preempt_delay 60s</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 50</span><br><span class="line">    priority 150</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.67</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        192.168.38.57</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.88 dev eth0 label eth0:1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">2.  在第二节点：</span><br><span class="line">[root@localhost keepalived]#ls</span><br><span class="line">conf.d  keepalived.conf</span><br><span class="line">[root@localhost keepalived]#cat keepalived.conf </span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     acassen@firewall.loc</span><br><span class="line">     failover@firewall.loc</span><br><span class="line">     sysadmin@firewall.loc</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from Alexandre.Cassen@firewall.loc</span><br><span class="line">   smtp_server 192.168.200.1</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">   vrrp_skip_check_adv_addr</span><br><span class="line">   #vrrp_strict</span><br><span class="line">   vrrp_garp_interval 0</span><br><span class="line">   vrrp_gna_interval 0</span><br><span class="line">   vrrp_iptables</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    #nopreempt</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 150</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.57</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">         192.168.38.67</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.66 dev eth0 label eth0:0</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">include /etc/keepalived/conf.d/*.conf</span><br><span class="line">[root@localhost keepalived]#cat conf.d/VI_2.conf </span><br><span class="line">vrrp_instance VI_2 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    #nopreempt</span><br><span class="line">    #preempt_delay 60s</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 50</span><br><span class="line">    priority 50</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.57</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        192.168.38.67</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.88 dev eth0 label eth0:1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) Keepalived通知配置:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mailx</span><br><span class="line">vim /etc/mail.rc</span><br><span class="line">    set from=xxxx@qq.com</span><br><span class="line">    set smtp=smtp.qq.com</span><br><span class="line">    set smtp-auth-user=xxxxxx@qq.com</span><br><span class="line">    set smtp-auth-password=ndycpollcffobfci</span><br><span class="line">    set smtp-auth=login</span><br><span class="line">    set ssl-verify=ignore</span><br><span class="line">vim notify.sh</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    contact=&apos;xxxxx@qq.com&apos;</span><br><span class="line">    notify() &#123;</span><br><span class="line">    mailsubject=&quot;$(hostname) to be $1, vip 转移&quot;</span><br><span class="line">    mailbody=&quot;$(date +&apos;%F %T&apos;): vrrp transition, $(hostname) changed to be $1&quot;</span><br><span class="line">    echo &quot;$mailbody&quot; | mail -s &quot;$mailsubject&quot; $contact</span><br><span class="line">    &#125;</span><br><span class="line">    case $1 in</span><br><span class="line">    master)</span><br><span class="line">    notify master</span><br><span class="line">    ;;</span><br><span class="line">    backup)</span><br><span class="line">    notify backup</span><br><span class="line">    ;;</span><br><span class="line">    fault)</span><br><span class="line">    notify fault</span><br><span class="line">    ;;</span><br><span class="line">    *)</span><br><span class="line">    echo &quot;Usage: $(basename $0) &#123;master|backup|fault&#125;&quot;</span><br><span class="line">    exit 1</span><br><span class="line">    ;;</span><br><span class="line">    esac</span><br><span class="line">chmod a+x notify.sh</span><br><span class="line">vim keepalived.conf</span><br><span class="line">在vrrp_instance VI_1 &#123;&#125;字段添加以下内容：</span><br><span class="line">    notify_master &quot;/etc/keepalived/notify.sh master&quot;</span><br><span class="line">    notify_backup &quot;/etc/keepalived/notify.sh backup&quot;</span><br><span class="line">    notify_fault &quot;/etc/keepalived/notify.sh fault&quot;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 利用keepalived配置LVS：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">1.在keepalive的配置文件最后加入以下内容：</span><br><span class="line">vim /etc/keepalived/keepalived.conf</span><br><span class="line"></span><br><span class="line">virtual_server 192.168.38.66 80 &#123;</span><br><span class="line">    delay_loop 6    #检查后端服务器的时间间隔。</span><br><span class="line">    lb_algo rr</span><br><span class="line">    lb_kind DR</span><br><span class="line">    #persistence_timeout 120 #会话保持时间。</span><br><span class="line">    protocol TCP</span><br><span class="line">    #sorry_server 192.168.38.26 80</span><br><span class="line">    real_server 192.168.38.36 80 &#123;</span><br><span class="line">        weight 1</span><br><span class="line">        TCP_CHECK &#123;         #定义当前RS主机的健康状态检测方法。</span><br><span class="line">            connect_timeout 5</span><br><span class="line">            nb_get_retry 3</span><br><span class="line">            delay_before_retry 3    #重试之前的延迟时长。</span><br><span class="line">            connect_port 80</span><br><span class="line">            &#125; </span><br><span class="line">    &#125;</span><br><span class="line">    real_server 192.168.38.26 80 &#123;</span><br><span class="line">    weight 1</span><br><span class="line">    TCP_CHECK &#123;</span><br><span class="line">        connect_timeout 5</span><br><span class="line">        nb_get_retry 3  #重试次数。</span><br><span class="line">        delay_before_retry 3</span><br><span class="line">        connect_port 80</span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.后端server运行以下脚本：</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    vip=192.168.38.66</span><br><span class="line">    mask=&apos;255.255.255.255&apos;</span><br><span class="line">    dev=lo:1</span><br><span class="line">    #rpm -q httpd &amp;&gt; /dev/null || yum -y install httpd &amp;&gt;/dev/null</span><br><span class="line">    #service httpd start &amp;&gt; /dev/null &amp;&amp; echo &quot;The httpd Server is Ready!&quot;</span><br><span class="line">    #echo &quot;&lt;h1&gt;`hostname`&lt;/h1&gt;&quot; &gt; /var/www/html/index.html</span><br><span class="line"></span><br><span class="line">    case $1 in</span><br><span class="line">    start)</span><br><span class="line">        echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">        echo 1 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">        echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">        echo 2 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">        ifconfig $dev $vip netmask $mask #broadcast $vip up</span><br><span class="line">        #route add -host $vip dev $dev</span><br><span class="line">        echo &quot;The RS Server is Ready!&quot;</span><br><span class="line">        ;;</span><br><span class="line">    stop)</span><br><span class="line">        ifconfig $dev down</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">        echo &quot;The RS Server is Canceled!&quot;</span><br><span class="line">        ;;</span><br><span class="line">    *) </span><br><span class="line">        echo &quot;Usage: $(basename $0) start|stop&quot;</span><br><span class="line">        exit 1</span><br><span class="line">        ;;</span><br><span class="line">    esac</span><br><span class="line">3. 安装ipvsadm工具查看规制(这些规制是由keepalive中的组件生成)：</span><br><span class="line">    yum install -y ipvsadm</span><br><span class="line">    [root@localhost keepalived]#ipvsadm -Ln</span><br><span class="line">    IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">    Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">    -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">    TCP  192.168.38.66:80 rr</span><br><span class="line">    -&gt; 192.168.38.26:80             Route   1      0          0         </span><br><span class="line">    -&gt; 192.168.38.36:80             Route   1      0          0</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 以上配置是基于TCP监测，下面是关于(HTTP_GET|SSL_GET)应用层的探测：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HTTP_GET &#123;</span><br><span class="line">    url &#123;</span><br><span class="line">    path /index.html</span><br><span class="line">    status_code 200</span><br><span class="line">    &#125;</span><br><span class="line">    connect_timeout 5</span><br><span class="line">    nb_get_retry 3</span><br><span class="line">    delay_before_retry 3</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/08/Keepalived的高级配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Keepalived的高级配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Keepalived安装及简单配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/08/Keepalived安装及简单配置/" class="article-date">
-  	<time datetime="2019-11-08T12:45:14.000Z" itemprop="datePublished">2019-11-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/08/Keepalived安装及简单配置/">
-        Keepalived安装及简单配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 编译安装keepalived:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libnfnetlink-devel libnfnetlink ipvsadm  libnl libnl-devel libnl3 libnl3-devel   lm_sensors-libs net-snmp-agent-libs net-snmp-libs  openssh-server openssh-clients  openssl openssl-devel automake iproute gcc</span><br><span class="line"></span><br><span class="line">tar -xvf keepalived-2.0.18.tar.gz</span><br><span class="line">mkdir /apps/keepalived -pv</span><br><span class="line">./configure --prefix=/apps/keepalived --disable-fwmark</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">这里有两个方法:</span><br><span class="line">    (1) cp /apps/keepalived/etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf</span><br><span class="line">    (2) 修改keepalived.service文件：</span><br><span class="line">        ExecStart=/apps/keepalived/sbin/keepalived $KEEPALIVED_OPTIONS -f /apps/keepalived/etc/keepalived/keepalived.conf</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) keppalived配置文件的简单说明：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/keepalived/keepalived.conf</span><br><span class="line">    在 global_defs&#123; &#125;全局配置中的必须项：</span><br><span class="line">        router_id LVS_DEVEL       #一般设置位置的主机名。</span><br><span class="line">        vrrp_skip_check_adv_addr  #所有报文都检查比较消耗性能，此配置为如果收到的报文和上一个报文是同一个路由器则跳过检查报文中的源地址。</span><br><span class="line">        vrrp_strict               #严格遵守VRRP协议,不允许出现以下状况:1,没有VIP地址,2.配置了单播邻居,3.在VRRP版本2中有IPv6地址。</span><br><span class="line">        vrrp_garp_interval 0      #关闭ARP报文发送延迟。</span><br><span class="line">        vrrp_gna_interval 0       #关闭消息发送延迟。</span><br><span class="line">        vrrp_mcast_group4 224.0.0.18 #默认组播IP地址，224.0.0.0到239.255.255.255</span><br><span class="line">        vrrp_iptables            #默认情况下，Keepalived是禁ping的，会生成一条Iptables规则，开启该项会关闭Iptables规则。</span><br><span class="line">    在 vrrp_instance VI_1 &#123; &#125;</span><br><span class="line">            interface eth0          #指定用于发送探测报文的端物理接口。</span><br><span class="line">            virtual_router_id 51    #指定全局唯一ID，在一组虚拟路由中该值必须统一。</span><br><span class="line">            advert_int 1            #vrrp通告的时间间隔，默认1s</span><br><span class="line">            authentication &#123;        #为了安全起见该项必须开启。</span><br><span class="line">                auth_type PASS</span><br><span class="line">                auth_pass 1111</span><br><span class="line">            &#125;   </span><br><span class="line">            virtual_ipaddress &#123;</span><br><span class="line">                192.168.38.66  dev eth0 label eth0:0       #指定虚拟IP，以及绑定的物理端口和标签名。</span><br><span class="line">            &#125; </span><br><span class="line">    修改/etc/sysctl.conf来更改内核参数:</span><br><span class="line">        net.ipv4.ip_nonlocal_bind = 1 #允许非本地IP地址socket监听，在做LVS/Nginx反向代理时，需要做高可用，VIP在其中有个机器工作，不开该参数，服务可能启动不了。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 默认Keepalive是以组播的方式进行存活性探测，在高并发场景中，网络阻塞可能造成误报，通常以单播方式发送探测报文。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#tcpdump -i eth0 host -nn 192.168.38.67</span><br><span class="line">tcpdump: verbose output suppressed, use -v or -vv for full protocol decode</span><br><span class="line">listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line">15:29:03.532379 IP 192.168.38.67 &gt; 224.0.0.18: VRRPv2, Advertisement, vrid 51, prio 100, authtype simple, intvl 1s, length 20</span><br><span class="line">15:29:04.533204 IP 192.168.38.67 &gt; 224.0.0.18: VRRPv2, Advertisement, vrid 51, prio 100, authtype simple, intvl 1s, length 20</span><br><span class="line">15:29:05.535246 IP 192.168.38.67 &gt; 224.0.0.18: VRRPv2, Advertisement, vrid 51, prio 100, authtype simple, intvl 1s, length 20</span><br><span class="line"></span><br><span class="line">如上默认是由VIP的拥有者向默认的组播地址发送通告报文，同一 vrid 51 内的机器到默认组播地址抓取报文，当一个局域网中存在多组Keepalive时，会影响效率。</span><br><span class="line">下面配置为单播方式提高效率：</span><br><span class="line">    vrrp_instance VI_1 &#123; &#125; 字段：（一组的Keepalived都要配置）</span><br><span class="line">        unicast_src_ip 192.168.38.67        #指定单播的源IP</span><br><span class="line">        unicast_peer &#123;</span><br><span class="line">            192.168.38.57                    #指定单播的对方IP  </span><br><span class="line">        &#125;</span><br><span class="line">    注意：一定要关闭vrrp_strict。</span><br><span class="line">[root@localhost ~]#tcpdump -i eth0 host -nn 192.168.38.67</span><br><span class="line">tcpdump: verbose output suppressed, use -v or -vv for full protocol decode</span><br><span class="line">listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line">15:44:19.723543 IP 192.168.38.67 &gt; 192.168.38.57: VRRPv2, Advertisement, vrid 51, prio 100, authtype simple, intvl 1s, length 20</span><br><span class="line">15:44:20.725283 IP 192.168.38.67 &gt; 192.168.38.57: VRRPv2, Advertisement, vrid 51, prio 100, authtype simple, intvl 1s, length 20</span><br><span class="line">15:44:21.727332 IP 192.168.38.67 &gt; 192.168.38.57: VRRPv2, Advertisement, vrid 51, prio 100, authtype simple, intvl 1s, length 20</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 默认Keepalived为抢占模式，生产多用非抢占模式：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vrrp_instance VI_1 &#123; &#125;（注意：MASTER必须改为BACKUP,同时同一组中最好都改为nopreempt）</span><br><span class="line">    state BACKUP</span><br><span class="line">    nopreempt</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 配置抢占延迟：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">preempt_delay 60s #抢占延迟模式，默认延迟300s，需要各keepalived服务器state为BACKUP，不能和非抢占模式同时使用。</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/08/Keepalived安装及简单配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Keepalived安装及简单配置">
          &nbsp;
         view
     </span>
