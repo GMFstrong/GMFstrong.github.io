@@ -202,6 +202,165 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-HTTPD的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/09/HTTPD的编译安装/" class="article-date">
+  	<time datetime="2019-10-09T13:54:30.000Z" itemprop="datePublished">2019-10-09</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/09/HTTPD的编译安装/">
+        HTTPD的编译安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 准备安装httpd-2.4依赖的包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。</span><br><span class="line">dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 make</span><br><span class="line">tar -xvf httpd-2.4.41.tar.gz</span><br><span class="line">tar -xvf apr-1.7.0.tar.bz2</span><br><span class="line">tar -xvf apr-util-1.6.1.tar.bz2</span><br><span class="line">mkdir /apps/httpd -pv</span><br><span class="line">mv apr-1.7.0 httpd-2.4.41/srclib/apr</span><br><span class="line">mv apr-util-1.6.1 httpd-2.4.41/srclib/apr-util</span><br><span class="line">cd httpd-2.4.41</span><br><span class="line">./configure \</span><br><span class="line">--prefix=/apps/httpd \</span><br><span class="line">--enable-so \</span><br><span class="line">--enable-ssl \</span><br><span class="line">--enable-cgi \</span><br><span class="line">--enable-rewrite \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-pcre \</span><br><span class="line">--with-included-apr \</span><br><span class="line">--enable-modules=most \</span><br><span class="line">--enable-mpms-shared=all \</span><br><span class="line">--with-mpm=prefork</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">修改环境变量：</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 默认用户的更改：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">默认apache在编译安装之后的默认用户是daemon。</span><br><span class="line">可以创建一个专有的系统用户供其使用：</span><br><span class="line">useradd -s /sbin/nologin -r apache</span><br><span class="line">打开以下文件，修改如下两行：</span><br><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 设置开机启动的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">方法一：</span><br><span class="line">在以下文件添加如下一行：</span><br><span class="line">vim /etc/rc.d/rc.local</span><br><span class="line">/apps/httpd/bin/apachectl start</span><br><span class="line">为以上文件添加执行权限：</span><br><span class="line">chmod +x /etc/rc.d/rc.local</span><br><span class="line">方法二：</span><br><span class="line">编写systemd的管理脚本：</span><br><span class="line">vim /usr/lib/systemd/system/httpd.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=The Apache HTTP Server</span><br><span class="line">After=network.target remote-fs.target nss-lookup.target</span><br><span class="line">Documentation=man:httpd(8)</span><br><span class="line">Documentation=man:apachectl(8)</span><br><span class="line">[Service]</span><br><span class="line">Type=forking #此行不要为notify，因为在apache编译时没有加载该模块。</span><br><span class="line">#EnvironmentFile=/etc/sysconfig/httpd</span><br><span class="line">ExecStart=/apps/httpd/bin/httpd $OPTIONS -k start</span><br><span class="line">ExecReload=/apps/httpd/bin/httpd $OPTIONS -k graceful</span><br><span class="line">ExecStop=/bin/kill -WINCH $&#123;MAINPID&#125;</span><br><span class="line">KillSignal=SIGCONT</span><br><span class="line">PrivateTmp=true</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">重新加载配置文件：</span><br><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/09/HTTPD的编译安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HTTPD的编译安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-https的·相关配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/09/https的·相关配置/" class="article-date">
+  	<time datetime="2019-10-09T13:54:06.000Z" itemprop="datePublished">2019-10-09</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/09/https的·相关配置/">
+        https的·相关配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Apache的https的实现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SSL是基于IP地址实现，单IP的主机仅可以使用一个https虚拟主机。</span><br><span class="line">（1）安装支持https的模块：</span><br><span class="line">    yum -y install mod_ssl</span><br><span class="line">    确认mod_ssl模块安装成功：</span><br><span class="line">    [root@localhost conf.modules.d]#grep mod_ssl *        </span><br><span class="line">    00-ssl.conf:LoadModule ssl_module modules/mod_ssl.so</span><br><span class="line">    在安装以上模块后，默认会生成一个自签名的证书。</span><br><span class="line">（2）搭建私有Ca，为其颁发证书。</span><br><span class="line">    在/etc/httpd/conf.d/ssl.conf文件中修改以下几行。</span><br><span class="line">    SSLCertificateFile /etc/pki/tls/certs/localhost.crt         #指明证书的位置</span><br><span class="line">    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key    #指明证书的私钥位置</span><br><span class="line">    SSLCACertificateFile /etc/pki/tls/certs/ca-bundle.crt       #指明Ca证书的位置</span><br><span class="line">    SSLCertificateChainFile /etc/pki/tls/certs/server-chain.crt #若是证书链，在此指明证书链的位置</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 实现http到https自动跳转(基于HSTS)：</p>
+</blockquote>
+<p>服务器端配置支持HSTS后，会在给浏览器返回的HTTP首部中携带HSTS字段。<br>浏览器获取到该信息后，会将所有HTTP访问请求在内部做307跳转到HTTPS。<br>而无需任何网络过程。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/httpd/conf.d/test.conf</span><br><span class="line">#Redirect temp / http://www.baidu.com/  实现跨主机跳转，在本机跳转同一目录容易造成跳转环路。</span><br><span class="line">Header always set Strict-Transport-Security &quot;max-age=31536000&quot;</span><br><span class="line">RewriteEngine on</span><br><span class="line">RewriteRule ^(/.*)$ https://192.168.38.57$1 [redirect=302]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">将http请求转发至https的URL</span><br><span class="line">重定向</span><br><span class="line">Redirect [status] URL-path URL</span><br><span class="line">status状态：</span><br><span class="line">permanent： 返回永久重定向状态码 301</span><br><span class="line">temp：返回临时重定向状态码302. 此为默认值</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) http的Method方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GET： 从服务器获取一个资源</span><br><span class="line">HEAD： 只从服务器获取文档的响应首部</span><br><span class="line">POST： 向服务器输入数据，通常会再由网关程序继续处理</span><br><span class="line">PUT： 将请求的主体部分存储在服务器中，如上传文件</span><br><span class="line">DELETE： 请求删除服务器上指定的文档</span><br><span class="line">TRACE： 追踪请求到达服务器中间经过的代理服务器</span><br><span class="line">OPTIONS：请求服务器返回对指定资源支持使用的请求方法</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) http协议常用的状态码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> 200： 成功，请求数据通过响应报文的entity-body部分发送;OK</span><br><span class="line"> 301： 请求的URL指向的资源已经被删除；但在响应报文中通过首部Location指明了资</span><br><span class="line">源现在所处的新位置；Moved Permanently</span><br><span class="line"> 302： 响应报文Location指明资源临时新位置 Moved Temporarily</span><br><span class="line"> 304： 客户端发出了条件式请求，但服务器上的资源未曾发生改变，则通过响应此响应</span><br><span class="line">状态码通知客户端；Not Modified</span><br><span class="line"> 401： 需要输入账号和密码认证方能访问资源；Unauthorized</span><br><span class="line"> 403： 请求被禁止；Forbidden</span><br><span class="line"> 404： 服务器无法找到客户端请求的资源；Not Found</span><br><span class="line"> 500： 服务器内部错误；Internal Server Error</span><br><span class="line"> 502： 代理服务器从后端服务器收到了一条伪响应，如无法连接到网关；Bad Gateway</span><br><span class="line"> 503： 服务不可用，临时服务器维护或过载，服务器无法处理请求</span><br><span class="line"> 504： 网关超时</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/09/https的·相关配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="https的·相关配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-HTTPD的配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -938,172 +1097,6 @@
 <div class="counter-tag counter">
     <span id="/2019/09/15/MYSQL的二进制安装/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="MYSQL的二进制安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-SSH服务简单优化" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/15/SSH服务简单优化/" class="article-date">
-  	<time datetime="2019-09-15T12:04:46.000Z" itemprop="datePublished">2019-09-15</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/15/SSH服务简单优化/">
-        SSH服务简单优化
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在Centos中默认使用的是Openssh，这一开源的服务软件。</p>
-<blockquote>
-<p>其中客户端的文件列表如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rpm -qal openssh-clients</span><br><span class="line">/etc/ssh/ssh_config</span><br><span class="line">/usr/bin/scp</span><br><span class="line">/usr/bin/sftp</span><br><span class="line">/usr/bin/slogin</span><br><span class="line">/usr/bin/ssh</span><br><span class="line">/usr/bin/ssh-add</span><br><span class="line">/usr/bin/ssh-agent</span><br><span class="line">/usr/bin/ssh-copy-id</span><br><span class="line">/usr/bin/ssh-keyscan</span><br><span class="line">/usr/lib64/fipscheck/ssh.hmac</span><br><span class="line">/usr/libexec/openssh/ssh-pkcs11-helper</span><br><span class="line">/usr/share/man/man1/scp.1.gz</span><br><span class="line">/usr/share/man/man1/sftp.1.gz</span><br><span class="line">/usr/share/man/man1/slogin.1.gz</span><br><span class="line">/usr/share/man/man1/ssh-add.1.gz</span><br><span class="line">/usr/share/man/man1/ssh-agent.1.gz</span><br><span class="line">/usr/share/man/man1/ssh-copy-id.1.gz</span><br><span class="line">/usr/share/man/man1/ssh-keyscan.1.gz</span><br><span class="line">/usr/share/man/man1/ssh.1.gz</span><br><span class="line">/usr/share/man/man5/ssh_config.5.gz</span><br><span class="line">/usr/share/man/man8/ssh-pkcs11-helper.8.gz</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>客户端常用的选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-p port：远程服务器监听的端口</span><br><span class="line">-b：指定连接的源IP</span><br><span class="line">-v：调试模式</span><br><span class="line">-C：压缩方式</span><br><span class="line">-X：支持x11转发</span><br><span class="line">-t：强制伪tty分配</span><br><span class="line">ssh -t remoteserver1 ssh -t remoteserver2 ssh remoteserver3</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>服务端的文件列表：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rpm -qal openssh-server</span><br><span class="line">/etc/pam.d/sshd</span><br><span class="line">/etc/ssh/sshd_config</span><br><span class="line">/etc/sysconfig/sshd</span><br><span class="line">/usr/lib/systemd/system/sshd-keygen.service</span><br><span class="line">/usr/lib/systemd/system/sshd.service</span><br><span class="line">/usr/lib/systemd/system/sshd.socket</span><br><span class="line">/usr/lib/systemd/system/sshd@.service</span><br><span class="line">/usr/lib64/fipscheck/sshd.hmac</span><br><span class="line">/usr/libexec/openssh/sftp-server</span><br><span class="line">/usr/sbin/sshd</span><br><span class="line">/usr/sbin/sshd-keygen</span><br><span class="line">/usr/share/man/man5/moduli.5.gz</span><br><span class="line">/usr/share/man/man5/sshd_config.5.gz</span><br><span class="line">/usr/share/man/man8/sftp-server.8.gz</span><br><span class="line">/usr/share/man/man8/sshd.8.gz</span><br><span class="line">/var/empty/sshd</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>客户端与服务端的配置文件分别为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">客户端：/etc/ssh/ssh_config</span><br><span class="line">服务端：/etc/ssh/sshd_config</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>首先，关于客户端的优化：</p>
-</blockquote>
-<p>默认在用ssh的密码首次连接远程服务器时，会询问检查服务端公钥的MD5值。可以使用如下配置关闭：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh root@192.168.38.16</span><br><span class="line">The authenticity of host &apos;192.168.38.16 (192.168.38.16)&apos; can&apos;t be established.</span><br><span class="line">RSA key fingerprint is 7a:da:f0:f0:d0:13:c1:4b:08:51:83:b3:e5:4b:1d:c6.</span><br><span class="line">Are you sure you want to continue connecting (yes/no)?</span><br></pre></td></tr></table></figure></p>
-<p>关闭该配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">把/etc/ssh/ssh_config文件中的  “#   StrictHostKeyChecking ask”  改为 “StrictHostKeyChecking no”。</span><br><span class="line">也可以直接在文件末尾追加一行“StrictHostKeyChecking no”。</span><br></pre></td></tr></table></figure></p>
-<p>效果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh root@192.168.38.16</span><br><span class="line">Warning: Permanently added &apos;192.168.38.16&apos; (RSA) to the list of known hosts.</span><br><span class="line">root@192.168.38.16&apos;s password:</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>再者关于服务端的优化：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#Port 22  建议使用非标准端口</span><br><span class="line">#ListenAddress 0.0.0.0  根据实际情况监听单个的私网IP。</span><br><span class="line">#PermitRootLogin yes    建议禁止root用户直接登录改为 no</span><br><span class="line">#PermitEmptyPasswords no  关闭使用空密码</span><br><span class="line">#PasswordAuthentication yes  允许使用密码登录，在配置过密钥对登录以后，建议关闭</span><br><span class="line">#UseDNS yes                     为了提升ssh连接速度建议改为no</span><br><span class="line">#GSSAPIAuthentication yes       为了提升ssh连接速度建议改为no   </span><br><span class="line">#StrictModes yes                检查.ssh/文件的所有者，权限等</span><br><span class="line">#LoginGraceTime 指的是登录输入密码的最长时间，2m内容不输入密码，则结束本次链接，0代表不做限制。</span><br><span class="line">#StrictModes 指的是在接受登录之前 是否检查文件权限和所有者信息和家目录信息，默认要检查。</span><br><span class="line">#MaxAuthTries 每次登录输入密码错误次数，默认是6次。</span><br><span class="line">#X11Forwarding 指定是否支持X11转发;</span><br><span class="line">#ClientAlivedInterval 非活动时间限制，0为不限制;</span><br><span class="line">#ClientAlivedCountMax 指定满足非活动时间次数，因此ClientAlivedInterval乘以ClientAlivedCountMax</span><br><span class="line">的值为最长终非活动时间;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/15/SSH服务简单优化/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="SSH服务简单优化">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-SSH免密码登录密钥配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/15/SSH免密码登录密钥配置/" class="article-date">
-  	<time datetime="2019-09-15T12:04:31.000Z" itemprop="datePublished">2019-09-15</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/15/SSH免密码登录密钥配置/">
-        SSH免密码登录密钥配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>首先,在本地生成密钥对：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh-keygen -t rsa</span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file in which to save the key (/root/.ssh/id_rsa): </span><br><span class="line">Created directory &apos;/root/.ssh&apos;.</span><br><span class="line">Enter passphrase (empty for no passphrase): </span><br><span class="line">Enter same passphrase again: </span><br><span class="line">Your identification has been saved in /root/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved in /root/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">cf:24:b8:b3:28:80:cc:e8:16:77:07:f2:b9:1d:bb:bf root@localhost.localdomain</span><br><span class="line">The key&apos;s randomart image is:</span><br><span class="line">+--[ RSA 2048]----+</span><br><span class="line">|                 |</span><br><span class="line">|                 |</span><br><span class="line">|                 |</span><br><span class="line">|   . . .         |</span><br><span class="line">|=   o + S .      |</span><br><span class="line">|++ . + + =       |</span><br><span class="line">|..o . * o o      |</span><br><span class="line">| o.  o =         |</span><br><span class="line">|.  .. ..oE.      |</span><br><span class="line">+-----------------+</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>默认生成如下文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# tree .ssh/</span><br><span class="line">.ssh/</span><br><span class="line">├── id_rsa</span><br><span class="line">└── id_rsa.pub</span><br><span class="line"></span><br><span class="line">0 directories, 2 files</span><br></pre></td></tr></table></figure></p>
-<p>将生成的公钥上传到ssh的服务端。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh-copy-id -i .ssh/id_rsa.pub root@192.168.38.27</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span><br><span class="line">root@192.168.38.27&apos;s password: </span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   &quot;ssh &apos;root@192.168.38.27&apos;&quot;</span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br></pre></td></tr></table></figure></p>
-<p>在服务端生成如下文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@test ~]# tree .ssh/</span><br><span class="line">.ssh/</span><br><span class="line">└── authorized_keys</span><br><span class="line"></span><br><span class="line">0 directories, 1 file</span><br></pre></td></tr></table></figure></p>
-<p>直接登录成功：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh root@192.168.38.27                           </span><br><span class="line">Warning: Permanently added &apos;192.168.38.27&apos; (ECDSA) to the list of known hosts.</span><br><span class="line">Last login: Tue Sep  3 05:41:17 2019 from 192.168.38.19</span><br><span class="line">[root@test ~]#</span><br></pre></td></tr></table></figure></p>
-<p>有时候为了安全需要对私钥进行加密：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]# ssh-keygen -p</span><br><span class="line">Enter file in which the key is (/root/.ssh/id_rsa): </span><br><span class="line">Key has comment &apos;/root/.ssh/id_rsa&apos;</span><br><span class="line">Enter new passphrase (empty for no passphrase): </span><br><span class="line">Enter same passphrase again: </span><br><span class="line">Your identification has been saved with the new passphrase.</span><br><span class="line">[root@centos7 ~]# ssh 192.168.38.16</span><br><span class="line">Enter passphrase for key &apos;/root/.ssh/id_rsa&apos;: </span><br><span class="line">Last login: Tue Sep  3 16:02:03 2019 from 192.168.38.17</span><br><span class="line">[root@centos6 ~]#</span><br></pre></td></tr></table></figure></p>
-<p>如上所述，在加密过后需要在登录时验证私钥口令，比较麻烦，因此可以托管到ssh-agent bash 代理中,需要安装psmisc。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]# yum install -y psmisc</span><br><span class="line">...</span><br><span class="line">[root@centos7 ~]# ssh-agent bash</span><br><span class="line">[root@centos7 ~]# pstree | grep ssh</span><br><span class="line">        |-sshd---sshd---bash---bash-+-grep</span><br><span class="line">        |                           `-ssh-agent</span><br><span class="line">[root@centos7 ~]# ssh-add</span><br><span class="line">Enter passphrase for /root/.ssh/id_rsa: </span><br><span class="line">Identity added: /root/.ssh/id_rsa (/root/.ssh/id_rsa)</span><br><span class="line">[root@centos7 ~]# ssh 192.168.38.16</span><br><span class="line">Last login: Tue Sep  3 16:08:49 2019 from 192.168.38.17</span><br></pre></td></tr></table></figure></p>
-<p>如上，将私钥密码托管到ssh-agent代理后，只需输入一次密码。</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/15/SSH免密码登录密钥配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="SSH免密码登录密钥配置">
          &nbsp;
         view
     </span>
