@@ -202,6 +202,177 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-iptables相关配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/21/iptables相关配置/" class="article-date">
+  	<time datetime="2019-10-21T05:21:48.000Z" itemprop="datePublished">2019-10-21</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/21/iptables相关配置/">
+        iptables相关配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>IPTABLES是工作在用户空间，用来管理内核空间的netfilter的工具。</p>
+<blockquote>
+<p>1) iptables的默认在各个链上的策略为ACCEPT。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.修改INPUT链默认策略：</span><br><span class="line">iptables -P INPUT DROP</span><br><span class="line">2.创建自定义的链：</span><br><span class="line">iptables -N WEB  #不能直接应用，需要在系统链中引用。</span><br><span class="line">3.删除自定义的链：</span><br><span class="line">iptables -X WEB  #自定义的链不能有规则，必须先清空规制。</span><br><span class="line">4.清空指定的链：</span><br><span class="line">iptables -F WEB</span><br><span class="line">5.修改自定义的链名：</span><br><span class="line">iptables -E WEB test</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 查看iptables中定义的规制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-L：list, 列出指定鏈上的所有规则，本选项须置后</span><br><span class="line">-n：numberic，以数字格式显示地址和端口号</span><br><span class="line">-v：verbose，详细信息</span><br><span class="line">-vv 更详细</span><br><span class="line">-x：exactly，显示计数器结果的精确值,而非单位转换后的易读值</span><br><span class="line">--line-numbers：显示规则的序号</span><br><span class="line">iptables -vnL --line-numbers    #-vnL必须将L放在最后</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 管理链上的规制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-A：append，追加到指定链上最后。</span><br><span class="line">-I：insert, 插入指定链规制，要指明插入至的规则编号，默认插到第一条。</span><br><span class="line">iptables -I INPUT 2 -s 127.0.0.1 -j REJECT #将该规制插入到第二条的位置。</span><br><span class="line">-D：delete，删除指定链规制，(1) 指明规则序号 (2) 指明规则本身。</span><br><span class="line">iptables -D INPUT 2</span><br><span class="line">iptables -D INPUT -s 192.168.38.67 -j REJECT #相当于把加入该规制的A或I变换成D</span><br><span class="line">-R：replace，修改指定链上指定序号的规制。</span><br><span class="line">iptables -R INPUT 2 -s 192.168.38.67 -j DROP</span><br><span class="line">-F：flush，清空指定的规则链。</span><br><span class="line">iptables的每条规则都有两个计数器：</span><br><span class="line">(1) 匹配到的报文的个数</span><br><span class="line">(2) 匹配到的所有报文的大小之和</span><br><span class="line">-Z：zero，置零以上计数器。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 基本匹配条件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-s 源IP地址或范围</span><br><span class="line">-d 目标IP地址或范围</span><br><span class="line">-p 指定协议,使用数字</span><br><span class="line">-i 报文流入的接口；只能应用于数据报文流入环节，只应用于INPUT、FORWARD、PREROUTING链</span><br><span class="line">-o 报文流入的接口；只能应用于数据报文流入环节，只应用于INPUT、FORWARD、PREROUTING链</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5)扩展的匹配规制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">需要加载扩展模块（/usr/lib64/xtables/*.so）</span><br><span class="line">--sport 匹配报文源端口,可为端口范围</span><br><span class="line">--dport 匹配报文目标端口,可为范围</span><br><span class="line">--tcp-flags mask comp </span><br><span class="line">    mask 需检查的标志位列表，用,分隔。例如 SYN,ACK,FIN,RST</span><br><span class="line">    comp 在mask列表中必须为1的标志位列表，无指定则必须为0，用,分隔</span><br><span class="line">    例如：--tcp-flags SYN,ACK,FIN,RST SYN 表示要检查的标志位为SYN,ACK,FIN,RST四个，其中SYN必须为1，余下的必须为0</span><br><span class="line">--syn：用于匹配第一次握手相当于：--tcp-flags SYN,ACK,FIN,RST SYN</span><br><span class="line">    例如：iptables -A INPUT -p tcp --syn -j REJECT </span><br><span class="line">          表示就得TCP连接保持，若有新的TCP连接进来，则拒绝。</span><br><span class="line">-p支持的协议为： tcp, udp, icmp, icmpv6, udplite,esp, ah, sctp, mh</span><br><span class="line">    例如：iptables -A INPUT -p icmp --icmp-type echo-request -j REJECT</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>6) 显式指定需要加载的模块：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">1.multiport扩展：以离散方式定义多端口匹配,最多指定15个端口。</span><br><span class="line">    --sports 指定多个源端口</span><br><span class="line">    --dports 指定多个目标端口</span><br><span class="line">    --ports  多个源或目标端口</span><br><span class="line">    例如：iptables -I INPUT 2 -s 192.168.38.0/24 -d 192.168.38.0/24 -p tcp -m multiport --dports 22,21,80 -j ACCEPT</span><br><span class="line">2.iprange扩展：指明连续的ip地址范围 （但一般不是整个网络）</span><br><span class="line">    --src-range from-to 源IP地址范围</span><br><span class="line">    --dst-range from-to 目标IP地址范围</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 80 -m iprange --src-range 192.168.38.57-192.168.38.100 -j DROP</span><br><span class="line">3.mac扩展：指明源MAC地址</span><br><span class="line">    --mac-source XX:XX:XX:XX:XX:XX</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 80 -m mac --mac-source 00:0c:29:6a:78:fa -j REJECT</span><br><span class="line">4.string扩展：对报文中的应用层数据做字符串模式匹配检测。</span><br><span class="line">    --algo 字符串匹配检测算法</span><br><span class="line">        bm：Boyer-Moore</span><br><span class="line">        kmp：Knuth-Pratt-Morris</span><br><span class="line">    --from offset 开始偏移</span><br><span class="line">    --to offset 结束偏移   </span><br><span class="line">    --string pattern 要检测的字符串模式</span><br><span class="line">    --hex-string pattern要检测字符串模式，16进制格式</span><br><span class="line">    例如：iptables -A OUTPUT -d 192.168.38.67 -p tcp --sport 80 -m string --algo bm --string &quot;sbsb&quot; -j  REJECT</span><br><span class="line">5.time扩展：根据将报文到达的时间与指定的时间范围进行匹配。</span><br><span class="line">    --datestart YYYY[-MM[-DD[Thh[:mm[:ss]]]]] 日期</span><br><span class="line">    --datestop YYYY[-MM[-DD[Thh[:mm[:ss]]]]]</span><br><span class="line">    --timestart hh:mm[:ss] 时间</span><br><span class="line">    --timestop hh:mm[:ss]</span><br><span class="line">    --monthdays day[,day...] 每个月的几号</span><br><span class="line">    --weekdays day[,day...] 星期几，1 – 7 分别表示星期一到星期日</span><br><span class="line">    --kerneltz：内核时区，不建议使用，CentOS7系统默认为UTC</span><br><span class="line">    centos6 不支持kerneltz ，--localtz指定本地时区(默认)</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 80 -m time --timestart 4:00 --timestop 12:00 -j REJECT</span><br><span class="line">6.connlimit扩展：根据每客户端IP做并发连接数数量匹配，可防止简单Dos(Denial of Service，拒绝服务)攻击。</span><br><span class="line">    --connlimit-upto #：连接的数量小于等于#时匹配</span><br><span class="line">    --connlimit-above #：连接的数量大于#时匹配</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 22 -m connlimit --connlimit-above 2 -j REJECT</span><br><span class="line">7.imit扩展：基于收发报文的速率做匹配。</span><br><span class="line">    --limit #[/second|/minute|/hour|/day]</span><br><span class="line">    --limit-burst number</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p icmp --icmp-type echo-request -m limit --limit 10/minute --limit-burst 5 -j ACCEPT</span><br><span class="line">    表示前5个包不限制，以后平均每分钟通过10个包。</span><br><span class="line">8.state扩展：根据”连接追踪机制“去检查连接的状态，较耗资源 。</span><br><span class="line">    NEW：新发出请求；连接追踪信息库中不存在此连接的相关信息条目，因此，将其识别为第一次发出的请求。</span><br><span class="line">    ESTABLISHED：NEW状态之后，连接追踪信息库中为其建立的条目失效之前期间内所进行的通信状态。</span><br><span class="line">    RELATED：新发起的但与已有连接相关联的连接，如：ftp协议中的数据连接与命令连接之间的关系。</span><br><span class="line">    INVALID：无效的连接，如flag标记不正确。</span><br><span class="line">    UNTRACKED：未进行追踪的连接，如raw表中关闭追踪。</span><br><span class="line">    已经追踪到的并记录下来的连接信息库：/proc/net/nf_conntrack</span><br><span class="line">    调整连接追踪功能所能够容纳的最大连接数量：/proc/sys/net/nf_conntrack_max</span><br><span class="line">    不同的协议的连接追踪时长：/proc/sys/net/netfilter/</span><br><span class="line">    CentOS7 需要加载模块： modprobe nf_conntrack_ipv4</span><br><span class="line">    iptables的链接跟踪表最大容量为/proc/sys/net/nf_conntrack_max，各种状态的超时链接会从表中删除；当模</span><br><span class="line">    板满载时，后续连接可能会超时</span><br><span class="line">解决方法两个：</span><br><span class="line">    (1) 加大nf_conntrack_max 值</span><br><span class="line">    vi /etc/sysctl.conf</span><br><span class="line">    net.nf_conntrack_max = 393216</span><br><span class="line">    net.netfilter.nf_conntrack_max = 393216</span><br><span class="line">    (2) 降低 nf_conntrack timeout时间</span><br><span class="line">    vi /etc/sysctl.conf</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_established = 300</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120</span><br><span class="line">    iptables –I INPUT -d LocalIP -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line">    iptables -A INPUT -d LocalIP -p tcp --dport 21 -m state --state NEW -j ACCEPT</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>7) iptables的规制默认保存期限为内核存活期限（重启机器就会清空）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">永久保存iptables规制：</span><br><span class="line">CentOS 7</span><br><span class="line">    iptables-save &gt; /PATH/TO/SOME_RULES_FILE</span><br><span class="line">    若要开机自动启用该规则，需要安装iptables-service，保存到/etc/sysconfig/iptables文件中</span><br><span class="line">    重新载入预存规则文件中规则：</span><br><span class="line">    iptables-restore &lt; /PATH/FROM/SOME_RULES_FILE</span><br><span class="line">    -n, --noflush：不清除原有规则</span><br><span class="line">    -t, --test：仅分析生成规则集，但不提交</span><br><span class="line">CentOS 6</span><br><span class="line">    service iptables save 将规则覆盖保存至/etc/sysconfig/iptables文件中</span><br><span class="line">    service iptables restart</span><br><span class="line">    会自动从/etc/sysconfig/iptables 重新载入规则</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>添加临时路由：ip route add 172.168.8.0/24 via 192.168.38.67</em></strong></p>
+<blockquote>
+<p>8) 基于iptables的NAT:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.SNAT:</span><br><span class="line">    iptables -t nat -A POSTROUTING -s 172.168.8.47 ! -d  172.168.8.0/24 -j SNAT --to-source 192.168.38.67</span><br><span class="line">    在拨号上网中，网关地址可能会发生变化，可用MASQUERADE，进行动态监视：</span><br><span class="line">    iptables -t nat -A POSTROUTING -s 10.0.1.0/24 ! –d 10.0.1.0/24 -j MASQUERADE</span><br><span class="line">2.DNAT:</span><br><span class="line">    iptables -t nat -A PREROUTING -s 0/0 -d 172.168.8.67 -p tcp --dport 10086 -j DNAT --to-destination 192.168.38.57:22</span><br><span class="line">3.REDIRECT：（在web服务器上设置）</span><br><span class="line">    iptables -t nat -A PREROUTING -s 0/0 -d 192.168.38.57 -p tcp --dport 80   -j REDIRECT --to-ports 8080</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/21/iptables相关配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="iptables相关配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-关于Linux日志" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/关于Linux日志/" class="article-date">
+  	<time datetime="2019-10-17T11:07:58.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/17/关于Linux日志/">
+        关于Linux日志
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 各种日志文件的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. /var/log/secure：系统安装日志，文本格式，应周期性分析。</span><br><span class="line">2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。</span><br><span class="line">3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。</span><br><span class="line">4. /var/log/lastlog：每一个用户最近一次的登录信息，二进制格式，lastlog命令可以查看。</span><br><span class="line">5. /var/log/dmesg：系统引导过程中的日志信息，文本格式文本查看工具查看。也可用专用命令dmesg查看。</span><br><span class="line">6. /var/log/messages ：系统中大部分的信息。</span><br><span class="line">7. /var/log/anaconda : anaconda的日志。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 用数据库mysql存储日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. 准备一台mysql服务器用来存放日志信息：</span><br><span class="line">    yum install -y mariadb-server</span><br><span class="line">    systemctl enable --now mariadb</span><br><span class="line">2. 创建一个管理该数据库的用户：</span><br><span class="line">    GRANT ALL ON Syslog.* TO &apos;log&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY &apos;testroot&apos;;</span><br><span class="line">3. 在rsyslog日志服务器上安装与mysql交互的模块：</span><br><span class="line">    yum install -y rsyslog-mysql</span><br><span class="line">    [root@localhost ~]#rpm -ql rsyslog-mysql</span><br><span class="line">    /usr/lib64/rsyslog/ommysql.so</span><br><span class="line">    /usr/share/doc/rsyslog-8.24.0/mysql-createDB.sql</span><br><span class="line">4. 将上面的mysql-createDB.sql传到mysql服务器上运行，生成需要的数据库及表。</span><br><span class="line">    mysql &lt;  mysql-createDB.sql</span><br><span class="line">5. 在日志服务器上修改配置，使其调用ommysql.so与mysql服务器交互。</span><br><span class="line">    #### MODULES ####</span><br><span class="line">    $ModLoad ommysql</span><br><span class="line">    #### RULES ####</span><br><span class="line">    local6.*                                                :ommysql:192.168.38.18,Syslog,log,testroot  #:ommysql:DBHOST,DBNAME,DBUSER, PASSWORD</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 基于loganalyzer管理日志服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install  httpd php php-mysqlnd php-gd</span><br><span class="line">wget http://download.adiscon.com/loganalyzer/loganalyzer-4.1.8.tar.gz</span><br><span class="line">tar xf loganalyzer-4.1.5.tar.gz</span><br><span class="line">cp -a loganalyzer-4.1.5/src /var/www/html/loganalyzer</span><br><span class="line">cd /var/www/html/loganalyzer</span><br><span class="line">touch config.php</span><br><span class="line">chmod 666 config.php</span><br><span class="line">在配置完成以后，要回收config.php权限，为了安全考虑。</span><br><span class="line">chmod 644 config.php</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/17/关于Linux日志/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="关于Linux日志">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-实现实时同步" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -891,172 +1062,6 @@
 <div class="counter-tag counter">
     <span id="/2019/09/22/MYSQL服务选项及变量日志/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="MYSQL服务选项及变量日志">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-MYSQL用户授权配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/22/MYSQL用户授权配置/" class="article-date">
-  	<time datetime="2019-09-22T13:22:21.000Z" itemprop="datePublished">2019-09-22</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/22/MYSQL用户授权配置/">
-        MYSQL用户授权配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>关于MYSQL的用户创建及授权管理。</em></strong></p>
-<blockquote>
-<p>1) 创建用户，并为其设置密码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; create user test@&apos;192.168.38.%&apos;;</span><br><span class="line">MariaDB [(none)]&gt; set password for test@&apos;192.168.38.%&apos;=password(&apos;testroot&apos;);</span><br><span class="line">#以上两条命令可以使用以下命令代替：</span><br><span class="line">MariaDB [(none)]&gt; create user test2@&apos;172.18.38.%&apos; identified by &apos;testroot&apos;;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) MySQL的管理员的密码忘记，如何找回密码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/my.cnf #默认为该配置文件，根据自己的配置文件位置修改。在[mysqld]字段下添加以下两行</span><br><span class="line">[mysqld]</span><br><span class="line">skip-grant-tables   #跳过密码认证。默认远程连接也会跳过密码认证。</span><br><span class="line">skip-networking     #断开网络连接MYSQL，安全考虑。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; update mysql.user set password=password(&apos;123456&apos;) where mysql.user.user=&apos;test&apos;; </span><br><span class="line">#以上方法，可能需要刷新。</span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 为用户授权。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; grant all on hellodb.* to test@&apos;192.168.38.%&apos;;  #对hellodb有所有权限。</span><br><span class="line">MariaDB [(none)]&gt; show grants for test@&apos;192.168.38.%&apos;;           </span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for test@192.168.38.%                                                                                   |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT USAGE ON *.* TO &apos;test&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY PASSWORD &apos;*DAEAFADB40481804151BA708437A5BEC415FBA85&apos; |</span><br><span class="line">| GRANT ALL PRIVILEGES ON `hellodb`.* TO &apos;test&apos;@&apos;192.168.38.%&apos;                                                   |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">MariaDB [(none)]&gt; grant all on *.* to test@&apos;192.168.38.%&apos;;  #类似于管理员权限，但是不能将权限赋给别人。</span><br><span class="line">MariaDB [(none)]&gt; grant all on *.* to test3@&apos;192.168.38.%&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; show grants for test3@&apos;192.168.38.%&apos;;</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for test3@192.168.38.%                                                                                            |</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT ALL PRIVILEGES ON *.* TO &apos;test3&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY PASSWORD &apos;*DAEAFADB40481804151BA708437A5BEC415FBA85&apos; |</span><br><span class="line">| GRANT ALL PRIVILEGES ON `hellodb`.* TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                                            |</span><br><span class="line">| GRANT SELECT (name, StuID) ON `hellodb`.`students` TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                             |</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br><span class="line">MariaDB [(none)]&gt; create user test002@&apos;192.168.38.%&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; select user();</span><br><span class="line">+---------------------+</span><br><span class="line">| user()              |</span><br><span class="line">+---------------------+</span><br><span class="line">| test3@192.168.38.27 |</span><br><span class="line">+---------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 回收权限。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; revoke all on *.* from test3@&apos;192.168.38.%&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; show grants for test3@&apos;192.168.38.%&apos;;       </span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for test3@192.168.38.%                                                                                   |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT USAGE ON *.* TO &apos;test3&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY PASSWORD &apos;*DAEAFADB40481804151BA708437A5BEC415FBA85&apos; |</span><br><span class="line">| GRANT ALL PRIVILEGES ON `hellodb`.* TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                                   |</span><br><span class="line">| GRANT SELECT (name, StuID) ON `hellodb`.`students` TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                    |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/22/MYSQL用户授权配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL用户授权配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-MYSQL多实例配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/22/MYSQL多实例配置/" class="article-date">
-  	<time datetime="2019-09-22T13:16:54.000Z" itemprop="datePublished">2019-09-22</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/22/MYSQL多实例配置/">
-        MYSQL多实例配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>MYSQL基于不同版本的多实例实现：</em></strong></p>
-<blockquote>
-<p>1) 在同一台主机上安装两个或两个以上版本的mysql。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mariadb-server  #默认为5.5.60-MariaDB版本</span><br><span class="line"></span><br><span class="line">#这里又用二进制安装了一个10.2.27-MariaDB版本</span><br><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">#具体的安装过程不再记录。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 规划多个实例的数据库，配置文件等的存放目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql/&#123;3306,3307,3308&#125;/&#123;etc,sock,log,pid,data&#125;/ -pv</span><br><span class="line">chown -R mysql:mysql /data/mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 复制 /etc/my.cnf 到 /data/mysql/3308/etc/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cp /etc/my.cnf /data/mysql/3308/etc/</span><br><span class="line">vim /data/mysql/3308/etc/my.cnf</span><br><span class="line">#添加以下内容：</span><br><span class="line">[mysqld]</span><br><span class="line">port=3308</span><br><span class="line">datadir=/data/mysql/3308/data</span><br><span class="line">socket=/data/mysql/3308/sock/mysql.sock</span><br><span class="line">[mysqld_safe]</span><br><span class="line">log-error=/data/mysql/3308/log/mariadb.log</span><br><span class="line">pid-file=/data/mysql/3308/pid/mariadb.pid</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#二进制安装初始化</span><br><span class="line">yum install -y  libaio</span><br><span class="line">/usr/local/mariadb-10.2.27-linux-x86_64/scripts/mysql_install_db --datadir=/data/mysql/3308/data/ --user=mysql</span><br><span class="line">#yum安装初始化</span><br><span class="line">mysql_install_db --datadir=/data/mysql/3306/data/ --user=mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 配置mysql服务启动脚本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">port=3308                                   #根据实例配置不同端口</span><br><span class="line">mysql_user=&quot;root&quot;</span><br><span class="line">mysql_pwd=&quot;&quot;</span><br><span class="line">cmd_path=&quot;/usr/local/mysql-10.2.27/bin&quot;     #指定mysqld_safe所在的目录</span><br><span class="line">mysql_basedir=&quot;/data/mysql&quot;                 #指定规划的多实例mysql的目录</span><br><span class="line">mysql_sock=&quot;$&#123;mysql_basedir&#125;/$&#123;port&#125;/sock/mysql.sock&quot;</span><br><span class="line"></span><br><span class="line">function_start_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">      printf &quot;Starting MySQL...\n&quot;</span><br><span class="line">      $&#123;cmd_path&#125;/mysqld_safe --defaults-file=$&#123;mysql_basedir&#125;/$&#123;port&#125;/etc/my.cnf  &amp;&gt; /dev/null  &amp;</span><br><span class="line">    else</span><br><span class="line">      printf &quot;MySQL is running...\n&quot;</span><br><span class="line">      exit</span><br><span class="line">    fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_stop_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">       printf &quot;MySQL is stopped...\n&quot;</span><br><span class="line">       exit</span><br><span class="line">    else</span><br><span class="line">       printf &quot;Stoping MySQL...\n&quot;</span><br><span class="line">       $&#123;cmd_path&#125;/mysqladmin -u $&#123;mysql_user&#125; -p$&#123;mysql_pwd&#125; -S $&#123;mysql_sock&#125; shutdown</span><br><span class="line">   fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_restart_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    printf &quot;Restarting MySQL...\n&quot;</span><br><span class="line">    function_stop_mysql</span><br><span class="line">    sleep 2</span><br><span class="line">    function_start_mysql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">start)</span><br><span class="line">    function_start_mysql</span><br><span class="line">;;</span><br><span class="line">stop)</span><br><span class="line">    function_stop_mysql</span><br><span class="line">;;</span><br><span class="line">restart)</span><br><span class="line">    function_restart_mysql</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">    printf &quot;Usage: $&#123;mysql_basedir&#125;/$&#123;port&#125;/bin/mysqld &#123;start|stop|restart&#125;\n&quot;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/22/MYSQL多实例配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL多实例配置">
          &nbsp;
         view
     </span>

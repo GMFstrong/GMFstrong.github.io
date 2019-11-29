@@ -202,6 +202,87 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Memcache的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/15/Memcache的安装配置/" class="article-date">
+  	<time datetime="2019-11-15T12:09:24.000Z" itemprop="datePublished">2019-11-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/15/Memcache的安装配置/">
+        Memcache的安装配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方<br>式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使<br>有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重<br>新加入到集群的时候可以自动从有数据的memcache当中自动获取数据并提供服务。Memcache支持最大的内存存储对象为1M，Memcache借助了操作系统的libevent工具做高效的读写，memcache最适合保存用户的session实现session共享。</em></strong></p>
+<blockquote>
+<p>1) 安装 memcached:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y memcached</span><br><span class="line"></span><br><span class="line">vim /etc/sysconfig/memcached</span><br><span class="line">    PORT=&quot;11211&quot; #监听端口</span><br><span class="line">    USER=&quot;memcached&quot; #启动用户</span><br><span class="line">    MAXCONN=&quot;1024&quot; #最大连接数</span><br><span class="line">    CACHESIZE=&quot;1024&quot; #最大使用内存</span><br><span class="line">    OPTIONS=&quot;&quot; #其他选项</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 编译安装：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget http://memcached.org/files/memcached-1.5.20.tar.gz</span><br><span class="line">tar -xvf memcached-1.5.20.tar.gz </span><br><span class="line">./configure --prefix=/apps/memcached</span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/memcached</span><br><span class="line">/apps/memcached/bin/memcached -u memcached -p 11211 -m 2048 -c 65536 &amp;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 通过repcached实现memcached集群部署架构:</p>
+</blockquote>
+<p>从这方案的技术实现来看，其实它是一个单 master单 slave的方案，但它的 master/slave都是可读写的，而且可<br>以相互同步，所以从功能上看，也可以认为它是双机 master-master方案。直接通过负载均衡连接之memcached，任<br>然有两台memcached做高可用，memcached会自动同步数据保持数据一致性，即使一台memcached故障也不影响业务<br>正常运行，故障的memcached修复上线后再自动从另外一台同步数据即可保持数据一致性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget https://sourceforge.net/projects/repcached/files/repcached/2.2.1-1.2.8/memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">tar -xvf memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">cd  memcached-1.2.8-repcached-2.2.1</span><br><span class="line">./configure --prefix=/apps/repcached --enable-replication</span><br><span class="line">在Centos7上make会报错，修改代码：</span><br><span class="line">vim memcached.c</span><br><span class="line">    56 #ifndef IOV_MAX</span><br><span class="line">    57 #if defined(__FreeBSD__) || defined(__APPLE__)</span><br><span class="line">    58 # define IOV_MAX 1024</span><br><span class="line">    59 #endif</span><br><span class="line">    60 #endif</span><br><span class="line">将以上内容删除，修改为如下代码：</span><br><span class="line">     #ifndef IOV_MAX</span><br><span class="line">     # define IOV_MAX 1024</span><br><span class="line">     #endif</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/repcached</span><br><span class="line"></span><br><span class="line">测试能否运行：</span><br><span class="line">/apps/repcached/bin/memcached  -h</span><br><span class="line"></span><br><span class="line">启动该集群：</span><br><span class="line">    67:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.57 -X 6666 (-x 对端的ip)</span><br><span class="line">    57:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.67 -X 6666</span><br><span class="line"></span><br><span class="line">连接与测试：</span><br><span class="line">[root@localhost ~]#telnet 192.168.38.57 11211</span><br><span class="line">Trying 192.168.38.57...</span><br><span class="line">Connected to 192.168.38.57.</span><br><span class="line">Escape character is &apos;^]&apos;.</span><br><span class="line">set sss 0 0 4</span><br><span class="line">dddd</span><br><span class="line">STORED  #符合长度后自动保存</span><br><span class="line">get sss</span><br><span class="line">VALUE sss 0 4</span><br><span class="line">dddd</span><br><span class="line">END</span><br><span class="line">quit</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/15/Memcache的安装配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Memcache的安装配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Redis集群维护" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -607,6 +688,81 @@
 
 
   
+    <article id="post-Centos7网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/12/Centos7网卡配置/" class="article-date">
+  	<time datetime="2019-11-12T12:00:09.000Z" itemprop="datePublished">2019-11-12</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/12/Centos7网卡配置/">
+        Centos7网卡配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 配置网卡绑定（bond）:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">1.网卡eth0的配置：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-eth0</span><br><span class="line">        NAME=&quot;eth0&quot;</span><br><span class="line">        DEVICE=&quot;eth0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        MASTER=bond0</span><br><span class="line">        SLAVE=yes</span><br><span class="line">2.网卡eth1的配置：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-eth1</span><br><span class="line">        NAME=&quot;eth1&quot;</span><br><span class="line">        DEVICE=&quot;eth1&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        MASTER=bond0</span><br><span class="line">        SLAVE=yes</span><br><span class="line">3.创建ifcfg-bond0配置文件：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-bond0 </span><br><span class="line">        NAME=&quot;bond0&quot;</span><br><span class="line">        DEVICE=&quot;bond0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        BONDING_OPTS=&apos;miimon=100 mode=1&apos;</span><br><span class="line">        IPADDR=192.168.38.105</span><br><span class="line">        PREFIX=24</span><br><span class="line">        GATEWAY=192.168.38.2</span><br><span class="line">        DNS1=192.168.38.2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于以上的bond创建Bridge（网桥设备）：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">1.创建ifcfg-br0配置文件：</span><br><span class="line">    [root@localhost network-scripts]# vim ifcfg-br0 </span><br><span class="line">        NAME=&quot;br0&quot;</span><br><span class="line">        DEVICE=&quot;br0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Bridge</span><br><span class="line">        IPADDR=192.168.38.105</span><br><span class="line">        PREFIX=24</span><br><span class="line">        GATEWAY=192.168.38.2</span><br><span class="line">        DNS1=192.168.38.2</span><br><span class="line">2.在创建的bond设备调用br0:</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-bond0 </span><br><span class="line">        NAME=&quot;bond0&quot;</span><br><span class="line">        DEVICE=&quot;bond0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        BONDING_OPTS=&apos;miimon=100 mode=1&apos;</span><br><span class="line">        BRIDGE=br0          #调用br0设备。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/network/">network</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/12/Centos7网卡配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Centos7网卡配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Keepalived的VRRP-script使用" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -838,193 +994,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/08/Keepalived安装及简单配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Keepalived安装及简单配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-HAproxy的ACL及https" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/08/HAproxy的ACL及https/" class="article-date">
-  	<time datetime="2019-11-08T12:45:05.000Z" itemprop="datePublished">2019-11-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/08/HAproxy的ACL及https/">
-        HAproxy的ACL及https
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 基于hdr_dom(host)主机名的调度：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">listen acltest</span><br><span class="line">    bind 192.168.38.66:8080</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    acl web_pc hdr_dom(host)         pc.gmf.com</span><br><span class="line">    acl web_app hdr_dom(host)        app.gmf.com</span><br><span class="line">    use_backend  pc_page        if   web_pc</span><br><span class="line">    use_backend  app_page       if   web_app</span><br><span class="line">    default_backend default_server</span><br><span class="line">backend pc_page</span><br><span class="line">    mode http</span><br><span class="line">    server 192.168.38.26 192.168.38.26:80 check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line">backend app_page</span><br><span class="line">    mode http</span><br><span class="line">    server 192.168.38.36 192.168.38.36:80 check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">backend default_server</span><br><span class="line">    mode http</span><br><span class="line">    server default_page 192.168.38.56:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2)关于HAproxy多配置文件的加载：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg -f /apps/haproxy/conf.d -c -q</span><br><span class="line">ExecStart=/apps/haproxy/sbin/haproxy -Ws -f /apps/haproxy/haproxy.cfg -f /apps/haproxy/conf.d -p /var/lib/haproxy/haproxy.pid</span><br><span class="line">ExecReload=/bin/kill -USR2 $MAINPID</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.targe</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) https的实现：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">配置HAProxy支持https协议：</span><br><span class="line">支持ssl会话；</span><br><span class="line"> bind *:443 ssl crt /PATH/TO/SOME_PEM_FILE</span><br><span class="line"> crt 后证书文件为PEM格式，且同时包含证书和所有私钥</span><br><span class="line"> cat demo.crt demo.key &gt; demo.pem</span><br><span class="line">把80端口的请求重向定443</span><br><span class="line"> bind *:80</span><br><span class="line"> redirect scheme https if !&#123; ssl_fc &#125;</span><br><span class="line">向后端传递用户请求的协议和端口（frontend或backend）</span><br><span class="line"> http_request set-header X-Forwarded-Port %[dst_port]</span><br><span class="line"> http_request add-header X-Forwared-Proto https if &#123; ssl_fc &#125;</span><br><span class="line">生成证书：</span><br><span class="line">openssl genrsa -out haproxy.key 2048</span><br><span class="line">openssl req -new -x509 -key haproxy.key -out haproxy.crt -subj &quot;/CN=www.gmf.net&quot;</span><br><span class="line">cat haproxy.key haproxy.crt &gt; haproxy.pem</span><br><span class="line">openssl x509 -in haproxy.pem -noout -text #查看证书</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">frontend web_server-http</span><br><span class="line"> bind 192.168.38.66:80</span><br><span class="line"> redirect scheme https if !&#123; ssl_fc &#125;</span><br><span class="line"> mode http</span><br><span class="line"> use_backend web_host</span><br><span class="line"></span><br><span class="line">frontend web_server-https</span><br><span class="line"> bind 192.168.38.66:443 ssl crt /apps/haproxy/certs/haproxy.pem</span><br><span class="line"> mode http</span><br><span class="line"> use_backend web_host</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">backend web_host</span><br><span class="line">   mode http</span><br><span class="line">   http-request set-header X-Forwarded-Port %[dst_port]</span><br><span class="line">   http-request add-header X-Forwarded-Proto https if &#123; ssl_fc &#125;</span><br><span class="line">   server web_xx 192.168.38.26:80 check inter 2000 fall 3 rise 5</span><br><span class="line">   server web_qq 192.168.38.36:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/08/HAproxy的ACL及https/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HAproxy的ACL及https">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-HAproxy的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/05/HAproxy的高级配置/" class="article-date">
-  	<time datetime="2019-11-05T12:04:37.000Z" itemprop="datePublished">2019-11-05</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/05/HAproxy的高级配置/">
-        HAproxy的高级配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 基于Cookie的会话保持：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">在frontend-backend中实现：</span><br><span class="line">    frontend Apache-PHP</span><br><span class="line">        bind :80</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        use_backend Apache-group1</span><br><span class="line"></span><br><span class="line">    backend Apache-group1</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        option forwardfor</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache    #定义Cookie的键名。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80   check inter 3000 fall 3 rise 5 cookie web1  #为后端服务定义Cookie的值。</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80   check inter 3000 fall 3 rise 5 cookie web2</span><br><span class="line"></span><br><span class="line">在Listen模式下实现：</span><br><span class="line">    listen web_port</span><br><span class="line">        bind 192.168.38.57:80</span><br><span class="line">        mode http</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache</span><br><span class="line">        server web1 192.168.38.26:80 check cookie WEB1 </span><br><span class="line">        server web2 192.168.38.36:80 check cookie WEB2</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 关于HAproxy状态页的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen status_Page</span><br><span class="line">    mode http                    #必须制定为http，必须项</span><br><span class="line">    stats enable                 #开启状态页，必须项</span><br><span class="line">    stats uri /haproxy           #指定状态页的URI，必须项</span><br><span class="line">    bind 192.168.38.57:9969      #绑定端口</span><br><span class="line">    stats auth admin:996941      #设置认证，非必须项</span><br><span class="line">    stats admin true             #启用stats page中的管理功能</span><br><span class="line">    stats refresh 2s             #设定自动刷新时间间隔</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 修改经过HAproxy的报文信息：</p>
-</blockquote>
-<p>在http模式下，基于实际需求修改客户端的请求报文与响应报文，通过reqadd和reqdel在请求报文添加删除字段，<br>通过rspadd与rspidel在响应报文中添加与删除字段。支持正则表达式。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在响应报文中添加一个字段：</span><br><span class="line">    rspadd X-Via:\ HAPorxy  #注意转义空格。</span><br><span class="line">    rspdel server:\ .*      #删除响应报文中的后端Server的信息。</span><br><span class="line">一般不会修改请求报文：</span><br><span class="line">    reqadd &lt;string&gt;</span><br><span class="line">    reqdel &lt;search&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 关于HAproxy的日志配置：</p>
-</blockquote>
-<p>出于对HAproxy的性能考虑，一般不会在HAproxy上记录日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1. 开启Rsyslog：</span><br><span class="line">    vim  /etc/rsyslog.conf</span><br><span class="line">    $ModLoad imudp</span><br><span class="line">    $UDPServerRun 514</span><br><span class="line">    local3.*        /var/log/haproxy.log</span><br><span class="line">    systemctl restart rsyslog</span><br><span class="line">2.在global配置项定义：</span><br><span class="line">    log 127.0.0.1 local&#123;1-7&#125; info #基于syslog记录日志到指定设备，级别有(err、warning、info、debug)</span><br><span class="line">    log 127.0.0.1 local3 info</span><br><span class="line">3.在自己的群组中引用global定义的日志：</span><br><span class="line">    log global</span><br><span class="line">4.默认的日志格式非常简陋，可以自定义日志格式：</span><br><span class="line">    capture cookie &lt;name&gt; len &lt;length&gt; #捕获请求和响应报文中的 cookie并记录日志</span><br><span class="line">    capture request header &lt;name&gt; len &lt;length&gt; #捕获请求报文中指定的首部内容和长度并记录日志</span><br><span class="line">    capture response header &lt;name&gt; len &lt;length&gt; #捕获响应报文中指定的内容和长度首部并记录日志</span><br><span class="line">    示例：</span><br><span class="line">    capture request header Host len 256</span><br><span class="line">    capture request header User-Agent len 512</span><br><span class="line">    capture request header Referer len 15</span><br><span class="line">    引用自定义的日志格式时：</span><br><span class="line">        log global</span><br><span class="line">        option httplog  </span><br><span class="line">        capture request header User-Agent len 512</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>5) 开启HAproxy的压缩功能：</p>
-</blockquote>
-<p>对响应给客户端的报文进行压缩，以节省网络带宽，但是会占用部分CPU性能。<br>出于对HAproxy的性能考虑，一般不会在HAproxy上启用压缩功能，会在后端的Nginx或者Apache上开启。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">compression algo   #启用http协议中的压缩机制，常用算法有gzip deflate</span><br><span class="line">   identity #调试使用的压缩方式</span><br><span class="line">   gzip #常用的压缩方式，与各浏览器兼容较好</span><br><span class="line">   deflate #有些浏览器不支持</span><br><span class="line">   raw-deflate #新出的压缩方式</span><br><span class="line">compression type #要压缩的文件类型</span><br><span class="line">在自己需要开启压缩的群组中添加以下两行：</span><br><span class="line">    compression algo gzip deflate</span><br><span class="line">    compression type compression type text/plain text/html text/css text/xml</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>6) 对后端服务器的三种检测方式：</p>
-</blockquote>
-<p>1.基于四层的传输端口做状态监测。</p>
-<p>2.基于指定URI做状态监测。</p>
-<p>3.基于指定URI的request请求头部内容做状态监测。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.默认是基于四层的方式对后端服务器进行存活性检查，但是该方式，在服务进程僵死，但是服务端口存在时，检测不出来后端服务器的存活情况。</span><br><span class="line">2.下面配置基于URI的状态检测。</span><br><span class="line">在listen字段配置：</span><br><span class="line">    option httpchk GET /monitor/index.html HTTP/1.0  #后端服务器的页面的根，是相对于代码的存放根路径。</span><br><span class="line">    该检测方式有一个弊端，就是完全将测试页面访问下来，在后端服务器数量庞大时，浪费HAproxy的带宽。</span><br><span class="line">3.基于指定URI的request请求头部内容做状态监测。</span><br><span class="line">    option httpchk HEAD /monitor/index.html HTTP/1.0\r\nHost:\ 192.168.38.57</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>7) 定义HAproxy的报错页面：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">在default的字段配置：</span><br><span class="line">    no option http-use-htx</span><br><span class="line">    errorfile 502 /apps/haproxy/html/502.html  #该状态码时针对HAProxy所产生的基于回应，报错页面在HAproxy中定义。</span><br><span class="line"></span><br><span class="line">在HAproxy中实现重定向功能：</span><br><span class="line">no option http-use-htx</span><br><span class="line">errorloc 503 http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>8) 基于四层的负载：</p>
-</blockquote>
-<p>适用于：Memcache Redis MySQL RabbitMQ<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen mysql</span><br><span class="line">   bind 192.168.38.57:3306</span><br><span class="line">   mode tcp</span><br><span class="line">   balance leastconn</span><br><span class="line">   server mysql 192.168.38.36:3306 check</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>9) IP地址透传：</p>
-</blockquote>
-<p>web服务器中需要记录客户端的真实IP地址，用于做访问统计、安全防护、行为分析、区域排行等场景。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1.四层透传：</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">2.七层透传：</span><br><span class="line">    在HAproxy的defaults字段：</span><br><span class="line">        option forwardfor</span><br><span class="line">    然后在后端服务器的配置文件中的日志格式引用透传过来的日志：</span><br><span class="line">3.后端服务器在配置文件中的日志格式配置：</span><br><span class="line">    #apache 配置：</span><br><span class="line">    LogFormat &quot;%&#123;X-Forwarded-For&#125;i %a %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;UserAgent&#125;i\&quot;&quot; combined</span><br><span class="line">    #tomcat 配置：</span><br><span class="line">    pattern=&apos;%&#123;X-Forwarded-For&#125;i %l %T %t &amp;quot;%r&amp;quot; %s %b &amp;quot;%&#123;UserAgent&#125;i&amp;quot;&apos;/&gt;</span><br><span class="line">    #nginx 日志格式：</span><br><span class="line">    log_format main &apos;&quot;$proxy_protocol_addr&quot; - $remote_user [$time_local] &quot;$request&quot;&apos;</span><br><span class="line">                        &apos;$status $body_bytes_sent &quot;$http_referer&quot;&apos;</span><br><span class="line">                        &apos;&quot;$http_user_agent&quot;&apos;;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>10) 通过 socat 动态修改某些算法的权重（多用于后端服务器动态上下线）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install socat</span><br><span class="line">echo &quot;show info&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">echo &quot;get weight web_host/web1&quot; | socat stdio /var/lib/haproxy/haproxy.sock </span><br><span class="line">echo &quot;set weight web_host/web1 2&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">在多进程的情况下，注意更改不同进程的信息。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/05/HAproxy的高级配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HAproxy的高级配置">
          &nbsp;
         view
     </span>

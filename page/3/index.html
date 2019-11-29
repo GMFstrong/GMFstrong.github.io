@@ -202,6 +202,193 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-HAproxy的ACL及https" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/08/HAproxy的ACL及https/" class="article-date">
+  	<time datetime="2019-11-08T12:45:05.000Z" itemprop="datePublished">2019-11-08</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/08/HAproxy的ACL及https/">
+        HAproxy的ACL及https
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 基于hdr_dom(host)主机名的调度：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">listen acltest</span><br><span class="line">    bind 192.168.38.66:8080</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    acl web_pc hdr_dom(host)         pc.gmf.com</span><br><span class="line">    acl web_app hdr_dom(host)        app.gmf.com</span><br><span class="line">    use_backend  pc_page        if   web_pc</span><br><span class="line">    use_backend  app_page       if   web_app</span><br><span class="line">    default_backend default_server</span><br><span class="line">backend pc_page</span><br><span class="line">    mode http</span><br><span class="line">    server 192.168.38.26 192.168.38.26:80 check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line">backend app_page</span><br><span class="line">    mode http</span><br><span class="line">    server 192.168.38.36 192.168.38.36:80 check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">backend default_server</span><br><span class="line">    mode http</span><br><span class="line">    server default_page 192.168.38.56:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2)关于HAproxy多配置文件的加载：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg -f /apps/haproxy/conf.d -c -q</span><br><span class="line">ExecStart=/apps/haproxy/sbin/haproxy -Ws -f /apps/haproxy/haproxy.cfg -f /apps/haproxy/conf.d -p /var/lib/haproxy/haproxy.pid</span><br><span class="line">ExecReload=/bin/kill -USR2 $MAINPID</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.targe</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) https的实现：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">配置HAProxy支持https协议：</span><br><span class="line">支持ssl会话；</span><br><span class="line"> bind *:443 ssl crt /PATH/TO/SOME_PEM_FILE</span><br><span class="line"> crt 后证书文件为PEM格式，且同时包含证书和所有私钥</span><br><span class="line"> cat demo.crt demo.key &gt; demo.pem</span><br><span class="line">把80端口的请求重向定443</span><br><span class="line"> bind *:80</span><br><span class="line"> redirect scheme https if !&#123; ssl_fc &#125;</span><br><span class="line">向后端传递用户请求的协议和端口（frontend或backend）</span><br><span class="line"> http_request set-header X-Forwarded-Port %[dst_port]</span><br><span class="line"> http_request add-header X-Forwared-Proto https if &#123; ssl_fc &#125;</span><br><span class="line">生成证书：</span><br><span class="line">openssl genrsa -out haproxy.key 2048</span><br><span class="line">openssl req -new -x509 -key haproxy.key -out haproxy.crt -subj &quot;/CN=www.gmf.net&quot;</span><br><span class="line">cat haproxy.key haproxy.crt &gt; haproxy.pem</span><br><span class="line">openssl x509 -in haproxy.pem -noout -text #查看证书</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">frontend web_server-http</span><br><span class="line"> bind 192.168.38.66:80</span><br><span class="line"> redirect scheme https if !&#123; ssl_fc &#125;</span><br><span class="line"> mode http</span><br><span class="line"> use_backend web_host</span><br><span class="line"></span><br><span class="line">frontend web_server-https</span><br><span class="line"> bind 192.168.38.66:443 ssl crt /apps/haproxy/certs/haproxy.pem</span><br><span class="line"> mode http</span><br><span class="line"> use_backend web_host</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">backend web_host</span><br><span class="line">   mode http</span><br><span class="line">   http-request set-header X-Forwarded-Port %[dst_port]</span><br><span class="line">   http-request add-header X-Forwarded-Proto https if &#123; ssl_fc &#125;</span><br><span class="line">   server web_xx 192.168.38.26:80 check inter 2000 fall 3 rise 5</span><br><span class="line">   server web_qq 192.168.38.36:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/08/HAproxy的ACL及https/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的ACL及https">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-HAproxy的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的高级配置/" class="article-date">
+  	<time datetime="2019-11-05T12:04:37.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/05/HAproxy的高级配置/">
+        HAproxy的高级配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 基于Cookie的会话保持：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">在frontend-backend中实现：</span><br><span class="line">    frontend Apache-PHP</span><br><span class="line">        bind :80</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        use_backend Apache-group1</span><br><span class="line"></span><br><span class="line">    backend Apache-group1</span><br><span class="line">        mode http                   #必须使用http模式，因为Cookie属于应用层的数据。</span><br><span class="line">        option forwardfor</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache    #定义Cookie的键名。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80   check inter 3000 fall 3 rise 5 cookie web1  #为后端服务定义Cookie的值。</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80   check inter 3000 fall 3 rise 5 cookie web2</span><br><span class="line"></span><br><span class="line">在Listen模式下实现：</span><br><span class="line">    listen web_port</span><br><span class="line">        bind 192.168.38.57:80</span><br><span class="line">        mode http</span><br><span class="line">        cookie SERVER-COOKIE insert indirect nocache</span><br><span class="line">        server web1 192.168.38.26:80 check cookie WEB1 </span><br><span class="line">        server web2 192.168.38.36:80 check cookie WEB2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 关于HAproxy状态页的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen status_Page</span><br><span class="line">    mode http                    #必须制定为http，必须项</span><br><span class="line">    stats enable                 #开启状态页，必须项</span><br><span class="line">    stats uri /haproxy           #指定状态页的URI，必须项</span><br><span class="line">    bind 192.168.38.57:9969      #绑定端口</span><br><span class="line">    stats auth admin:996941      #设置认证，非必须项</span><br><span class="line">    stats admin true             #启用stats page中的管理功能</span><br><span class="line">    stats refresh 2s             #设定自动刷新时间间隔</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 修改经过HAproxy的报文信息：</p>
+</blockquote>
+<p>在http模式下，基于实际需求修改客户端的请求报文与响应报文，通过reqadd和reqdel在请求报文添加删除字段，<br>通过rspadd与rspidel在响应报文中添加与删除字段。支持正则表达式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在响应报文中添加一个字段：</span><br><span class="line">    rspadd X-Via:\ HAPorxy  #注意转义空格。</span><br><span class="line">    rspdel server:\ .*      #删除响应报文中的后端Server的信息。</span><br><span class="line">一般不会修改请求报文：</span><br><span class="line">    reqadd &lt;string&gt;</span><br><span class="line">    reqdel &lt;search&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 关于HAproxy的日志配置：</p>
+</blockquote>
+<p>出于对HAproxy的性能考虑，一般不会在HAproxy上记录日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1. 开启Rsyslog：</span><br><span class="line">    vim  /etc/rsyslog.conf</span><br><span class="line">    $ModLoad imudp</span><br><span class="line">    $UDPServerRun 514</span><br><span class="line">    local3.*        /var/log/haproxy.log</span><br><span class="line">    systemctl restart rsyslog</span><br><span class="line">2.在global配置项定义：</span><br><span class="line">    log 127.0.0.1 local&#123;1-7&#125; info #基于syslog记录日志到指定设备，级别有(err、warning、info、debug)</span><br><span class="line">    log 127.0.0.1 local3 info</span><br><span class="line">3.在自己的群组中引用global定义的日志：</span><br><span class="line">    log global</span><br><span class="line">4.默认的日志格式非常简陋，可以自定义日志格式：</span><br><span class="line">    capture cookie &lt;name&gt; len &lt;length&gt; #捕获请求和响应报文中的 cookie并记录日志</span><br><span class="line">    capture request header &lt;name&gt; len &lt;length&gt; #捕获请求报文中指定的首部内容和长度并记录日志</span><br><span class="line">    capture response header &lt;name&gt; len &lt;length&gt; #捕获响应报文中指定的内容和长度首部并记录日志</span><br><span class="line">    示例：</span><br><span class="line">    capture request header Host len 256</span><br><span class="line">    capture request header User-Agent len 512</span><br><span class="line">    capture request header Referer len 15</span><br><span class="line">    引用自定义的日志格式时：</span><br><span class="line">        log global</span><br><span class="line">        option httplog  </span><br><span class="line">        capture request header User-Agent len 512</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>5) 开启HAproxy的压缩功能：</p>
+</blockquote>
+<p>对响应给客户端的报文进行压缩，以节省网络带宽，但是会占用部分CPU性能。<br>出于对HAproxy的性能考虑，一般不会在HAproxy上启用压缩功能，会在后端的Nginx或者Apache上开启。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">compression algo   #启用http协议中的压缩机制，常用算法有gzip deflate</span><br><span class="line">   identity #调试使用的压缩方式</span><br><span class="line">   gzip #常用的压缩方式，与各浏览器兼容较好</span><br><span class="line">   deflate #有些浏览器不支持</span><br><span class="line">   raw-deflate #新出的压缩方式</span><br><span class="line">compression type #要压缩的文件类型</span><br><span class="line">在自己需要开启压缩的群组中添加以下两行：</span><br><span class="line">    compression algo gzip deflate</span><br><span class="line">    compression type compression type text/plain text/html text/css text/xml</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>6) 对后端服务器的三种检测方式：</p>
+</blockquote>
+<p>1.基于四层的传输端口做状态监测。</p>
+<p>2.基于指定URI做状态监测。</p>
+<p>3.基于指定URI的request请求头部内容做状态监测。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.默认是基于四层的方式对后端服务器进行存活性检查，但是该方式，在服务进程僵死，但是服务端口存在时，检测不出来后端服务器的存活情况。</span><br><span class="line">2.下面配置基于URI的状态检测。</span><br><span class="line">在listen字段配置：</span><br><span class="line">    option httpchk GET /monitor/index.html HTTP/1.0  #后端服务器的页面的根，是相对于代码的存放根路径。</span><br><span class="line">    该检测方式有一个弊端，就是完全将测试页面访问下来，在后端服务器数量庞大时，浪费HAproxy的带宽。</span><br><span class="line">3.基于指定URI的request请求头部内容做状态监测。</span><br><span class="line">    option httpchk HEAD /monitor/index.html HTTP/1.0\r\nHost:\ 192.168.38.57</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>7) 定义HAproxy的报错页面：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">在default的字段配置：</span><br><span class="line">    no option http-use-htx</span><br><span class="line">    errorfile 502 /apps/haproxy/html/502.html  #该状态码时针对HAProxy所产生的基于回应，报错页面在HAproxy中定义。</span><br><span class="line"></span><br><span class="line">在HAproxy中实现重定向功能：</span><br><span class="line">no option http-use-htx</span><br><span class="line">errorloc 503 http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>8) 基于四层的负载：</p>
+</blockquote>
+<p>适用于：Memcache Redis MySQL RabbitMQ<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen mysql</span><br><span class="line">   bind 192.168.38.57:3306</span><br><span class="line">   mode tcp</span><br><span class="line">   balance leastconn</span><br><span class="line">   server mysql 192.168.38.36:3306 check</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>9) IP地址透传：</p>
+</blockquote>
+<p>web服务器中需要记录客户端的真实IP地址，用于做访问统计、安全防护、行为分析、区域排行等场景。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1.四层透传：</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">2.七层透传：</span><br><span class="line">    在HAproxy的defaults字段：</span><br><span class="line">        option forwardfor</span><br><span class="line">    然后在后端服务器的配置文件中的日志格式引用透传过来的日志：</span><br><span class="line">3.后端服务器在配置文件中的日志格式配置：</span><br><span class="line">    #apache 配置：</span><br><span class="line">    LogFormat &quot;%&#123;X-Forwarded-For&#125;i %a %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;UserAgent&#125;i\&quot;&quot; combined</span><br><span class="line">    #tomcat 配置：</span><br><span class="line">    pattern=&apos;%&#123;X-Forwarded-For&#125;i %l %T %t &amp;quot;%r&amp;quot; %s %b &amp;quot;%&#123;UserAgent&#125;i&amp;quot;&apos;/&gt;</span><br><span class="line">    #nginx 日志格式：</span><br><span class="line">    log_format main &apos;&quot;$proxy_protocol_addr&quot; - $remote_user [$time_local] &quot;$request&quot;&apos;</span><br><span class="line">                        &apos;$status $body_bytes_sent &quot;$http_referer&quot;&apos;</span><br><span class="line">                        &apos;&quot;$http_user_agent&quot;&apos;;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>10) 通过 socat 动态修改某些算法的权重（多用于后端服务器动态上下线）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install socat</span><br><span class="line">echo &quot;show info&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">echo &quot;get weight web_host/web1&quot; | socat stdio /var/lib/haproxy/haproxy.sock </span><br><span class="line">echo &quot;set weight web_host/web1 2&quot; | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">在多进程的情况下，注意更改不同进程的信息。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的高级配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的高级配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-HAproxy的配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -898,177 +1085,6 @@
 <div class="counter-tag counter">
     <span id="/2019/10/21/LVS集群调度/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="LVS集群调度">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-iptables相关配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/21/iptables相关配置/" class="article-date">
-  	<time datetime="2019-10-21T05:21:48.000Z" itemprop="datePublished">2019-10-21</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/21/iptables相关配置/">
-        iptables相关配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>IPTABLES是工作在用户空间，用来管理内核空间的netfilter的工具。</p>
-<blockquote>
-<p>1) iptables的默认在各个链上的策略为ACCEPT。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.修改INPUT链默认策略：</span><br><span class="line">iptables -P INPUT DROP</span><br><span class="line">2.创建自定义的链：</span><br><span class="line">iptables -N WEB  #不能直接应用，需要在系统链中引用。</span><br><span class="line">3.删除自定义的链：</span><br><span class="line">iptables -X WEB  #自定义的链不能有规则，必须先清空规制。</span><br><span class="line">4.清空指定的链：</span><br><span class="line">iptables -F WEB</span><br><span class="line">5.修改自定义的链名：</span><br><span class="line">iptables -E WEB test</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 查看iptables中定义的规制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-L：list, 列出指定鏈上的所有规则，本选项须置后</span><br><span class="line">-n：numberic，以数字格式显示地址和端口号</span><br><span class="line">-v：verbose，详细信息</span><br><span class="line">-vv 更详细</span><br><span class="line">-x：exactly，显示计数器结果的精确值,而非单位转换后的易读值</span><br><span class="line">--line-numbers：显示规则的序号</span><br><span class="line">iptables -vnL --line-numbers    #-vnL必须将L放在最后</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 管理链上的规制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-A：append，追加到指定链上最后。</span><br><span class="line">-I：insert, 插入指定链规制，要指明插入至的规则编号，默认插到第一条。</span><br><span class="line">iptables -I INPUT 2 -s 127.0.0.1 -j REJECT #将该规制插入到第二条的位置。</span><br><span class="line">-D：delete，删除指定链规制，(1) 指明规则序号 (2) 指明规则本身。</span><br><span class="line">iptables -D INPUT 2</span><br><span class="line">iptables -D INPUT -s 192.168.38.67 -j REJECT #相当于把加入该规制的A或I变换成D</span><br><span class="line">-R：replace，修改指定链上指定序号的规制。</span><br><span class="line">iptables -R INPUT 2 -s 192.168.38.67 -j DROP</span><br><span class="line">-F：flush，清空指定的规则链。</span><br><span class="line">iptables的每条规则都有两个计数器：</span><br><span class="line">(1) 匹配到的报文的个数</span><br><span class="line">(2) 匹配到的所有报文的大小之和</span><br><span class="line">-Z：zero，置零以上计数器。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 基本匹配条件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-s 源IP地址或范围</span><br><span class="line">-d 目标IP地址或范围</span><br><span class="line">-p 指定协议,使用数字</span><br><span class="line">-i 报文流入的接口；只能应用于数据报文流入环节，只应用于INPUT、FORWARD、PREROUTING链</span><br><span class="line">-o 报文流入的接口；只能应用于数据报文流入环节，只应用于INPUT、FORWARD、PREROUTING链</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5)扩展的匹配规制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">需要加载扩展模块（/usr/lib64/xtables/*.so）</span><br><span class="line">--sport 匹配报文源端口,可为端口范围</span><br><span class="line">--dport 匹配报文目标端口,可为范围</span><br><span class="line">--tcp-flags mask comp </span><br><span class="line">    mask 需检查的标志位列表，用,分隔。例如 SYN,ACK,FIN,RST</span><br><span class="line">    comp 在mask列表中必须为1的标志位列表，无指定则必须为0，用,分隔</span><br><span class="line">    例如：--tcp-flags SYN,ACK,FIN,RST SYN 表示要检查的标志位为SYN,ACK,FIN,RST四个，其中SYN必须为1，余下的必须为0</span><br><span class="line">--syn：用于匹配第一次握手相当于：--tcp-flags SYN,ACK,FIN,RST SYN</span><br><span class="line">    例如：iptables -A INPUT -p tcp --syn -j REJECT </span><br><span class="line">          表示就得TCP连接保持，若有新的TCP连接进来，则拒绝。</span><br><span class="line">-p支持的协议为： tcp, udp, icmp, icmpv6, udplite,esp, ah, sctp, mh</span><br><span class="line">    例如：iptables -A INPUT -p icmp --icmp-type echo-request -j REJECT</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) 显式指定需要加载的模块：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">1.multiport扩展：以离散方式定义多端口匹配,最多指定15个端口。</span><br><span class="line">    --sports 指定多个源端口</span><br><span class="line">    --dports 指定多个目标端口</span><br><span class="line">    --ports  多个源或目标端口</span><br><span class="line">    例如：iptables -I INPUT 2 -s 192.168.38.0/24 -d 192.168.38.0/24 -p tcp -m multiport --dports 22,21,80 -j ACCEPT</span><br><span class="line">2.iprange扩展：指明连续的ip地址范围 （但一般不是整个网络）</span><br><span class="line">    --src-range from-to 源IP地址范围</span><br><span class="line">    --dst-range from-to 目标IP地址范围</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 80 -m iprange --src-range 192.168.38.57-192.168.38.100 -j DROP</span><br><span class="line">3.mac扩展：指明源MAC地址</span><br><span class="line">    --mac-source XX:XX:XX:XX:XX:XX</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 80 -m mac --mac-source 00:0c:29:6a:78:fa -j REJECT</span><br><span class="line">4.string扩展：对报文中的应用层数据做字符串模式匹配检测。</span><br><span class="line">    --algo 字符串匹配检测算法</span><br><span class="line">        bm：Boyer-Moore</span><br><span class="line">        kmp：Knuth-Pratt-Morris</span><br><span class="line">    --from offset 开始偏移</span><br><span class="line">    --to offset 结束偏移   </span><br><span class="line">    --string pattern 要检测的字符串模式</span><br><span class="line">    --hex-string pattern要检测字符串模式，16进制格式</span><br><span class="line">    例如：iptables -A OUTPUT -d 192.168.38.67 -p tcp --sport 80 -m string --algo bm --string &quot;sbsb&quot; -j  REJECT</span><br><span class="line">5.time扩展：根据将报文到达的时间与指定的时间范围进行匹配。</span><br><span class="line">    --datestart YYYY[-MM[-DD[Thh[:mm[:ss]]]]] 日期</span><br><span class="line">    --datestop YYYY[-MM[-DD[Thh[:mm[:ss]]]]]</span><br><span class="line">    --timestart hh:mm[:ss] 时间</span><br><span class="line">    --timestop hh:mm[:ss]</span><br><span class="line">    --monthdays day[,day...] 每个月的几号</span><br><span class="line">    --weekdays day[,day...] 星期几，1 – 7 分别表示星期一到星期日</span><br><span class="line">    --kerneltz：内核时区，不建议使用，CentOS7系统默认为UTC</span><br><span class="line">    centos6 不支持kerneltz ，--localtz指定本地时区(默认)</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 80 -m time --timestart 4:00 --timestop 12:00 -j REJECT</span><br><span class="line">6.connlimit扩展：根据每客户端IP做并发连接数数量匹配，可防止简单Dos(Denial of Service，拒绝服务)攻击。</span><br><span class="line">    --connlimit-upto #：连接的数量小于等于#时匹配</span><br><span class="line">    --connlimit-above #：连接的数量大于#时匹配</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p tcp --dport 22 -m connlimit --connlimit-above 2 -j REJECT</span><br><span class="line">7.imit扩展：基于收发报文的速率做匹配。</span><br><span class="line">    --limit #[/second|/minute|/hour|/day]</span><br><span class="line">    --limit-burst number</span><br><span class="line">    例如：iptables -A INPUT -d 192.168.38.57 -p icmp --icmp-type echo-request -m limit --limit 10/minute --limit-burst 5 -j ACCEPT</span><br><span class="line">    表示前5个包不限制，以后平均每分钟通过10个包。</span><br><span class="line">8.state扩展：根据”连接追踪机制“去检查连接的状态，较耗资源 。</span><br><span class="line">    NEW：新发出请求；连接追踪信息库中不存在此连接的相关信息条目，因此，将其识别为第一次发出的请求。</span><br><span class="line">    ESTABLISHED：NEW状态之后，连接追踪信息库中为其建立的条目失效之前期间内所进行的通信状态。</span><br><span class="line">    RELATED：新发起的但与已有连接相关联的连接，如：ftp协议中的数据连接与命令连接之间的关系。</span><br><span class="line">    INVALID：无效的连接，如flag标记不正确。</span><br><span class="line">    UNTRACKED：未进行追踪的连接，如raw表中关闭追踪。</span><br><span class="line">    已经追踪到的并记录下来的连接信息库：/proc/net/nf_conntrack</span><br><span class="line">    调整连接追踪功能所能够容纳的最大连接数量：/proc/sys/net/nf_conntrack_max</span><br><span class="line">    不同的协议的连接追踪时长：/proc/sys/net/netfilter/</span><br><span class="line">    CentOS7 需要加载模块： modprobe nf_conntrack_ipv4</span><br><span class="line">    iptables的链接跟踪表最大容量为/proc/sys/net/nf_conntrack_max，各种状态的超时链接会从表中删除；当模</span><br><span class="line">    板满载时，后续连接可能会超时</span><br><span class="line">解决方法两个：</span><br><span class="line">    (1) 加大nf_conntrack_max 值</span><br><span class="line">    vi /etc/sysctl.conf</span><br><span class="line">    net.nf_conntrack_max = 393216</span><br><span class="line">    net.netfilter.nf_conntrack_max = 393216</span><br><span class="line">    (2) 降低 nf_conntrack timeout时间</span><br><span class="line">    vi /etc/sysctl.conf</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_established = 300</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60</span><br><span class="line">    net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120</span><br><span class="line">    iptables –I INPUT -d LocalIP -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line">    iptables -A INPUT -d LocalIP -p tcp --dport 21 -m state --state NEW -j ACCEPT</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>7) iptables的规制默认保存期限为内核存活期限（重启机器就会清空）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">永久保存iptables规制：</span><br><span class="line">CentOS 7</span><br><span class="line">    iptables-save &gt; /PATH/TO/SOME_RULES_FILE</span><br><span class="line">    若要开机自动启用该规则，需要安装iptables-service，保存到/etc/sysconfig/iptables文件中</span><br><span class="line">    重新载入预存规则文件中规则：</span><br><span class="line">    iptables-restore &lt; /PATH/FROM/SOME_RULES_FILE</span><br><span class="line">    -n, --noflush：不清除原有规则</span><br><span class="line">    -t, --test：仅分析生成规则集，但不提交</span><br><span class="line">CentOS 6</span><br><span class="line">    service iptables save 将规则覆盖保存至/etc/sysconfig/iptables文件中</span><br><span class="line">    service iptables restart</span><br><span class="line">    会自动从/etc/sysconfig/iptables 重新载入规则</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>添加临时路由：ip route add 172.168.8.0/24 via 192.168.38.67</em></strong></p>
-<blockquote>
-<p>8) 基于iptables的NAT:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.SNAT:</span><br><span class="line">    iptables -t nat -A POSTROUTING -s 172.168.8.47 ! -d  172.168.8.0/24 -j SNAT --to-source 192.168.38.67</span><br><span class="line">    在拨号上网中，网关地址可能会发生变化，可用MASQUERADE，进行动态监视：</span><br><span class="line">    iptables -t nat -A POSTROUTING -s 10.0.1.0/24 ! –d 10.0.1.0/24 -j MASQUERADE</span><br><span class="line">2.DNAT:</span><br><span class="line">    iptables -t nat -A PREROUTING -s 0/0 -d 172.168.8.67 -p tcp --dport 10086 -j DNAT --to-destination 192.168.38.57:22</span><br><span class="line">3.REDIRECT：（在web服务器上设置）</span><br><span class="line">    iptables -t nat -A PREROUTING -s 0/0 -d 192.168.38.57 -p tcp --dport 80   -j REDIRECT --to-ports 8080</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/21/iptables相关配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="iptables相关配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-关于Linux日志" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/关于Linux日志/" class="article-date">
-  	<time datetime="2019-10-17T11:07:58.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/关于Linux日志/">
-        关于Linux日志
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 各种日志文件的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. /var/log/secure：系统安装日志，文本格式，应周期性分析。</span><br><span class="line">2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。</span><br><span class="line">3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。</span><br><span class="line">4. /var/log/lastlog：每一个用户最近一次的登录信息，二进制格式，lastlog命令可以查看。</span><br><span class="line">5. /var/log/dmesg：系统引导过程中的日志信息，文本格式文本查看工具查看。也可用专用命令dmesg查看。</span><br><span class="line">6. /var/log/messages ：系统中大部分的信息。</span><br><span class="line">7. /var/log/anaconda : anaconda的日志。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 用数据库mysql存储日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. 准备一台mysql服务器用来存放日志信息：</span><br><span class="line">    yum install -y mariadb-server</span><br><span class="line">    systemctl enable --now mariadb</span><br><span class="line">2. 创建一个管理该数据库的用户：</span><br><span class="line">    GRANT ALL ON Syslog.* TO &apos;log&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY &apos;testroot&apos;;</span><br><span class="line">3. 在rsyslog日志服务器上安装与mysql交互的模块：</span><br><span class="line">    yum install -y rsyslog-mysql</span><br><span class="line">    [root@localhost ~]#rpm -ql rsyslog-mysql</span><br><span class="line">    /usr/lib64/rsyslog/ommysql.so</span><br><span class="line">    /usr/share/doc/rsyslog-8.24.0/mysql-createDB.sql</span><br><span class="line">4. 将上面的mysql-createDB.sql传到mysql服务器上运行，生成需要的数据库及表。</span><br><span class="line">    mysql &lt;  mysql-createDB.sql</span><br><span class="line">5. 在日志服务器上修改配置，使其调用ommysql.so与mysql服务器交互。</span><br><span class="line">    #### MODULES ####</span><br><span class="line">    $ModLoad ommysql</span><br><span class="line">    #### RULES ####</span><br><span class="line">    local6.*                                                :ommysql:192.168.38.18,Syslog,log,testroot  #:ommysql:DBHOST,DBNAME,DBUSER, PASSWORD</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 基于loganalyzer管理日志服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install  httpd php php-mysqlnd php-gd</span><br><span class="line">wget http://download.adiscon.com/loganalyzer/loganalyzer-4.1.8.tar.gz</span><br><span class="line">tar xf loganalyzer-4.1.5.tar.gz</span><br><span class="line">cp -a loganalyzer-4.1.5/src /var/www/html/loganalyzer</span><br><span class="line">cd /var/www/html/loganalyzer</span><br><span class="line">touch config.php</span><br><span class="line">chmod 666 config.php</span><br><span class="line">在配置完成以后，要回收config.php权限，为了安全考虑。</span><br><span class="line">chmod 644 config.php</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/关于Linux日志/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="关于Linux日志">
          &nbsp;
         view
     </span>

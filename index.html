@@ -202,6 +202,98 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-KVM的基本配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/29/KVM的基本配置/" class="article-date">
+  	<time datetime="2019-11-29T08:00:09.000Z" itemprop="datePublished">2019-11-29</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/29/KVM的基本配置/">
+        KVM的基本配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Ubuntu安装：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.安装KVM相关包:</span><br><span class="line">    apt install qemu-kvm virt-manager libvirt-daemon-system</span><br><span class="line">2.确定KVM安装成功：</span><br><span class="line">    root@gmf:~# kvm-ok</span><br><span class="line">        INFO: /dev/kvm exists</span><br><span class="line">        KVM acceleration can be used</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 更改NAT网络的默认网段：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/libvirt/qemu/networks/default.xml  #/etc/libvirt/qemu/networks/autostart/default.xml是软连接。</span><br><span class="line">&lt;network&gt;</span><br><span class="line">  &lt;name&gt;default&lt;/name&gt;</span><br><span class="line">  &lt;uuid&gt;0f60c65a-aa93-42f5-9bf0-e2f2f5db3b53&lt;/uuid&gt;</span><br><span class="line">  &lt;forward mode=&apos;nat&apos;/&gt;</span><br><span class="line">  &lt;bridge name=&apos;virbr0&apos; stp=&apos;on&apos; delay=&apos;0&apos;/&gt;</span><br><span class="line">  &lt;mac address=&apos;52:54:00:0c:b7:d3&apos;/&gt;</span><br><span class="line">  &lt;ip address=&apos;192.168.66.1&apos; netmask=&apos;255.255.255.0&apos;&gt;</span><br><span class="line">    &lt;dhcp&gt;</span><br><span class="line">      &lt;range start=&apos;192.168.66.2&apos; end=&apos;192.168.66.254&apos;/&gt;</span><br><span class="line">    &lt;/dhcp&gt;</span><br><span class="line">  &lt;/ip&gt;</span><br><span class="line">&lt;/network&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 安装NAT网络的KVM：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 /var/lib/libvirt/images/centos.qcow2 20G</span><br><span class="line">virt-install --virt-type kvm \</span><br><span class="line">--name centos7 \</span><br><span class="line">--ram 1024 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos.qcow2 \</span><br><span class="line">--network network=default \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--noautoconsole</span><br></pre></td></tr></table></figure>
+<p><strong><em>使用 virt-manager 管理KVM时，需要在windows安装Xmanager 及Xserver。</em></strong></p>
+<blockquote>
+<p>4) 安装Bridge(桥接网络)的KVM：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">1.创建网桥：</span><br><span class="line">vim /etc/netplan/01-netcfg.yaml </span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">              addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">              - eth0</span><br><span class="line">    br1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [10.6.6.6/23]</span><br><span class="line">      interfaces:</span><br><span class="line">              - eth1              </span><br><span class="line">2.创建KVM虚拟机：</span><br><span class="line">qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-bridge.qcow2 20G</span><br><span class="line">virt-install --virt-type kvm \</span><br><span class="line">--name centos7-ha1 \</span><br><span class="line">--ram 1024 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos7-bridge.qcow2 \</span><br><span class="line">--network bridge=br0 \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--noautoconsole</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) Centos下安装KVM:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">yum install -y qemu-kvm qemu-kvm-tools libvirt libvirt-client virt-manager virt-install</span><br><span class="line">systemctl enable --now libvirtd</span><br><span class="line">创建桥接网络KVM:</span><br><span class="line">  1.创建桥接网卡：</span><br><span class="line">      [root@localhost network-scripts]# cat ifcfg-eth0</span><br><span class="line">          # Generated by dracut initrd</span><br><span class="line">          NAME=&quot;eth0&quot;</span><br><span class="line">          DEVICE=&quot;eth0&quot;</span><br><span class="line">          ONBOOT=yes</span><br><span class="line">          NETBOOT=yes</span><br><span class="line">          IPV6INIT=yes</span><br><span class="line">          BOOTPROTO=static</span><br><span class="line">          TYPE=Ethernet</span><br><span class="line">          BRIDGE=br0   </span><br><span class="line">      [root@localhost network-scripts]# cat ifcfg-br0 </span><br><span class="line">          TYPE=Bridge</span><br><span class="line">          BOOTPROTO=static</span><br><span class="line">          NAME=br0</span><br><span class="line">          DEVICE=br0</span><br><span class="line">          ONBOOT=yes</span><br><span class="line">          IPADDR=192.168.38.106</span><br><span class="line">          GATEWAY=192.168.38.2</span><br><span class="line">          PREFIX=24</span><br><span class="line">          DNS1=192.168.38.2</span><br><span class="line">  2.创建KVM虚拟机：</span><br><span class="line">      qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-ha2.qcow2 20G</span><br><span class="line">      virt-install --virt-type kvm \</span><br><span class="line">      --name centos7-ha2 \</span><br><span class="line">      --ram 1024 \</span><br><span class="line">      --vcpus 1 \</span><br><span class="line">      --cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">      --disk path=/var/lib/libvirt/images/centos7-ha2.qcow2 \</span><br><span class="line">      --network bridge=br0 \</span><br><span class="line">      --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">      --noautoconsole</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) 安装windows-server:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1.下载Virtio驱动（Linux内核默认安装，windows需要自行安装，否则无法驱动raw和qcow2块设备）：</span><br><span class="line">    wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.141-1/virtio-win_amd64.vfd</span><br><span class="line">2.安装windows-server2016的KVM虚拟机：</span><br><span class="line">    qemu-img create -f qcow2 /var/lib/libvirt/images/windows-server.qcow2 100G</span><br><span class="line">    virt-install --virt-type kvm \</span><br><span class="line">    --name windows-server \</span><br><span class="line">    --ram 2048 \</span><br><span class="line">    --vcpus 1 \</span><br><span class="line">    --os-type=windows \</span><br><span class="line">    --cdrom=/usr/local/src/cn_windows_server_2016_x64_dvd_9718765.iso \</span><br><span class="line">    --disk path=/var/lib/libvirt/images/windows-server.qcow2,format=qcow2,bus=virtio \</span><br><span class="line">    --disk path=/usr/local/src/virtio-win_amd64.vfd,device=floppy \</span><br><span class="line">    --network bridge=br0 \</span><br><span class="line">    --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">    --noautoconsole</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/29/KVM的基本配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="KVM的基本配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Ubuntu的源配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1022,87 +1114,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/17/web高可用入门架构/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="web高可用入门架构">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Memcache的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/15/Memcache的安装配置/" class="article-date">
-  	<time datetime="2019-11-15T12:09:24.000Z" itemprop="datePublished">2019-11-15</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/15/Memcache的安装配置/">
-        Memcache的安装配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方<br>式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使<br>有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重<br>新加入到集群的时候可以自动从有数据的memcache当中自动获取数据并提供服务。Memcache支持最大的内存存储对象为1M，Memcache借助了操作系统的libevent工具做高效的读写，memcache最适合保存用户的session实现session共享。</em></strong></p>
-<blockquote>
-<p>1) 安装 memcached:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y memcached</span><br><span class="line"></span><br><span class="line">vim /etc/sysconfig/memcached</span><br><span class="line">    PORT=&quot;11211&quot; #监听端口</span><br><span class="line">    USER=&quot;memcached&quot; #启动用户</span><br><span class="line">    MAXCONN=&quot;1024&quot; #最大连接数</span><br><span class="line">    CACHESIZE=&quot;1024&quot; #最大使用内存</span><br><span class="line">    OPTIONS=&quot;&quot; #其他选项</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 编译安装：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget http://memcached.org/files/memcached-1.5.20.tar.gz</span><br><span class="line">tar -xvf memcached-1.5.20.tar.gz </span><br><span class="line">./configure --prefix=/apps/memcached</span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/memcached</span><br><span class="line">/apps/memcached/bin/memcached -u memcached -p 11211 -m 2048 -c 65536 &amp;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 通过repcached实现memcached集群部署架构:</p>
-</blockquote>
-<p>从这方案的技术实现来看，其实它是一个单 master单 slave的方案，但它的 master/slave都是可读写的，而且可<br>以相互同步，所以从功能上看，也可以认为它是双机 master-master方案。直接通过负载均衡连接之memcached，任<br>然有两台memcached做高可用，memcached会自动同步数据保持数据一致性，即使一台memcached故障也不影响业务<br>正常运行，故障的memcached修复上线后再自动从另外一台同步数据即可保持数据一致性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget https://sourceforge.net/projects/repcached/files/repcached/2.2.1-1.2.8/memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">tar -xvf memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">cd  memcached-1.2.8-repcached-2.2.1</span><br><span class="line">./configure --prefix=/apps/repcached --enable-replication</span><br><span class="line">在Centos7上make会报错，修改代码：</span><br><span class="line">vim memcached.c</span><br><span class="line">    56 #ifndef IOV_MAX</span><br><span class="line">    57 #if defined(__FreeBSD__) || defined(__APPLE__)</span><br><span class="line">    58 # define IOV_MAX 1024</span><br><span class="line">    59 #endif</span><br><span class="line">    60 #endif</span><br><span class="line">将以上内容删除，修改为如下代码：</span><br><span class="line">     #ifndef IOV_MAX</span><br><span class="line">     # define IOV_MAX 1024</span><br><span class="line">     #endif</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/repcached</span><br><span class="line"></span><br><span class="line">测试能否运行：</span><br><span class="line">/apps/repcached/bin/memcached  -h</span><br><span class="line"></span><br><span class="line">启动该集群：</span><br><span class="line">    67:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.57 -X 6666 (-x 对端的ip)</span><br><span class="line">    57:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.67 -X 6666</span><br><span class="line"></span><br><span class="line">连接与测试：</span><br><span class="line">[root@localhost ~]#telnet 192.168.38.57 11211</span><br><span class="line">Trying 192.168.38.57...</span><br><span class="line">Connected to 192.168.38.57.</span><br><span class="line">Escape character is &apos;^]&apos;.</span><br><span class="line">set sss 0 0 4</span><br><span class="line">dddd</span><br><span class="line">STORED  #符合长度后自动保存</span><br><span class="line">get sss</span><br><span class="line">VALUE sss 0 4</span><br><span class="line">dddd</span><br><span class="line">END</span><br><span class="line">quit</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/15/Memcache的安装配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Memcache的安装配置">
          &nbsp;
         view
     </span>

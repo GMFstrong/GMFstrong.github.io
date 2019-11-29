@@ -202,6 +202,172 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-MYSQL用户授权配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/22/MYSQL用户授权配置/" class="article-date">
+  	<time datetime="2019-09-22T13:22:21.000Z" itemprop="datePublished">2019-09-22</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/22/MYSQL用户授权配置/">
+        MYSQL用户授权配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>关于MYSQL的用户创建及授权管理。</em></strong></p>
+<blockquote>
+<p>1) 创建用户，并为其设置密码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; create user test@&apos;192.168.38.%&apos;;</span><br><span class="line">MariaDB [(none)]&gt; set password for test@&apos;192.168.38.%&apos;=password(&apos;testroot&apos;);</span><br><span class="line">#以上两条命令可以使用以下命令代替：</span><br><span class="line">MariaDB [(none)]&gt; create user test2@&apos;172.18.38.%&apos; identified by &apos;testroot&apos;;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) MySQL的管理员的密码忘记，如何找回密码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/my.cnf #默认为该配置文件，根据自己的配置文件位置修改。在[mysqld]字段下添加以下两行</span><br><span class="line">[mysqld]</span><br><span class="line">skip-grant-tables   #跳过密码认证。默认远程连接也会跳过密码认证。</span><br><span class="line">skip-networking     #断开网络连接MYSQL，安全考虑。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; update mysql.user set password=password(&apos;123456&apos;) where mysql.user.user=&apos;test&apos;; </span><br><span class="line">#以上方法，可能需要刷新。</span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 为用户授权。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; grant all on hellodb.* to test@&apos;192.168.38.%&apos;;  #对hellodb有所有权限。</span><br><span class="line">MariaDB [(none)]&gt; show grants for test@&apos;192.168.38.%&apos;;           </span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for test@192.168.38.%                                                                                   |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT USAGE ON *.* TO &apos;test&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY PASSWORD &apos;*DAEAFADB40481804151BA708437A5BEC415FBA85&apos; |</span><br><span class="line">| GRANT ALL PRIVILEGES ON `hellodb`.* TO &apos;test&apos;@&apos;192.168.38.%&apos;                                                   |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">MariaDB [(none)]&gt; grant all on *.* to test@&apos;192.168.38.%&apos;;  #类似于管理员权限，但是不能将权限赋给别人。</span><br><span class="line">MariaDB [(none)]&gt; grant all on *.* to test3@&apos;192.168.38.%&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; show grants for test3@&apos;192.168.38.%&apos;;</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for test3@192.168.38.%                                                                                            |</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT ALL PRIVILEGES ON *.* TO &apos;test3&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY PASSWORD &apos;*DAEAFADB40481804151BA708437A5BEC415FBA85&apos; |</span><br><span class="line">| GRANT ALL PRIVILEGES ON `hellodb`.* TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                                            |</span><br><span class="line">| GRANT SELECT (name, StuID) ON `hellodb`.`students` TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                             |</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br><span class="line">MariaDB [(none)]&gt; create user test002@&apos;192.168.38.%&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; select user();</span><br><span class="line">+---------------------+</span><br><span class="line">| user()              |</span><br><span class="line">+---------------------+</span><br><span class="line">| test3@192.168.38.27 |</span><br><span class="line">+---------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 回收权限。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; revoke all on *.* from test3@&apos;192.168.38.%&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; show grants for test3@&apos;192.168.38.%&apos;;       </span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for test3@192.168.38.%                                                                                   |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT USAGE ON *.* TO &apos;test3&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY PASSWORD &apos;*DAEAFADB40481804151BA708437A5BEC415FBA85&apos; |</span><br><span class="line">| GRANT ALL PRIVILEGES ON `hellodb`.* TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                                   |</span><br><span class="line">| GRANT SELECT (name, StuID) ON `hellodb`.`students` TO &apos;test3&apos;@&apos;192.168.38.%&apos;                                    |</span><br><span class="line">+-----------------------------------------------------------------------------------------------------------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/22/MYSQL用户授权配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MYSQL用户授权配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-MYSQL多实例配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/22/MYSQL多实例配置/" class="article-date">
+  	<time datetime="2019-09-22T13:16:54.000Z" itemprop="datePublished">2019-09-22</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/22/MYSQL多实例配置/">
+        MYSQL多实例配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>MYSQL基于不同版本的多实例实现：</em></strong></p>
+<blockquote>
+<p>1) 在同一台主机上安装两个或两个以上版本的mysql。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mariadb-server  #默认为5.5.60-MariaDB版本</span><br><span class="line"></span><br><span class="line">#这里又用二进制安装了一个10.2.27-MariaDB版本</span><br><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">#具体的安装过程不再记录。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 规划多个实例的数据库，配置文件等的存放目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql/&#123;3306,3307,3308&#125;/&#123;etc,sock,log,pid,data&#125;/ -pv</span><br><span class="line">chown -R mysql:mysql /data/mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 复制 /etc/my.cnf 到 /data/mysql/3308/etc/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cp /etc/my.cnf /data/mysql/3308/etc/</span><br><span class="line">vim /data/mysql/3308/etc/my.cnf</span><br><span class="line">#添加以下内容：</span><br><span class="line">[mysqld]</span><br><span class="line">port=3308</span><br><span class="line">datadir=/data/mysql/3308/data</span><br><span class="line">socket=/data/mysql/3308/sock/mysql.sock</span><br><span class="line">[mysqld_safe]</span><br><span class="line">log-error=/data/mysql/3308/log/mariadb.log</span><br><span class="line">pid-file=/data/mysql/3308/pid/mariadb.pid</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#二进制安装初始化</span><br><span class="line">yum install -y  libaio</span><br><span class="line">/usr/local/mariadb-10.2.27-linux-x86_64/scripts/mysql_install_db --datadir=/data/mysql/3308/data/ --user=mysql</span><br><span class="line">#yum安装初始化</span><br><span class="line">mysql_install_db --datadir=/data/mysql/3306/data/ --user=mysql</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 配置mysql服务启动脚本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">port=3308                                   #根据实例配置不同端口</span><br><span class="line">mysql_user=&quot;root&quot;</span><br><span class="line">mysql_pwd=&quot;&quot;</span><br><span class="line">cmd_path=&quot;/usr/local/mysql-10.2.27/bin&quot;     #指定mysqld_safe所在的目录</span><br><span class="line">mysql_basedir=&quot;/data/mysql&quot;                 #指定规划的多实例mysql的目录</span><br><span class="line">mysql_sock=&quot;$&#123;mysql_basedir&#125;/$&#123;port&#125;/sock/mysql.sock&quot;</span><br><span class="line"></span><br><span class="line">function_start_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">      printf &quot;Starting MySQL...\n&quot;</span><br><span class="line">      $&#123;cmd_path&#125;/mysqld_safe --defaults-file=$&#123;mysql_basedir&#125;/$&#123;port&#125;/etc/my.cnf  &amp;&gt; /dev/null  &amp;</span><br><span class="line">    else</span><br><span class="line">      printf &quot;MySQL is running...\n&quot;</span><br><span class="line">      exit</span><br><span class="line">    fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_stop_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">       printf &quot;MySQL is stopped...\n&quot;</span><br><span class="line">       exit</span><br><span class="line">    else</span><br><span class="line">       printf &quot;Stoping MySQL...\n&quot;</span><br><span class="line">       $&#123;cmd_path&#125;/mysqladmin -u $&#123;mysql_user&#125; -p$&#123;mysql_pwd&#125; -S $&#123;mysql_sock&#125; shutdown</span><br><span class="line">   fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_restart_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    printf &quot;Restarting MySQL...\n&quot;</span><br><span class="line">    function_stop_mysql</span><br><span class="line">    sleep 2</span><br><span class="line">    function_start_mysql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">start)</span><br><span class="line">    function_start_mysql</span><br><span class="line">;;</span><br><span class="line">stop)</span><br><span class="line">    function_stop_mysql</span><br><span class="line">;;</span><br><span class="line">restart)</span><br><span class="line">    function_restart_mysql</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">    printf &quot;Usage: $&#123;mysql_basedir&#125;/$&#123;port&#125;/bin/mysqld &#123;start|stop|restart&#125;\n&quot;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/22/MYSQL多实例配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MYSQL多实例配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-MYSQL的备份与还原" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -883,228 +1049,6 @@
 <div class="counter-tag counter">
     <span id="/2019/09/15/CA证书的创建与吊销/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="CA证书的创建与吊销">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-DNS服务的配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/13/DNS服务的配置/" class="article-date">
-  	<time datetime="2019-09-13T07:41:01.000Z" itemprop="datePublished">2019-09-13</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/13/DNS服务的配置/">
-        DNS服务的配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>以下操作确保自己的 SElinux , firewall 已关闭，时间已经同步。</em></strong></p>
-<p><strong><em>确保自己创建的域数据库文件权限与系统保持一致。</em></strong></p>
-<p><strong><em>并且确保自己已经配置epel源</em></strong></p>
-<p><strong><em>主DNS服务器：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/yum.repos.d/base.repo</span><br><span class="line">[epel]</span><br><span class="line">name=EPEL</span><br><span class="line">baseurl=https://mirrors.aliyun.com/epel/7/x86_64/</span><br><span class="line">gpgcheck=0</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>1) 安装bind包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bind</span><br><span class="line"></span><br><span class="line">客户端安装：yum install bind-utils -y</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 先配置主DNS服务器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 创建域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vim vim /var/named/test.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN SOA  master  admin.test.com.  (</span><br><span class="line">                    1       ; serial    数据库版本号，用于判断是否同步到从DNS服务器</span><br><span class="line">                    3600    ; refresh   主从服务器同步时间 间隔 （默认单位：秒）</span><br><span class="line">                    600     ; retry     主从同步失败后，多久后重新同步</span><br><span class="line">                    1W      ; expire    从服务器多久没有到主服务器同步数据，就不在提供服务</span><br><span class="line">                    3H )    ; minimum   错误记录的缓存时间</span><br><span class="line">        NS  master</span><br><span class="line"></span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">websrv  A   192.168.38.37</span><br><span class="line"></span><br><span class="line">www    CNAME  websrv</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 在配置文件中引入域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">默认的配置文件是 /etc/named.conf ，但是引入域数据库文件，建议在 /etc/named.rfc1912.zones 中配置。</span><br><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line">zone &quot;test.com&quot;&#123;</span><br><span class="line">type master;</span><br><span class="line">file &quot;test.com.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>从DNS服务的配置：</em></strong></p>
-<blockquote>
-<p>1)同样安装 bind 包。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bind</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 配置从DNS服务器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br><span class="line">allow-transfer &#123;none;&#125;;               为了安全，防止抓取这个DNS库文件</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 修改配置文件引用域数据库文件，从服务器不用创建域数据库文件。默认会从主服务器同步。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line">zone &quot;test.com&quot;&#123;</span><br><span class="line">type slave;</span><br><span class="line">masters &#123;192.168.38.47;&#125;;</span><br><span class="line">file &quot;slaves/test.com.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 配置主服务器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf</span><br><span class="line">allow-transfer &#123;192.168.38.27;&#125;;</span><br><span class="line"></span><br><span class="line">vim /var/named/test.com.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN SOA  master  admin.test.com.  (</span><br><span class="line">                    1        ; serial </span><br><span class="line">                    3600     ; refresh</span><br><span class="line">                    600      ; retry</span><br><span class="line">                    1W       ; expire</span><br><span class="line">                    3H )     ; minimum</span><br><span class="line">        NS  master</span><br><span class="line">        NS  slave</span><br><span class="line">slave   A   192.168.38.27</span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">websrv  A   192.168.38.37</span><br><span class="line"></span><br><span class="line">www    CNAME  websrv</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>子DNS服务器的配置</em></strong></p>
-<blockquote>
-<p>1) 主DNS服务器的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">vim /var/named/test.com.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN SOA  master  admin.test.com.  (</span><br><span class="line">                    1        ; serial </span><br><span class="line">                    3600     ; refresh</span><br><span class="line">                    600      ; retry</span><br><span class="line">                    1W       ; expire</span><br><span class="line">                    3H )     ; minimum</span><br><span class="line">        NS  master</span><br><span class="line">        NS  slave</span><br><span class="line">beijing NS  son</span><br><span class="line">son     A   192.168.38.36</span><br><span class="line">slave   A   192.168.38.27</span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">websrv  A   192.168.38.37</span><br><span class="line"></span><br><span class="line">www    CNAME  websrv</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 子DNS服务器的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br><span class="line">allow-transfer &#123;none;&#125;;               为了安全，防止抓取这个DNS库文件</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 在子DNS服务器上创建 域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim /var/named/beijing.test.com.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@       IN      SOA     master  admin.test.com. ( 1</span><br><span class="line">                                                1D</span><br><span class="line">                                                3H</span><br><span class="line">                                                1W</span><br><span class="line">                                                6H )</span><br><span class="line">                NS      master</span><br><span class="line">master          A       192.168.38.36</span><br><span class="line"></span><br><span class="line">app             A       1.1.1.1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 在子DNS服务器配置文件中引用以上域数据库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.rfc1912.zones </span><br><span class="line">zone &quot;beijing.test.com&quot;&#123;</span><br><span class="line">type master;</span><br><span class="line">file &quot;beijing.test.com.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>转发（缓存）DNS服务器</em></strong></p>
-<blockquote>
-<p>1) DNS服务器的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.conf </span><br><span class="line">//  listen-on port 53 &#123; 127.0.0.1; &#125;; 默认监听在回环地址的53端口。注释掉本行</span><br><span class="line">//  allow-query     &#123; localhost; &#125;;   默认仅仅为本地提供域名解析。注释掉本行</span><br><span class="line">allow-transfer &#123;none;&#125;;               为了安全，防止抓取这个DNS库文件</span><br><span class="line">forwarders &#123; 192.168.38.47;&#125;;</span><br><span class="line">forward only;                         only如若转发目标服务器不可用，这解析失败。first则在转发目标不可用时，转发服务器自己去找根服务器解析。</span><br><span class="line">dnssec-enable no;</span><br><span class="line">dnssec-validation no;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>反向域解析服务器</em></strong></p>
-<blockquote>
-<p>1) 首先创建反向域解析库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim /var/named/192.168.38.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@   IN  SOA master  admin.test.com. ( 1 1D 3H 1W 3H )</span><br><span class="line"></span><br><span class="line">    NS  master</span><br><span class="line"></span><br><span class="line">master  A   192.168.38.47</span><br><span class="line"></span><br><span class="line">100     PTR  web.test.com.</span><br><span class="line"></span><br><span class="line">66      PTR  qq.test.com.</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 在配置文件中引用以上域解析库文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line">zone &quot;38.168.192.in-addr.arpa&quot;&#123;</span><br><span class="line">type master;</span><br><span class="line">file &quot;192.168.38.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/13/DNS服务的配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="DNS服务的配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-文本处理-awk" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/31/文本处理-awk/" class="article-date">
-  	<time datetime="2019-08-31T08:21:33.000Z" itemprop="datePublished">2019-08-31</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/31/文本处理-awk/">
-        文本处理_awk
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <img src="/2019/08/31/文本处理-awk/1.png">
-<img src="/2019/08/31/文本处理-awk/2.png">
-<blockquote>
-<p>关于变量</p>
-</blockquote>
-<img src="/2019/08/31/文本处理-awk/3.png">
-<img src="/2019/08/31/文本处理-awk/4.png">
-<img src="/2019/08/31/文本处理-awk/5.png">
-<blockquote>
-<p>awk的基本使用格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">awk [options] &apos;program&apos; file</span><br><span class="line">program：表示为pattern&#123;action statements;...&#125;</span><br><span class="line">pattern：表示部分决定动作语句何时触发及触发事件BEGIN、END；</span><br><span class="line">action statements：表示对数据进行处理，放置&#123;&#125;内指明print、printf。</span><br><span class="line"></span><br><span class="line">awk执行时，由分隔符的字段（域）标记$1,$2...$n称为域标识,$0为所有域。</span><br><span class="line">文件的每一行称为记录。</span><br><span class="line">省略action，则默认执行print $0的操作。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: &apos;/^root/&#123;print$1,$3&#125;&apos; /etc/passwd      </span><br><span class="line">root 0</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>不指定action默认“print $0”及所有匹配到的行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: &apos;/^UUID/&apos; /etc/fstab </span><br><span class="line">UUID=63f39645-9ff8-467a-b661-2b01b7c4d904 /                       xfs     defaults        0 0</span><br><span class="line">UUID=47fc0f00-af74-467f-9da3-e666bc8b1f29 /boot                   xfs     defaults        0 0</span><br><span class="line">UUID=da4d0c6b-b89a-4e7b-9d02-e2254fc75737 /date                   xfs     defaults        0 0</span><br><span class="line">UUID=aaef23a7-e6dc-4e1e-9a58-9d9d215fded7 swap                    swap    defaults        0 0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>如下：只有当“{action}”前的表达式为真时，才有后续的处理。</p>
-</blockquote>
-<p><strong><em>真：结果为非0值，非空字符串</em></strong></p>
-<p><strong><em>假：结果为空字符串或0值</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk -F: -v OFS=*** &apos;1&#123;print $1OFS$3&#125;&apos; /etc/passwd</span><br><span class="line">root***0</span><br><span class="line">bin***1</span><br><span class="line">daemon***2</span><br><span class="line">adm***3</span><br><span class="line">lp***4</span><br><span class="line">sync***5</span><br><span class="line">shutdown***6</span><br><span class="line">...</span><br><span class="line">[root@localhost ~]# awk -F: -v OFS=*** &apos;!1&#123;print $1OFS$3&#125;&apos; /etc/passwd</span><br><span class="line">[root@localhost ~]# </span><br><span class="line">[root@localhost ~]# awk -F: &apos;$3&gt;=100&#123;print $1,$3&#125;&apos; /etc/passwd</span><br><span class="line">avahi-autoipd 170</span><br><span class="line">systemd-bus-proxy 999</span><br><span class="line">systemd-network 998</span><br><span class="line">polkitd 997</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>在“i=1”后面默认隐藏了{print $0}。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# awk  -F: &apos;i=1;j=1&#123;print $1,$3&#125;&apos; /etc/passwd </span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">root 0</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">bin 1</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon 2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>关于awk的一些特殊使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=0&apos;</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=1&apos;</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=!i&apos;</span><br><span class="line">1</span><br><span class="line">3</span><br><span class="line">5</span><br><span class="line">7</span><br><span class="line">9</span><br><span class="line">[root@localhost ~]# seq 10 | awk &apos;i=!i;&#123;print i&#125;&apos;</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">3</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">5</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">7</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">9</span><br><span class="line">1</span><br><span class="line">0</span><br><span class="line">[root@localhost ~]# seq 10 |awk -v i=1 &apos;i=!i&apos;</span><br><span class="line">2</span><br><span class="line">4</span><br><span class="line">6</span><br><span class="line">8</span><br><span class="line">10</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>awk中数组的使用:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(1) 可使用任意字符串；字符串要使用双引号括起来</span><br><span class="line">(2) 如果某数组元素事先不存在，在引用时，awk会自动创建此元素，并将其值</span><br><span class="line">初始化为“空串”</span><br><span class="line">(3) 若要判断数组中是否存在某元素，要使用“index in array”格式进行遍历</span><br></pre></td></tr></table></figure>
-<img src="/2019/08/31/文本处理-awk/6.png">
-<img src="/2019/08/31/文本处理-awk/7.png">
-<img src="/2019/08/31/文本处理-awk/8.png">
-<img src="/2019/08/31/文本处理-awk/9.png">
-<img src="/2019/08/31/文本处理-awk/10.png">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/31/文本处理-awk/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="文本处理_awk">
          &nbsp;
         view
     </span>
