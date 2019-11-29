@@ -385,101 +385,6 @@
 
 
   
-    <article id="post-HTTPD的编译安装/Ubuntu的基础配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/27/HTTPD的编译安装/Ubuntu的基础配置/" class="article-date">
-  	<time datetime="2019-11-27T12:00:09.000Z" itemprop="datePublished">2019-11-27</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/27/HTTPD的编译安装/Ubuntu的基础配置/">
-        Ubuntu的基础配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 修改主机名：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# cat /etc/hostname </span><br><span class="line">gmf.testroot.com</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 修改网卡名：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# cat /etc/default/grub</span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;net.ifnames=0 biosdevname=0&quot;</span><br><span class="line"></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 配置Ubuntu的root用户连接：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# vim /etc/ssh/sshd_config </span><br><span class="line">PermitRootLogin yes</span><br><span class="line">PasswordAuthentication yes</span><br><span class="line">sudo su - root  #切换root设置密码。</span><br><span class="line"> systemctl restart sshd #重启ssh服务并测试root用户远程ssh连接</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 配置Ubuntu的网卡：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">ubuntu 17.04及之前的静态IP配置方式：</span><br><span class="line">    cat /etc/network/interfaces</span><br><span class="line">        # interfaces(5) file used by ifup(8) and ifdown(8)</span><br><span class="line">        auto lo</span><br><span class="line">        iface lo inet loopback</span><br><span class="line">        auto eth0 #网卡自启动，写自己要配置IP的实际网卡名称</span><br><span class="line">        iface eth0 inet static #配置静态IP，写自己要配置IP的实际网卡名称</span><br><span class="line">        address 172.18.3.12 #IP地址</span><br><span class="line">        netmask 255.255.0.0 #掩码</span><br><span class="line">        gateway 172.18.0.1 #网关</span><br><span class="line">        dns-nameservers 223.6.6.6 #DNS</span><br><span class="line">        dns-nameservers 223.5.5.5</span><br><span class="line">    #重启网络服务</span><br><span class="line">    /etc/init.d/networking restart</span><br><span class="line">    systemctl restart networking.service</span><br><span class="line">ubuntu 18.04配置静态IP地址:</span><br><span class="line">    vim /etc/netplan/01-netcfg.yaml</span><br><span class="line">        network:</span><br><span class="line">            version: 2</span><br><span class="line">            renderer: networkd</span><br><span class="line">            ethernets:</span><br><span class="line">                eth0:</span><br><span class="line">                    dhcp4: no</span><br><span class="line">                    addresses: [192.168.38.201/24]</span><br><span class="line">                    gateway4: 192.168.38.2</span><br><span class="line">                    nameservers:</span><br><span class="line">                            addresses: [192.168.38.2]</span><br><span class="line">                            </span><br><span class="line">                eth1:</span><br><span class="line">                    dhcp4: no</span><br><span class="line">                    addresses: [172.18.8.201/16]</span><br><span class="line">                    routes:</span><br><span class="line">                        - to: 172.30.0.0/16</span><br><span class="line">                        via: 172.18.0.1</span><br><span class="line">                        - to: 172.17.0.0/16</span><br><span class="line">                        via: 172.18.0.1</span><br><span class="line">    netplan apply  #是当前配置生效。</span><br><span class="line">vim ~/.vimrc #取消vim 自动缩进功能</span><br><span class="line">set past</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 配置网卡桥接：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line"></span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">          addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">          - eth0</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 多网卡绑定（bond）:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">第一种模式：mod=0，即：(balance-rr) Round-robin policy（平衡抡循环策略）</span><br><span class="line">特点：传输数据包顺序是依次传输（即：第1个包走eth0，下一个包就走eth1….一直循环下去，直到最后一个传</span><br><span class="line">输完毕），此模式提供负载平衡和容错能力。</span><br><span class="line">第二种模式：mod=1，即： (active-backup) Active-backup policy（主-备份策略）</span><br><span class="line">特点：只有一个设备处于活动状态，当一个宕掉另一个马上由备份转换为主设备。mac地址是外部可见得，从外面</span><br><span class="line">看来，bond的MAC地址是唯一的，以避免switch(交换机)发生混乱。此模式只提供了容错能力；由此可见此算法</span><br><span class="line">的优点是可以提供高网络连接的可用性，但是它的资源利用率较低，只有一个接口处于工作状态，在有 N 个网络</span><br><span class="line">接口的情况下，资源利用率为1/N。</span><br><span class="line">第三种模式：mod=2，即：(balance-xor) XOR policy（平衡策略）</span><br><span class="line">特点：基于指定的传输HASH策略传输数据包。缺省的策略是：(源MAC地址 XOR 目标MAC地址) % slave数量。</span><br><span class="line">其他的传输策略可以通过xmit_hash_policy选项指定，此模式提供负载平衡和容错能力。</span><br><span class="line">第四种模式：mod=3，即：broadcast（广播策略）</span><br><span class="line">特点：在每个slave接口上传输每个数据包，此模式提供了容错能力。</span><br><span class="line">第五种模式：mod=4，即：(802.3ad) IEEE 802.3adDynamic link aggregation（IEEE 802.3ad 动态</span><br><span class="line">链接聚合）</span><br><span class="line">特点：创建一个聚合组，它们共享同样的速率和双工设定。根据802.3ad规范将多个slave工作在同一个激活的聚</span><br><span class="line">合体下。</span><br><span class="line">必要条件：</span><br><span class="line">条件1：ethtool支持获取每个slave的速率和双工设定。</span><br><span class="line">条件2：switch(交换机)支持IEEE 802.3ad Dynamic link aggregation。</span><br><span class="line">条件3：大多数switch(交换机)需要经过特定配置才能支持802.3ad模式。</span><br><span class="line">第六种模式：mod=5，即：(balance-tlb) Adaptive transmit load balancing（适配器传输负载均</span><br><span class="line">衡）</span><br><span class="line">特点：不需要任何特别的switch(交换机)支持的通道bonding。在每个slave上根据当前的负载（根据速度计</span><br><span class="line">算）分配外出流量。如果正在接受数据的slave出故障了，另一个slave接管失败的slave的MAC地址。</span><br><span class="line">该模式的必要条件：</span><br><span class="line">ethtool支持获取每个slave的速率</span><br><span class="line">第七种模式：mod=6，即：(balance-alb) Adaptive load balancing（适配器适应性负载均衡）</span><br><span class="line">特点：该模式包含了balance-tlb模式，同时加上针对IPV4流量的接收负载均衡(receive load balance,</span><br><span class="line">rlb)，而且不需要任何switch(交换机)的支持。</span><br><span class="line">一般根据情况大多用0,1,4策略。</span><br><span class="line"></span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">    eth1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">  bonds:</span><br><span class="line">    bond0:</span><br><span class="line">      interfaces:</span><br><span class="line">        - eth0</span><br><span class="line">        - eth1</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">        addresses: [192.168.38.2]</span><br><span class="line">      parameters:</span><br><span class="line">        mode: active-backup</span><br><span class="line">        mii-monitor-interval: 100</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) 基于bond的桥接：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">    eth1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">  bonds:</span><br><span class="line">    bond0:</span><br><span class="line">      interfaces:</span><br><span class="line">        - eth0</span><br><span class="line">        - eth1</span><br><span class="line">      parameters:</span><br><span class="line">        mode: active-backup</span><br><span class="line">        mii-monitor-interval: 100</span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">        addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">        - bond0</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/27/HTTPD的编译安装/Ubuntu的基础配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Ubuntu的基础配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
     <article id="post-Ubuntu的基础配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1114,6 +1019,87 @@
 <div class="counter-tag counter">
     <span id="/2019/11/17/web高可用入门架构/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="web高可用入门架构">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Memcache的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/15/Memcache的安装配置/" class="article-date">
+  	<time datetime="2019-11-15T12:09:24.000Z" itemprop="datePublished">2019-11-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/15/Memcache的安装配置/">
+        Memcache的安装配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方<br>式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使<br>有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重<br>新加入到集群的时候可以自动从有数据的memcache当中自动获取数据并提供服务。Memcache支持最大的内存存储对象为1M，Memcache借助了操作系统的libevent工具做高效的读写，memcache最适合保存用户的session实现session共享。</em></strong></p>
+<blockquote>
+<p>1) 安装 memcached:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y memcached</span><br><span class="line"></span><br><span class="line">vim /etc/sysconfig/memcached</span><br><span class="line">    PORT=&quot;11211&quot; #监听端口</span><br><span class="line">    USER=&quot;memcached&quot; #启动用户</span><br><span class="line">    MAXCONN=&quot;1024&quot; #最大连接数</span><br><span class="line">    CACHESIZE=&quot;1024&quot; #最大使用内存</span><br><span class="line">    OPTIONS=&quot;&quot; #其他选项</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 编译安装：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget http://memcached.org/files/memcached-1.5.20.tar.gz</span><br><span class="line">tar -xvf memcached-1.5.20.tar.gz </span><br><span class="line">./configure --prefix=/apps/memcached</span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/memcached</span><br><span class="line">/apps/memcached/bin/memcached -u memcached -p 11211 -m 2048 -c 65536 &amp;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 通过repcached实现memcached集群部署架构:</p>
+</blockquote>
+<p>从这方案的技术实现来看，其实它是一个单 master单 slave的方案，但它的 master/slave都是可读写的，而且可<br>以相互同步，所以从功能上看，也可以认为它是双机 master-master方案。直接通过负载均衡连接之memcached，任<br>然有两台memcached做高可用，memcached会自动同步数据保持数据一致性，即使一台memcached故障也不影响业务<br>正常运行，故障的memcached修复上线后再自动从另外一台同步数据即可保持数据一致性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget https://sourceforge.net/projects/repcached/files/repcached/2.2.1-1.2.8/memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">tar -xvf memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">cd  memcached-1.2.8-repcached-2.2.1</span><br><span class="line">./configure --prefix=/apps/repcached --enable-replication</span><br><span class="line">在Centos7上make会报错，修改代码：</span><br><span class="line">vim memcached.c</span><br><span class="line">    56 #ifndef IOV_MAX</span><br><span class="line">    57 #if defined(__FreeBSD__) || defined(__APPLE__)</span><br><span class="line">    58 # define IOV_MAX 1024</span><br><span class="line">    59 #endif</span><br><span class="line">    60 #endif</span><br><span class="line">将以上内容删除，修改为如下代码：</span><br><span class="line">     #ifndef IOV_MAX</span><br><span class="line">     # define IOV_MAX 1024</span><br><span class="line">     #endif</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/repcached</span><br><span class="line"></span><br><span class="line">测试能否运行：</span><br><span class="line">/apps/repcached/bin/memcached  -h</span><br><span class="line"></span><br><span class="line">启动该集群：</span><br><span class="line">    67:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.57 -X 6666 (-x 对端的ip)</span><br><span class="line">    57:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.67 -X 6666</span><br><span class="line"></span><br><span class="line">连接与测试：</span><br><span class="line">[root@localhost ~]#telnet 192.168.38.57 11211</span><br><span class="line">Trying 192.168.38.57...</span><br><span class="line">Connected to 192.168.38.57.</span><br><span class="line">Escape character is &apos;^]&apos;.</span><br><span class="line">set sss 0 0 4</span><br><span class="line">dddd</span><br><span class="line">STORED  #符合长度后自动保存</span><br><span class="line">get sss</span><br><span class="line">VALUE sss 0 4</span><br><span class="line">dddd</span><br><span class="line">END</span><br><span class="line">quit</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/15/Memcache的安装配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Memcache的安装配置">
          &nbsp;
         view
     </span>
