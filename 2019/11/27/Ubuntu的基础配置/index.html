@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="ConqUeroR">
 <meta property="og:description" content="1) 修改主机名：  12root@gmf:~# cat /etc/hostname gmf.testroot.com  2) 修改网卡名：  1234root@gmf:~# cat /etc/default/grubGRUB_CMDLINE_LINUX=&amp;quot;net.ifnames=0 biosdevname=0&amp;quot;reboot  3) 配置Ubuntu的root用户连接：  1">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-27T13:56:50.000Z">
+<meta property="og:updated_time" content="2019-11-29T11:10:11.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Ubuntu的基础配置">
 <meta name="twitter:description" content="1) 修改主机名：  12root@gmf:~# cat /etc/hostname gmf.testroot.com  2) 修改网卡名：  1234root@gmf:~# cat /etc/default/grubGRUB_CMDLINE_LINUX=&amp;quot;net.ifnames=0 biosdevname=0&amp;quot;reboot  3) 配置Ubuntu的root用户连接：  1">
@@ -261,7 +261,7 @@
 <blockquote>
 <p>3) 配置Ubuntu的root用户连接：</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# vim /etc/ssh/sshd_config </span><br><span class="line">PermitRootLogin yes</span><br><span class="line">PasswordAuthentication yes</span><br><span class="line">sudo su - root  #切换root设置密码。</span><br><span class="line"> systemctl restart sshd #重启ssh服务并测试root用户远程ssh连接</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# vim /etc/ssh/sshd_config </span><br><span class="line">PermitRootLogin yes</span><br><span class="line">PasswordAuthentication yes</span><br><span class="line">sudo su - root  #切换root设置密码。</span><br><span class="line">systemctl restart sshd #重启ssh服务并测试root用户远程ssh连接</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>4) 配置Ubuntu的网卡：</p>
 </blockquote>
