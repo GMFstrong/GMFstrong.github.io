@@ -202,6 +202,92 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Docker的安装及基础配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/02/Docker的安装及基础配置/" class="article-date">
+  	<time datetime="2019-12-02T12:00:09.000Z" itemprop="datePublished">2019-12-02</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/02/Docker的安装及基础配置/">
+        Docker的安装及基础配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 二进制安装docker-ce:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">1.下载二进制包：</span><br><span class="line">    wget https://mirrors.aliyun.com/docker-ce/linux/static/stable/x86_64/docker-18.09.9.tgz</span><br><span class="line">    mv docker-18.09.9.tgz /usr/local/src/</span><br><span class="line">    cd /usr/local/src/</span><br><span class="line">    tar -xvf docker-18.09.9.tgz docker/</span><br><span class="line">    cp docker/* /usr/bin/</span><br><span class="line">2.准备启动文件：</span><br><span class="line">    root@gmf:~# cat /lib/systemd/system/containerd.service</span><br><span class="line">        [Unit]</span><br><span class="line">        Description=containerd container runtime</span><br><span class="line">        Documentation=https://containerd.io</span><br><span class="line">        After=network.target</span><br><span class="line">        [Service]</span><br><span class="line">        ExecStartPre=-/sbin/modprobe overlay</span><br><span class="line">        ExecStart=/usr/bin/containerd</span><br><span class="line">        KillMode=process</span><br><span class="line">        Delegate=yes</span><br><span class="line">        LimitNOFILE=1048576</span><br><span class="line">        # Having non-zero Limit*s causes performance problems due to accounting overhead</span><br><span class="line">        # in the kernel. We recommend using cgroups to do container-local accounting.</span><br><span class="line">        LimitNPROC=infinity</span><br><span class="line">        LimitCORE=infinity</span><br><span class="line">        TasksMax=infinity</span><br><span class="line">        [Install]</span><br><span class="line">        WantedBy=multi-user.target</span><br><span class="line">    root@gmf:~# cat /lib/systemd/system/docker.service </span><br><span class="line">        [Unit]</span><br><span class="line">        Description=Docker Application Container Engine</span><br><span class="line">        Documentation=https://docs.docker.com</span><br><span class="line">        BindsTo=containerd.service</span><br><span class="line">        After=network-online.target firewalld.service containerd.service</span><br><span class="line">        Wants=network-online.target</span><br><span class="line">        Requires=docker.socket</span><br><span class="line">        [Service]</span><br><span class="line">        Type=notify</span><br><span class="line">        # the default is not to use systemd for cgroups because the delegate issues still</span><br><span class="line">        # exists and systemd currently does not support the cgroup feature set required</span><br><span class="line">        # for containers run by docker</span><br><span class="line">        ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock</span><br><span class="line">        ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">        TimeoutSec=0</span><br><span class="line">        RestartSec=2</span><br><span class="line">        Restart=always</span><br><span class="line">        # Note that StartLimit* options were moved from &quot;Service&quot; to &quot;Unit&quot; in systemd 229.</span><br><span class="line">        # Both the old, and new location are accepted by systemd 229 and up, so using the old location</span><br><span class="line">        # to make them work for either version of systemd.</span><br><span class="line">        StartLimitBurst=3</span><br><span class="line">        # Note that StartLimitInterval was renamed to StartLimitIntervalSec in systemd 230.</span><br><span class="line">        # Both the old, and new name are accepted by systemd 230 and up, so using the old name to make</span><br><span class="line">        # this option work for either version of systemd.</span><br><span class="line">        StartLimitInterval=60s</span><br><span class="line">        # Having non-zero Limit*s causes performance problems due to accounting overhead</span><br><span class="line">        # in the kernel. We recommend using cgroups to do container-local accounting.</span><br><span class="line">        LimitNOFILE=infinity</span><br><span class="line">        LimitNPROC=infinity</span><br><span class="line">        LimitCORE=infinity</span><br><span class="line">        # Comment TasksMax if your systemd version does not supports it.</span><br><span class="line">        # Only systemd 226 and above support this option.</span><br><span class="line">        TasksMax=infinity</span><br><span class="line">        # set delegate yes so that systemd does not reset the cgroups of docker containers</span><br><span class="line">        Delegate=yes</span><br><span class="line">        # kill only the docker process, not all processes in the cgroup</span><br><span class="line">        KillMode=process</span><br><span class="line">        [Install]</span><br><span class="line">        WantedBy=multi-user.target</span><br><span class="line">    root@gmf:~# cat /lib/systemd/system/docker.socket</span><br><span class="line">        [Unit]</span><br><span class="line">        Description=Docker Socket for the API</span><br><span class="line">        PartOf=docker.service</span><br><span class="line">        [Socket]</span><br><span class="line">        ListenStream=/var/run/docker.sock</span><br><span class="line">        SocketMode=0660</span><br><span class="line">        SocketUser=root</span><br><span class="line">        SocketGroup=docker</span><br><span class="line">        [Install]</span><br><span class="line">        WantedBy=sockets.target</span><br><span class="line">3.添加docker组：</span><br><span class="line">    groupadd docker</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 解决docker的swap的限制警告：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/default/grub</span><br><span class="line">    GRUB_CMDLINE_LINUX=&quot;net.ifnames=0 biosdevname=0  cgroup_enable=memory swapaccount=1&quot;</span><br><span class="line">update-grub</span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 关于docker的存储引擎：</p>
+</blockquote>
+<p><strong><em>docker是使用联合挂载（Union FS）技术实现了存储的分层架构，因此需要存储引擎的支持，目前主流的为 overlay2，使用该引擎又需要底层文件系统的支持。</em></strong></p>
+<p><strong><em>在早期Redhat系列（Centos7.2以前）需要在格式化磁盘时传入参数支持d-type 文件分层功能。-n ftype=1</em></strong></p>
+<p><strong><em>修改docker的存储引擎会造成数据丢失。更改前注意数据备份。</em></strong></p>
+<blockquote>
+<p>4) docker 镜像加速配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim  /etc/docker/daemon.json </span><br><span class="line">&#123;</span><br><span class="line">         &quot;registry-mirrors&quot;: [&quot;https://9916w1ow.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/02/Docker的安装及基础配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Docker的安装及基础配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-KVM的基本配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1023,87 +1109,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/17/web高可用入门架构/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="web高可用入门架构">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Memcache的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/15/Memcache的安装配置/" class="article-date">
-  	<time datetime="2019-11-15T12:09:24.000Z" itemprop="datePublished">2019-11-15</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/15/Memcache的安装配置/">
-        Memcache的安装配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>memcache本身没有像redis所具备的数据持久化功能，比如RDB和AOF都没有，但是可以通过做集群同步的方<br>式，让各memcache服务器的数据进行同步，从而实现数据的一致性，即保证各memcache的数据是一样的，即使<br>有任何一台memcache发生故障，只要集群种有一台memcache可用就不会出现数据丢失，当其他memcache重<br>新加入到集群的时候可以自动从有数据的memcache当中自动获取数据并提供服务。Memcache支持最大的内存存储对象为1M，Memcache借助了操作系统的libevent工具做高效的读写，memcache最适合保存用户的session实现session共享。</em></strong></p>
-<blockquote>
-<p>1) 安装 memcached:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y memcached</span><br><span class="line"></span><br><span class="line">vim /etc/sysconfig/memcached</span><br><span class="line">    PORT=&quot;11211&quot; #监听端口</span><br><span class="line">    USER=&quot;memcached&quot; #启动用户</span><br><span class="line">    MAXCONN=&quot;1024&quot; #最大连接数</span><br><span class="line">    CACHESIZE=&quot;1024&quot; #最大使用内存</span><br><span class="line">    OPTIONS=&quot;&quot; #其他选项</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 编译安装：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget http://memcached.org/files/memcached-1.5.20.tar.gz</span><br><span class="line">tar -xvf memcached-1.5.20.tar.gz </span><br><span class="line">./configure --prefix=/apps/memcached</span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/memcached</span><br><span class="line">/apps/memcached/bin/memcached -u memcached -p 11211 -m 2048 -c 65536 &amp;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 通过repcached实现memcached集群部署架构:</p>
-</blockquote>
-<p>从这方案的技术实现来看，其实它是一个单 master单 slave的方案，但它的 master/slave都是可读写的，而且可<br>以相互同步，所以从功能上看，也可以认为它是双机 master-master方案。直接通过负载均衡连接之memcached，任<br>然有两台memcached做高可用，memcached会自动同步数据保持数据一致性，即使一台memcached故障也不影响业务<br>正常运行，故障的memcached修复上线后再自动从另外一台同步数据即可保持数据一致性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libevent libevent-devel gcc</span><br><span class="line">wget https://sourceforge.net/projects/repcached/files/repcached/2.2.1-1.2.8/memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">tar -xvf memcached-1.2.8-repcached-2.2.1.tar.gz</span><br><span class="line">cd  memcached-1.2.8-repcached-2.2.1</span><br><span class="line">./configure --prefix=/apps/repcached --enable-replication</span><br><span class="line">在Centos7上make会报错，修改代码：</span><br><span class="line">vim memcached.c</span><br><span class="line">    56 #ifndef IOV_MAX</span><br><span class="line">    57 #if defined(__FreeBSD__) || defined(__APPLE__)</span><br><span class="line">    58 # define IOV_MAX 1024</span><br><span class="line">    59 #endif</span><br><span class="line">    60 #endif</span><br><span class="line">将以上内容删除，修改为如下代码：</span><br><span class="line">     #ifndef IOV_MAX</span><br><span class="line">     # define IOV_MAX 1024</span><br><span class="line">     #endif</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">useradd -s /sbin/nologin -u 2019 memcached</span><br><span class="line">chown -R memcached:memcached /apps/repcached</span><br><span class="line"></span><br><span class="line">测试能否运行：</span><br><span class="line">/apps/repcached/bin/memcached  -h</span><br><span class="line"></span><br><span class="line">启动该集群：</span><br><span class="line">    67:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.57 -X 6666 (-x 对端的ip)</span><br><span class="line">    57:/apps/repcached/bin/memcached -d -m 2048 -p 11211 -u memcached -c 2048 -x 192.168.38.67 -X 6666</span><br><span class="line"></span><br><span class="line">连接与测试：</span><br><span class="line">[root@localhost ~]#telnet 192.168.38.57 11211</span><br><span class="line">Trying 192.168.38.57...</span><br><span class="line">Connected to 192.168.38.57.</span><br><span class="line">Escape character is &apos;^]&apos;.</span><br><span class="line">set sss 0 0 4</span><br><span class="line">dddd</span><br><span class="line">STORED  #符合长度后自动保存</span><br><span class="line">get sss</span><br><span class="line">VALUE sss 0 4</span><br><span class="line">dddd</span><br><span class="line">END</span><br><span class="line">quit</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/15/Memcache的安装配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Memcache的安装配置">
          &nbsp;
         view
     </span>
