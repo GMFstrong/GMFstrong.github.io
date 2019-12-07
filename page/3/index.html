@@ -202,6 +202,240 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Redis的安装及简单配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/Redis的安装及简单配置/" class="article-date">
+  	<time datetime="2019-11-13T12:05:24.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/13/Redis的安装及简单配置/">
+        Redis的安装及简单配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 编译安装 redis：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-4.0.14.tar.gz</span><br><span class="line">yum install -y gcc</span><br><span class="line">mkdir /apps/redis/&#123;etc,logs,data,run&#125; -pv</span><br><span class="line">tar -xvf redis-4.0.14.tar.gz </span><br><span class="line">cd redis-4.0.14</span><br><span class="line">make install PREFIX=/apps/redis</span><br><span class="line">cp redis.conf /apps/redis/etc/</span><br><span class="line">ln -sv /apps/redis/bin/redis-* /usr/bin/</span><br><span class="line">useradd -u 2019 redis -s /sbin/nologin</span><br><span class="line">chown redis:redis -R /apps/redis/</span><br><span class="line"></span><br><span class="line">/apps/redis/bin/redis-server /apps/redis/etc/redis.conf  #启动会出现警告信息，处理相关警告。</span><br><span class="line">（1）backlog 参数控制的是三次握手的时候 server 端收到 client ack 确认号之后的队列的大小。默认为128。</span><br><span class="line">    我们修改内核参数，让它大于511。</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        net.core.somaxconn = 512</span><br><span class="line">（2）vm.overcommit_memory：</span><br><span class="line">    0. 表示内核将检查是否有足够的可用内存供应用进程使用；如果有足够的可用内存，内存申请允许；否则，内存申请失</span><br><span class="line">       败，并把错误返回给应用进程。</span><br><span class="line">    1. 表示内核允许分配所有的物理内存，而不管当前的内存状态如何。</span><br><span class="line">    2. 表示内核允许分配超过所有物理内存和交换空间总和的内存。</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        vm.overcommit_memory = 1</span><br><span class="line">（3）transparent hugepage：（该项需要添加到开机自动运行的文件中，否者重启机器会失效。）</span><br><span class="line">    开启大页内存动态分配，需要关闭让 redis 负责内存管理。</span><br><span class="line">    echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled</span><br><span class="line"></span><br><span class="line">创建service文件，通过systemd管理redis：</span><br><span class="line">vim /usr/lib/systemd/system/redis.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Redis persistent key-value database</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/apps/redis/bin/redis-server /apps/redis/etc/redis.conf --supervised systemd</span><br><span class="line">#ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID</span><br><span class="line">Type=notify</span><br><span class="line">User=redis</span><br><span class="line">Group=redis</span><br><span class="line">RuntimeDirectory=redis</span><br><span class="line">RuntimeDirectoryMode=0755</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 关于 redis 的简单配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">requirepass foobared #设置 redis 连接密码</span><br><span class="line">stop-writes-on-bgsave-error no #快照出错时是否禁止 redis 写入操作，该项默认为yes（在快照出错时，不再写入redis）</span><br><span class="line">该项建议关闭否者在磁盘用完时，会造成redis不能写快照，而引起redis停止服务的现象。</span><br><span class="line"></span><br><span class="line">dir ./ #快照文件保存路径，在使用非root用户启动redis时，注意该目录的权限问题。</span><br><span class="line"></span><br><span class="line">replica-serve-stale-data [yes|no]：当从库与主库失去连接或者正在进行数据同步，从库有两种运行方式（一般设置为yes）。</span><br><span class="line">    yes：(默认设置)，从库会继续响应客户端的读请求。</span><br><span class="line">    no：除去指定的命令之外的任何请求都会返回一个错误&quot;SYNC with master in progress&quot;。</span><br><span class="line"></span><br><span class="line">repl-diskless-sync [no|yes]：是否使用 socket 方式复制数据(无盘同步，默认为no，及使用磁盘同步，不使用socket模式)。</span><br><span class="line">新 slave 连接连接时候需要做数据的全量同步，redis server 就要从内存 dump 出新的 RDB 文件，然后从 master 传到 slave。</span><br><span class="line">1、基于硬盘（disk-backed）：master 创建一个新进程 dump RDB，RDB 完成之后由父进程（即主进程）经过硬盘传给 slaves。</span><br><span class="line">2、基于 socket（diskless）：master 创建一个新进程直接 dump RDB 到 slave 的socket，不经过主进程，不经过硬盘。</span><br><span class="line">    基于硬盘的话，RDB 文件创建后，一旦创建完毕，可以同时服务更多的 slave，但是基于 socket 的话， 新 slave 连接到 </span><br><span class="line">    master 之后得逐个同步数据。在磁盘IO较慢并且网络较快的时候，可以用 diskless(yes),否则使用磁盘(no)。</span><br><span class="line"></span><br><span class="line">repl-diskless-sync-delay 30 #diskless 复制的延迟时间，设置 0 为关闭，在延迟时间内</span><br><span class="line">连接的新客户端，会一起通过 disk 方式同步数据，但是一旦复制开始还没有结束之前，master</span><br><span class="line">节点不会再接收新 slave 的复制请求，直到下一次同步开始。(在基于磁盘复制时生效)</span><br><span class="line"></span><br><span class="line">repl-backlog-size 512mb #复制缓冲区内存大小，只有在 slave 连接之后才分配内存。</span><br><span class="line">repl-backlog-ttl 3600 #多次时间 master 没有 slave 连接，就清空 backlog 缓冲区。</span><br><span class="line"></span><br><span class="line">maxmemory # 最大内存 ，单位为 bytes 字节 ，8G内存的计算方式8(G)*1024(MB)*1024(KB)*1024(Kbyte)，</span><br><span class="line">需要注意的是 slave 的输出缓冲区是不计算在maxmemory 内。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 关于AOF日志的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AppendOnly [yes|no] 默认为no，开启yes。</span><br><span class="line">File 是另一种持久化方式，可以提供更好的持久化特性，Redis 会把每次写入的数据在</span><br><span class="line">接收后都写入 appendonly.aof 文件，每次启动时 Redis 都会先把这个文件的数据读入</span><br><span class="line">内存里，先忽略 RDB 文件。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/13/Redis的安装及简单配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Redis的安装及简单配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Centos7网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/12/Centos7网卡配置/" class="article-date">
+  	<time datetime="2019-11-12T12:00:09.000Z" itemprop="datePublished">2019-11-12</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/12/Centos7网卡配置/">
+        Centos7网卡配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 配置网卡绑定（bond）:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">1.网卡eth0的配置：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-eth0</span><br><span class="line">        NAME=&quot;eth0&quot;</span><br><span class="line">        DEVICE=&quot;eth0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        MASTER=bond0</span><br><span class="line">        SLAVE=yes</span><br><span class="line">2.网卡eth1的配置：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-eth1</span><br><span class="line">        NAME=&quot;eth1&quot;</span><br><span class="line">        DEVICE=&quot;eth1&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        MASTER=bond0</span><br><span class="line">        SLAVE=yes</span><br><span class="line">3.创建ifcfg-bond0配置文件：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-bond0 </span><br><span class="line">        NAME=&quot;bond0&quot;</span><br><span class="line">        DEVICE=&quot;bond0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        BONDING_OPTS=&apos;miimon=100 mode=1&apos;</span><br><span class="line">        IPADDR=192.168.38.105</span><br><span class="line">        PREFIX=24</span><br><span class="line">        GATEWAY=192.168.38.2</span><br><span class="line">        DNS1=192.168.38.2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于以上的bond创建Bridge（网桥设备）：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">1.创建ifcfg-br0配置文件：</span><br><span class="line">    [root@localhost network-scripts]# vim ifcfg-br0 </span><br><span class="line">        NAME=&quot;br0&quot;</span><br><span class="line">        DEVICE=&quot;br0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Bridge</span><br><span class="line">        IPADDR=192.168.38.105</span><br><span class="line">        PREFIX=24</span><br><span class="line">        GATEWAY=192.168.38.2</span><br><span class="line">        DNS1=192.168.38.2</span><br><span class="line">2.在创建的bond设备调用br0:</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-bond0 </span><br><span class="line">        NAME=&quot;bond0&quot;</span><br><span class="line">        DEVICE=&quot;bond0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        BONDING_OPTS=&apos;miimon=100 mode=1&apos;</span><br><span class="line">        BRIDGE=br0          #调用br0设备。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/network/">network</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/12/Centos7网卡配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Centos7网卡配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Keepalived的VRRP-script使用" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/08/Keepalived的VRRP-script使用/" class="article-date">
+  	<time datetime="2019-11-08T12:45:41.000Z" itemprop="datePublished">2019-11-08</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/08/Keepalived的VRRP-script使用/">
+        Keepalived的VRRP script使用
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 通过VRRP script 监控HAproxy进程：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.定义VRRP script 脚本，通常放在global_defs &#123;&#125; 与 vrrp_instance VI_1 &#123;&#125; 之间。</span><br><span class="line">vrrp_script chk_haproxy &#123;</span><br><span class="line">    script &quot;/etc/keepalived/chk_haproxy.sh&quot;</span><br><span class="line">    interval 1</span><br><span class="line">    weight -80</span><br><span class="line">    fall 3</span><br><span class="line">    rise 5</span><br><span class="line">    timeout 2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.在 vrrp_instance VI_1 &#123;&#125; 中引用脚本：</span><br><span class="line">track_script &#123;</span><br><span class="line">    chk_haproxy</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">3.创建VRRP script 脚本中的sh脚本：</span><br><span class="line">yum install psmisc -y</span><br><span class="line"></span><br><span class="line">vim chk_haproxy.sh </span><br><span class="line">#!/bin/bash</span><br><span class="line">/usr/bin/killall -0 haproxy</span><br><span class="line"></span><br><span class="line">chmod a+x /etc/keepalived/chk_haproxy.sh</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 通过VRRP script 监控Nginx进程：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.定义VRRP script 脚本，通常放在global_defs &#123;&#125; 与 vrrp_instance VI_1 &#123;&#125; 之间。</span><br><span class="line">vrrp_script chk_nginx &#123;</span><br><span class="line">    script &quot;/etc/keepalived/chk_nginx.sh&quot;</span><br><span class="line">    interval 1</span><br><span class="line">    weight -80</span><br><span class="line">    fall 3</span><br><span class="line">    rise 5</span><br><span class="line">    timeout 2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.在 vrrp_instance VI_1 &#123;&#125; 中引用脚本：</span><br><span class="line">track_script &#123;</span><br><span class="line">    chk_nginx</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">3.创建VRRP script 脚本中的sh脚本：</span><br><span class="line">yum install psmisc -y</span><br><span class="line"></span><br><span class="line">vim chk_nginx.sh </span><br><span class="line">#!/bin/bash</span><br><span class="line">/usr/bin/killall -0 nginx</span><br><span class="line"></span><br><span class="line">chmod a+x /etc/keepalived/chk_nginx.sh</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 通过VRRP script 监控LVS：</p>
+</blockquote>
+<p><strong><em>由于LVS为内核级的，故而没有服务进程也没有端口号，所以需要借助于第三方的仲裁设备。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">1.在Master节点配置：</span><br><span class="line">vrrp_script chk_down &#123; </span><br><span class="line">    script &quot;/bin/bash -c &apos;[[ -f /data/test/down ]]&apos; &amp;&amp; exit 1 || exit 0&quot;</span><br><span class="line">    interval 1</span><br><span class="line">    weight -130</span><br><span class="line">    fall 3</span><br><span class="line">    rise 5</span><br><span class="line">    timeout 2</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">track_script &#123;</span><br><span class="line">    chk_down</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">2.用NFS模拟仲裁设备：</span><br><span class="line">    yum install -y nfs-utils</span><br><span class="line">    mkdir -pv /data/check</span><br><span class="line">    vim /etc/exports</span><br><span class="line">        /data/check * (rw,no_root_squash)</span><br><span class="line">    systemctl start nfs</span><br><span class="line">    exportfs -v</span><br><span class="line">3.在两台LVS服务器挂载该NFS:</span><br><span class="line">    showmount -e 192.168.38.47</span><br><span class="line">    mkdir -pv /data/chk_lvs/</span><br><span class="line">    mount 192.168.38.47:/data/check  /data/chk_lvs/down</span><br><span class="line">4. 在另一台机器挂载NFS，并探测VIP提供的http服务，如果中断，则在NFS创建down文件。</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/08/Keepalived的VRRP-script使用/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Keepalived的VRRP script使用">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Keepalived的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -772,304 +1006,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/01/Tengine的安装与配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Tengine的安装与配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Nginx下配置php" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/01/Nginx下配置php/" class="article-date">
-  	<time datetime="2019-11-01T13:44:41.000Z" itemprop="datePublished">2019-11-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/01/Nginx下配置php/">
-        Nginx下配置php
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) Nginx 通过fastCGI 调用php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1) 通过调用本机的php-fpm解析php请求：</span><br><span class="line">    </span><br><span class="line">    location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; #主要通过该配置将请求的URI通过变量传递给后端PHP。</span><br><span class="line">        include fastcgi_params;     #该配置包含大量传递到php-fpm的变量。</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    location ~ ^/(ping|status) &#123;</span><br><span class="line">        include fastcgi_params;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_script_name;    </span><br><span class="line">    &#125;</span><br><span class="line">2) 通过调用其它服务器的PHP解析PHP请求：</span><br><span class="line">    1.安装remi源：</span><br><span class="line">        wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    2.安装epel源后，安装该rpm包：</span><br><span class="line">        yum install -y wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    3.安装php7.2版本的php:</span><br><span class="line">        yum install -y php72-php-fpm  </span><br><span class="line">    4.PHP启动需要至少3个配置文件在/opt/remi/php72/root/usr/etc下：</span><br><span class="line">        php.ini    #该文件不是php72-php-fpm安装，而是由php72-php-common安装的。</span><br><span class="line">        php-fpm.conf    #该文件默认包含了include=/etc/opt/remi/php72/php-fpm.d/*.conf，故而www.conf不用动。</span><br><span class="line">        www.conf #该文件在yum安装后默认在/etc/opt/remi/php72/php-fpm.d/www.conf。</span><br><span class="line">    5.默认php72监听在本机回环地址的9000端口，需要更改：</span><br><span class="line">        listen = 0.0.0.0:9000</span><br><span class="line">        listen.allowed_clients = 192.168.38.67</span><br><span class="line">    6.配置nginx:</span><br><span class="line">        location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 192.168.38.57:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; </span><br><span class="line">        include fastcgi_params;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/01/Nginx下配置php/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Nginx下配置php">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Nginx的rewrite" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/01/Nginx的rewrite/" class="article-date">
-  	<time datetime="2019-11-01T13:44:29.000Z" itemprop="datePublished">2019-11-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/01/Nginx的rewrite/">
-        Nginx的rewrite
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 关于rewrite的 flag:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">redirect(临时重定向)：状态码：302，重写完成后以临时重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。</span><br><span class="line">临时重定向不会在客户端浏览器生成域名的缓存。</span><br><span class="line">permanent(永久重定向)：状态码：301，重写完成后以永久重定向方式直接返回重写后生成的新URL给客户端，由客户端重新发起请求。</span><br><span class="line">永久重定向会在客户端浏览器生成域名的缓存。</span><br><span class="line">----&gt;以上两种flag会让客户端发起两次请求。</span><br><span class="line">----&gt;下面的两种flag会在Nginx内部自动完成重写，直接返回给客户最终结果。</span><br><span class="line">break：最终的结果不会超出break的location而且不会继续匹配当前location后续的write规则，而且直接返回数据给客户端。</span><br><span class="line">last：对某个location的URL匹配成功后会停止当前location的后续rewrite规则，并结束当前location，然后将匹配生成的</span><br><span class="line">新URL跳转至其他location继续匹配，直到没有location可匹配后将最后一次location的数据返回给客户端。</span><br><span class="line">location /rewrite &#123;</span><br><span class="line">    root /data;</span><br><span class="line">    index index.html;</span><br><span class="line">    rewrite ^/rewrite/(.*) /testbr/$1 break;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location /testbr &#123;</span><br><span class="line">    root /data;</span><br><span class="line">    #index index1.html;</span><br><span class="line">    #echo $server_port;</span><br><span class="line">    if ($server_port = 80)&#123;</span><br><span class="line">        echo &apos;testbreak!!!!&apos;;</span><br><span class="line">    &#125;</span><br><span class="line">    #rewrite ^/testbr/(.*) /testbrl/$1 last;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">location /testbrl &#123;</span><br><span class="line">    root /data;</span><br><span class="line">    index index.html;</span><br><span class="line">    return 666 &apos;This is a last page!!!&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) Nginx作http反向代理时的缓存配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">首先，配置Nginx的http反向代理：</span><br><span class="line">    server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name = www.test.com;</span><br><span class="line">    location / &#123;</span><br><span class="line">    proxy_pass http://192.168.38.17;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">配置Nginx的缓存：</span><br><span class="line">    1) 定义缓存（在http字段）：</span><br><span class="line">         proxy_cache_path /var/cache/nginx/proxy_cache levels=1:2:2 keys_zone=gmf:20m inactive=120s  max_size=1g;</span><br><span class="line">            </span><br><span class="line">            proxy_cache_path /var/cache/nginx/proxy_cache #定义缓存保存路径，proxy_cache会自动创建</span><br><span class="line">            levels=1:2:2 #定义缓存目录结构层次，1:2:2可以生成2^4x2^8x2^8=1048576个目录</span><br><span class="line">            keys_zone=gmf:20m #指内存中缓存的大小，主要用于存放key和metadata（如：使用次数）  </span><br><span class="line">            inactive=120s； #缓存有效时间  </span><br><span class="line">            max_size=1g; #最大磁盘占用空间，磁盘存入文件内容的缓存空间最大值</span><br><span class="line">    2）引用以上定义的缓存：（定义在server或者location字段）</span><br><span class="line">            proxy_cache gmf; #引用以上定义缓存中的keys_zone名称。</span><br><span class="line">            proxy_cache_key $request_uri;    #缓存中用于“键”的内容，默认值：proxy_cache_key $scheme$proxy_host$request_uri;</span><br><span class="line">            proxy_cache_valid 200 302 301 10m; #指定的状态码返回的数据缓存多长时间</span><br><span class="line">            proxy_cache_valid any 1m;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 在Nginx的回复报文中添加信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name = www.test.com;</span><br><span class="line">       proxy_cache gmf; </span><br><span class="line">       proxy_cache_key $request_uri; </span><br><span class="line">       proxy_cache_valid 200 302 301 10m; </span><br><span class="line">       proxy_cache_valid any 1m;</span><br><span class="line">    location / &#123;</span><br><span class="line">    proxy_pass http://192.168.38.17;</span><br><span class="line">    add_header X-Via  $server_addr;  #会在响应报文中添加一个键值对。</span><br><span class="line">    add_header X-Cache $upstream_cache_status;  #在客户端查看是否命中Nginx的缓存。  </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) Nginx配置服务器群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">在http字段配置一个服务器群组：</span><br><span class="line">    upstream gmf &#123;</span><br><span class="line">    server 192.168.38.17:80  weight=1 fail_timeout=5s max_fails=3;</span><br><span class="line">    server 192.168.38.57:80  weight=1 fail_timeout=5s max_fails=3;</span><br><span class="line">        &#125;</span><br><span class="line">    weight=number #设置权重，默认为1。</span><br><span class="line">    max_conns=number  #给当前server设置最大活动链接数，默认为0表示没有限制。</span><br><span class="line">    max_fails=number  #对后端服务器连续监测失败多少次就标记为不可用。</span><br><span class="line">    fail_timeout=time #对后端服务器的单次监测超时时间，默认为10秒。</span><br><span class="line">    backup  #设置为备份服务器，当所有服务器不可用时将重新启用次服务器。</span><br><span class="line">    down    #标记为down状态。</span><br><span class="line">    resolve #当server定义的是主机名的时候，当A记录发生变化会自动应用新IP而不用重启Nginx。</span><br><span class="line"></span><br><span class="line">在location中调用上面定义的upstream：</span><br><span class="line">    location /ups &#123;</span><br><span class="line">    proxy_pass http://gmf;   </span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 默认在后端的apache的日志中记录的时Nginx http代理的访问日志，需要开启客户端ip地址透传：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">location /ups &#123;</span><br><span class="line">    proxy_pass http://gmf;    </span><br><span class="line">    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; #将远程客户地址透传给后端的apache等服务器，但是需要在后</span><br><span class="line">    端的apache等服务器配置使其记录该字段的日志信息。</span><br><span class="line">    &#125;</span><br><span class="line">后端apache的日志格式：</span><br><span class="line">LogFormat &quot;\&quot;%&#123;X-Forwarded-For&#125;i\ %h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot; combined</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) Nginx的tcp代理(该配置需要配置在http字段以外)：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">stream&#123;</span><br><span class="line">    upstream mysql &#123;</span><br><span class="line">        server 192.168.38.27:3306 max_fails=3 fail_timeout=30s;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    upstream raids &#123;</span><br><span class="line">        server 192.168.38.17:6379 max_fails=3 fail_timeout=30s;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    server &#123;</span><br><span class="line">        listen 3306;</span><br><span class="line">        proxy_connect_timeout 10s;</span><br><span class="line">        proxy_timeout 10s; </span><br><span class="line">        proxy_pass mysql;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    server &#123;</span><br><span class="line">        listen 6379;</span><br><span class="line">        proxy_connect_timeout 10s;</span><br><span class="line">        proxy_timeout 10s;</span><br><span class="line">        proxy_pass raids;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/01/Nginx的rewrite/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Nginx的rewrite">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Nginx的配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/01/Nginx的配置/" class="article-date">
-  	<time datetime="2019-11-01T13:44:08.000Z" itemprop="datePublished">2019-11-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/01/Nginx的配置/">
-        Nginx的配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 绑定CPU:</p>
-</blockquote>
-<p>server_tokens off;  #隐藏Nginx server版本。<br>watch -n 0.5 ‘ps -axo pid,cmd,user,psr | grep nginx’ #用于监视CPU是否切换。<br>将Nginx工作进程绑定到指定的CPU核心，默认Nginx是不进行进程绑定的，绑定并不是意味着当前nginx进程独占以一核心CPU，<br>但是可以保证此进程不会运行在其他核心上，这就极大减少了nginx的工作进程在不同的cpu核心上的来回跳转，减少了CPU对<br>进程的资源分配与回收以及内存管理等，因此可以有效的提升nginx服务器的性能。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">全局配置中修改：</span><br><span class="line">worker_processes [number | auto];</span><br><span class="line">worker_cpu_affinity 00000001 00000010 00000100 00001000;#在8核CPU上这样绑定。新写法可以直接用auto。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>2) 设置Nginx的工作优先级（一般仅仅在一台物理机上跑多个服务时，Nginx又想占用多时间片可以修改）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">全局配置中修改：</span><br><span class="line">worker_priority 0; #工作进程优先级，-20~19</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) Nginx的最大连接数：</p>
-</blockquote>
-<p>包括Nginx的所有连接（例如与代理服务器的连接等），而不仅仅是与客户端的连接,另一个考虑因素是实际的并发连接数不能超过系统级别<br>的最大打开文件数的限制。<br>可以在一台机器上配置多个ip增加系统可以打开的sock文件，从而增加Nginx的并发量。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">全局配置中修改：</span><br><span class="line">worker_rlimit_nofile 65536;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>4) 单个工作进程的最大并发连接数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在events中配置：</span><br><span class="line">worker_connections  65536;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) Nginx可以同时处理多个请求：</p>
-</blockquote>
-<p>Nginx服务器的每个工作进程可以同时接受多个新的网络连接，但是需要在配置文件中配置，此指令默认为关闭，即默认为一个工作进程只<br>能一次接受一个新的网络连接，打开后几个同时接受多个。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">multi_accept on;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>6) 在并发量不大的业务中为防止‘惊群’现象出现：</p>
-</blockquote>
-<p>优化同一时刻只有一个请求而避免多个睡眠进程被唤醒的设置，on为防止被同时唤醒默认为off，全部唤醒的过程也成为”惊群”，因此nginx<br>刚安装完以后要进行适当的优化。<br>在大并发业务开启该选项无太大意义。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accept_mutex on;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>6) 关于Nginx日志的优选级：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">access_log可以在http,server,location三个位置设置。</span><br><span class="line">其中的优先级关系为：location &gt; server &gt; http。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>7) 关于sendfile，tcp_nopush，tcp_nodelay:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sendfile       on;  实现零拷贝，由内核直接发往网络协议栈。减少了内核与用户空间的拷贝以及切换次数。</span><br><span class="line">tcp_nopush     on;  在开启了sendfile的情况下，合并请求后统一发送给客户端。减少了CUP的利用率但是，由于需要等待合并小的数据包，</span><br><span class="line">所以存在一定的延迟。</span><br><span class="line">tcp_nodelay   off;  在开启了keepalived模式下的连接是否启用TCP_NODELAY选项，当为off时，延迟0.2s发送，默认On时，不延迟发送，</span><br><span class="line">立即发送用户相应报文。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>8) keepalive_timeout:</p>
-</blockquote>
-<p>设定保持连接超时时长，0表示禁止长连接，默认为75s，通常配置在http字段作为站点全局配置 keepalive_requests number;<br>在一次长连接上所允许请求的资源的最大数量，默认为100次<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">keepalive_timeout  65 65; #设置会话保持时间，根据实际的业务场景，比如在电商等网站可以适当调大该时间。</span><br><span class="line">keepalive_requests 100;   #一次tcp连接最多接收多少个用户的http请求。根据网站页面的情况可以适当调大。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>9) 拒绝以web的形式访问某个敏感文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~ /passwd.php &#123;</span><br><span class="line">           deny all;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>10) 关于Nginx的location配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>11) try_files的使用：</p>
-</blockquote>
-<p>try_files会按顺序检查文件是否存在，返回第一个找到的文件或文件夹（结尾加斜线表示为文件夹），如果所有文<br>件或文件夹都找不到，会进行一个内部重定向到最后一个参数。只有最后一个参数可以引起一个内部重定向，之前<br>的参数只设置内部URI的指向。最后一个参数是回退URI且必须存在，否则会出现内部500错误。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location /login &#123;</span><br><span class="line">    root /data/gmf/test/;</span><br><span class="line">    index index.html;</span><br><span class="line">    try_files $uri $uri.html $uri/index.html /login/default.html;</span><br><span class="line">    try_files $uri $uri.html $uri/index.html =666; #以前的都不匹配，最后会返回一个666的错误。</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>12) Nginx配置下载服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">location /download &#123;</span><br><span class="line">    root /data/gmf/;</span><br><span class="line">    autoindex on;   #开启索引</span><br><span class="line">    autoindex_exact_size on;  #on显示文件的精确大小，off显示文件的模糊大小，K,M,G的形式。</span><br><span class="line">    autoindex_localtime   on; #显示本机时间而非GMT(格林威治)时间。</span><br><span class="line">    limit_rate 100k;          #限制传输文件的速度。</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>13) 在Nginx的后端存在上传功能是，需要更改Nginx的上传阀值：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">client_max_body_size 10m； #设置允许客户端上传单个文件的最大值，默认值为1m。</span><br><span class="line">client_body_buffer_size size; #用于接收每个客户端请求报文的body部分的缓冲区大小；默认16k；</span><br><span class="line">超出此大小时，其将被暂存到磁盘上的由下面client_body_temp_path指令所定义的位置。</span><br><span class="line">client_body_temp_path path [level1 [level2 [level3]]];</span><br><span class="line">#设定存储客户端请求报文的body部分的临时存储路径及子目录结构和数量，目录名为16进制的数字，使用hash</span><br><span class="line">之后的值从后往前截取1位、2位、2位作为文件名：</span><br><span class="line">配置示例：</span><br><span class="line">   client_max_body_size 10m；</span><br><span class="line">   client_body_buffer_size 16k;</span><br><span class="line">   client_body_temp_path   /apps/nginx/temp 1 2 2; #reload Nginx会自动创建temp目录。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>14) 打开Nginx的异步非阻塞（aio）：</p>
-</blockquote>
-<p>需要在编译时开启‘–with-file-aio’功能，若在编译没有开启该选项直接在配置文件开启报错。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aio on; #默认为off</span><br></pre></td></tr></table></figure></p>
-<p>directio size | off; #操作完全和aio相反，aio是读取文件而directio是写文件到磁盘，启用直接I/O，<br>默认为关闭，当文件大于等于给定大小时，例如directio 4m，同步（直接）写磁盘，而非写缓存。</p>
-<blockquote>
-<p>15) 缓存打开过文件的的信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache max=10000 inactive=60s; #最大缓存10000个文件，非活动数据超时时长60s</span><br><span class="line">open_file_cache_valid   60s;  #每间隔60s检查一下缓存数据有效性</span><br><span class="line">open_file_cache_min_uses 5; #60秒内至少被命中访问5次才被标记为活动数据</span><br><span class="line">open_file_cache_errors   on; #缓存错误信息</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>16) 开启Nginx的状态页：</p>
-</blockquote>
-<p>Active connections： 当前处于活动状态的客户端连接数，包括连接等待空闲连接数。<br>accepts：统计总值，Nginx自启动后已经接受的客户端请求的总数。<br>handled：统计总值，Nginx自启动后已经处理完成的客户端请求的总数，通常等于accepts，除非有因<br>worker_connections限制等被拒绝的连接。<br>requests：统计总值，Nginx自启动后客户端发来的总的请求数。<br>Reading：当前状态，正在读取客户端请求报文首部的连接的连接数。<br>Writing：当前状态，正在向客户端发送响应报文过程中的连接数。<br>Waiting：当前状态，正在等待客户端发出请求的空闲连接数，开启 keep-alive的情况下,这个值等于active–(reading+writing),<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location /nginx_status &#123;</span><br><span class="line">   stub_status;</span><br><span class="line">   allow 192.168.0.0/16;</span><br><span class="line">   allow 127.0.0.1;</span><br><span class="line">   deny all;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>17) 开启Nginx的压缩功能：<br>Nginx对文件的压缩功能是依赖于模块ngx_http_gzip_module，在编译安装时必须加载该模块。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">在server中设置：</span><br><span class="line">    gzip on;</span><br><span class="line">    gzip_comp_level 3;  #压缩比由低到高从1到9，默认为1</span><br><span class="line">    gzip_disable &quot;MSIE [1-6]\.&quot;;    #禁用IE6 gzip功能</span><br><span class="line">    gzip_min_length 1k;     #gzip压缩的最小文件，小于设置值的文件将不会压缩</span><br><span class="line">    gzip_http_version 1.1;  #启用压缩功能时，协议的最小版本，默认HTTP/1.1</span><br><span class="line">    gzip_buffers 16 8k;     #指定Nginx服务需要向服务器申请的缓存空间的个数*大小，根据服务器中文件的大小临时调整，文件比较大则开启个数</span><br><span class="line">    少一点缓存大一点，文件比较小则开启的个数多一点，缓存小一点。</span><br><span class="line">    gzip_types text/plain application/javascript application/x-javascript text/cssapplication/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;</span><br><span class="line">    gzip_vary on; 在客户端浏览器显示开启了压缩功能。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>18)为Nginx安装第三方模块：</p>
-</blockquote>
-<p>第三方模块需要在编译安装Nginx 的时候使用参数–add-module=PATH指定路径添加。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/apps/nginx --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module --with-stream_realip_module --with-file-aio --add-module=/root/echo-nginx-module</span><br><span class="line"></span><br><span class="line">location /echo &#123;</span><br><span class="line">    default_type text/html;     #添加该行，否者浏览器不识别该格式，默认会下载页面。</span><br><span class="line">    echo &apos;hello Nginx!!!&apos;;   </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>19) 自定义json格式的日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Nginx 的默认访问日志记录内容相对比较单一，默认的格式也不方便后期做日志统计分析，生产环境中通常将</span><br><span class="line">nginx日志转换为json日志，然后配合使用ELK做日志收集-统计-分析。</span><br><span class="line">log_format access_json &apos;&#123;&quot;@timestamp&quot;:&quot;$time_iso8601&quot;,&apos;</span><br><span class="line">        &apos;&quot;host&quot;:&quot;$server_addr&quot;,&apos;</span><br><span class="line">        &apos;&quot;clientip&quot;:&quot;$remote_addr&quot;,&apos;</span><br><span class="line">        &apos;&quot;size&quot;:$body_bytes_sent,&apos;</span><br><span class="line">        &apos;&quot;responsetime&quot;:$request_time,&apos;</span><br><span class="line">        &apos;&quot;upstreamtime&quot;:&quot;$upstream_response_time&quot;,&apos;</span><br><span class="line">        &apos;&quot;upstreamhost&quot;:&quot;$upstream_addr&quot;,&apos;</span><br><span class="line">        &apos;&quot;http_host&quot;:&quot;$host&quot;,&apos;</span><br><span class="line">        &apos;&quot;uri&quot;:&quot;$uri&quot;,&apos;</span><br><span class="line">        &apos;&quot;domain&quot;:&quot;$host&quot;,&apos;</span><br><span class="line">        &apos;&quot;xff&quot;:&quot;$http_x_forwarded_for&quot;,&apos;</span><br><span class="line">        &apos;&quot;referer&quot;:&quot;$http_referer&quot;,&apos;</span><br><span class="line">        &apos;&quot;tcp_xff&quot;:&quot;$proxy_protocol_addr&quot;,&apos;</span><br><span class="line">        &apos;&quot;http_user_agent&quot;:&quot;$http_user_agent&quot;,&apos;</span><br><span class="line">        &apos;&quot;status&quot;:&quot;$status&quot;&#125;&apos;;</span><br><span class="line">access_log /apps/nginx/logs/access_json.log access_json;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>20) 为Nginx配置认证功能：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">yum install httpd-tools -y</span><br><span class="line">htpasswd -cb /apps/nginx/conf/.htpasswd user1 123456</span><br><span class="line">htpasswd -b /apps/nginx/conf/.htpasswd user2 123456</span><br><span class="line"></span><br><span class="line">    location /download &#123;</span><br><span class="line">        root /data/gmf/;</span><br><span class="line">        autoindex on;</span><br><span class="line">        autoindex_exact_size off;</span><br><span class="line">        autoindex_localtime   on;</span><br><span class="line">        limit_rate 100k;</span><br><span class="line">        auth_basic           &quot;login download!!!&quot;;</span><br><span class="line">        auth_basic_user_file /apps/nginx/conf/.httpss;      </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/01/Nginx的配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Nginx的配置">
          &nbsp;
         view
     </span>

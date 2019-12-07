@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>vim常用技巧 | ConqUeroR</title>
+  <title>Docker数据卷的使用 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="以只读方式打开文件：  vim -m filename  在底行模式下（按“:”）  !command 执行命令 r!command 读入命令的输出结果  在命令模式下的光标跳转：  在当前页跳转： H页首    M页面中间    L页底 ^ 跳转至行首的第一个非空白字符 0 跳转至行首  $ 跳转至行尾    行间移动： #G 或者扩展命令模式下:#   跳转至由第#行      例如：5G">
+  <meta name="description" content="一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。  1) 使用数据卷的有点：  12341. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。4. 在容">
 <meta property="og:type" content="article">
-<meta property="og:title" content="vim常用技巧">
-<meta property="og:url" content="http://gmfdevops.com.com/2019/07/20/vim常用技巧/index.html">
+<meta property="og:title" content="Docker数据卷的使用">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/12/06/Docker数据卷的使用/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="以只读方式打开文件：  vim -m filename  在底行模式下（按“:”）  !command 执行命令 r!command 读入命令的输出结果  在命令模式下的光标跳转：  在当前页跳转： H页首    M页面中间    L页底 ^ 跳转至行首的第一个非空白字符 0 跳转至行首  $ 跳转至行尾    行间移动： #G 或者扩展命令模式下:#   跳转至由第#行      例如：5G">
+<meta property="og:description" content="一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。  1) 使用数据卷的有点：  12341. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。4. 在容">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-25T02:20:29.000Z">
+<meta property="og:updated_time" content="2019-12-07T10:39:47.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="vim常用技巧">
-<meta name="twitter:description" content="以只读方式打开文件：  vim -m filename  在底行模式下（按“:”）  !command 执行命令 r!command 读入命令的输出结果  在命令模式下的光标跳转：  在当前页跳转： H页首    M页面中间    L页底 ^ 跳转至行首的第一个非空白字符 0 跳转至行首  $ 跳转至行尾    行间移动： #G 或者扩展命令模式下:#   跳转至由第#行      例如：5G">
+<meta name="twitter:title" content="Docker数据卷的使用">
+<meta name="twitter:description" content="一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。  1) 使用数据卷的有点：  12341. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。4. 在容">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -201,11 +201,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-Docker数据卷的使用" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/07/20/vim常用技巧/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+      <a href="/2019/12/06/Docker数据卷的使用/" class="article-date">
+  	<time datetime="2019-12-06T12:00:09.000Z" itemprop="datePublished">2019-12-06</time>
 </a>
     </div>
   
@@ -218,7 +218,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      vim常用技巧
+      Docker数据卷的使用
       
     </h1>
   
@@ -229,15 +229,15 @@
         
         
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
+	<a class="article-category-link" href="/categories/other/">other</a>
 	</div>
 
 
         
           
 <div class="counter-tag counter">
-    <span id="/2019/07/20/vim常用技巧/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="vim常用技巧">
+    <span id="/2019/12/06/Docker数据卷的使用/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Docker数据卷的使用">
          &nbsp;
         view
     </span>
@@ -250,105 +250,27 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>以只读方式打开文件：</p>
+        <p><strong><em>一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。</em></strong></p>
+<blockquote>
+<p>1) 使用数据卷的有点：</p>
 </blockquote>
-<pre><code>vim -m filename
-</code></pre><blockquote>
-<p>在底行模式下（按“:”）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。</span><br><span class="line">2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。</span><br><span class="line">3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。</span><br><span class="line">4. 在容器里面的写入数据不会影响到镜像本身。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 将宿主机目录映射到容器内部：（将目录或者文件映射进容器时注意权限问题）</p>
 </blockquote>
-<pre><code>!command 执行命令
-r!command 读入命令的输出结果
-</code></pre><blockquote>
-<p>在命令模式下的光标跳转：</p>
+<p><strong><em>使用-v 参数，将宿主机目录映射到容器内部，web2 的 的 ro 标示在容器内对该目录只读，默认是可读写的</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在容器中/apps/nginx/html该目录仅仅能读不能修改（宿主机仍然可以修改，在宿主机可以使用chattr +i xxx 进行控制）。</span><br><span class="line">    root@gmf:~# docker run -itd -p 83:80 -v /data/html/web2/:/apps/nginx/html:ro 4f183a656f6b</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 同时在容器中挂载多个文件或目录：</p>
 </blockquote>
-<pre><code>在当前页跳转：
-H页首    M页面中间    L页底
-^ 跳转至行首的第一个非空白字符
-0 跳转至行首 
-$ 跳转至行尾 
-
-
-行间移动：
-#G 或者扩展命令模式下:#   跳转至由第#行 
-    例如：5G 跳转到第5行
-G   最后一行 
-1G, gg 第一行 
-</code></pre><blockquote>
-<p>命令模式下的字符编辑：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# docker run -it --rm -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh -v /data/html/:/data/app1 -p 80:8080 edbe434432c9</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) JVM的优化参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=&quot;-server -Xms4g -Xmx4g -Xss512k -Xmn1g -XX:CMSInitiatingOccupancyFraction=65 -XX:+UseFastAccessorMethods -XX:+AggressiveOpts -XX:+UseBiasedLocking -XX:+DisableExplicitGC -XX:MaxTenuringThreshold=10 -XX:NewSize=2048M -XX:MaxNewSize=2048M -XX:NewRatio=2 -XX:PermSize=128m -XX:MaxPermSize=512m -XX:CMSFullGCsBeforeCompaction=5 -XX:+ExplicitGCInvokesConcurrent -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods&quot;</span><br></pre></td></tr></table></figure></p>
 </blockquote>
-<pre><code>~ 转换大小写
-删除命令：
-    x 删除光标处的字符  
-    dd：删除光标所在的行 
-    #dd 多行删除 
-    D：从当前光标位置一直删除到行尾，等同于d$ 
-复制命令(y, yank)：
-    yy：复制行 
-    #yy 复制多行 
-    Y：复制整行 
-
-粘贴命令(p, paste)： 
-    p 缓冲区存的如果为整行，则粘贴当前光标所在行的下方；否则，则粘 贴至当前光标所在处的后面
-    P 缓冲区存的如果为整行，则粘贴当前光标所在行的上方；否则，则粘 贴至当前光标所在处的前面 
-
-查找：
-    /PATTERN：从当前光标所在处向文件尾部查找     
-    ?PATTERN：从当前光标所在处向文件首部查找   
-
-撤销更改：
-    u 撤销最近的更改 
-    #u 撤销之前多次更改 
-</code></pre><blockquote>
-<p>关于vim寄存器：</p>
+<blockquote>
+<p>5) 数据卷容器的使用：</p>
 </blockquote>
-<pre><code>有26个命名寄存器和1个无命名寄存器，常存放不同的剪贴版内容，可以不同会话间共享
+<p><strong><em>停止 volume server 可以创建新容器，将 volume server 删除，不能创建容器，已经运行的容器不受任何影响。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.创建存储卷server：</span><br><span class="line">    docker run -d -v /data/html:/data/app1/ -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh:ro --name vserver edbe434432c9</span><br><span class="line">2.基于存储卷server创建容器：</span><br><span class="line">    docker run -d -p 80:8080 --volumes-from vserver --name=web1 edbe434432c9</span><br></pre></td></tr></table></figure></p>
 
-寄存器名称a，b,…,z,格式：“寄存器放在数字和命令之间如：3&quot;tyy 表示复制3行到t寄存器中   &quot;tp  表示将t寄存器内容粘贴 
-
-未指定，将使用无命名寄存器 
-
-有10个数字寄存器，用0，1，…，9表示，0存放最近复制内容，1存放最近删除内容。 当新的文本变更和删除时，1转存到2，2转存到3，以此类推。数字寄存器不能在不 同会话间共享 
-</code></pre><blockquote>
-<p>在底行模式下查找并替换:</p>
-</blockquote>
-<pre><code>查找替换中的分隔符/可替换为其它字符
-    s@/etc@/var@g 
-    s#/boot#/#i 
-i 忽略大小写 
-g 全局替换，默认情况下，每一行只替换第一次出现 
-gc 全局替换，每次替换前询问
-</code></pre><blockquote>
-<p>使用多个窗口</p>
-</blockquote>
-<pre><code>vim -o|-O FILE1 FILE2 ... 
-    -o: 水平分割 
-    -O: 垂直分割 
-在窗口间切换：Ctrl+w r
-</code></pre><blockquote>
-<p>定制vim的工作特性：</p>
-</blockquote>
-<pre><code>配置文件：永久有效
-    全局：/etc/vimrc  
-    个人：~/.vimrc 
-底行模式：当前vim进程有效 
-    (1) 行号 
-        显示：set number，简写 set nu 
-        取消显示：set nonumber, 简写 set nonu 
-    (2) 忽略字符的大小写 
-        启用：set ignorecase，简写 set ic 
-        不忽略：set noic 
-    (3) 自动缩进 
-        启用：set autoindent，简写 set ai 
-        禁用：set noai 
-    (4) 设置光标所在行的标识线 
-        启用：set cursorline，简写 set cul 
-        禁用：set nocursorline 
-    (5) 文件格式 
-        启用windows格式：set  fileformat=dos 
-        启用unix格式：set fileformat=unix 
-        简写 set ff=dos|unix 
-</code></pre>
       
     </div>
     
@@ -357,18 +279,18 @@ gc 全局替换，每次替换前询问
     
 <nav id="article-nav">
   
-    <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/12/06/Docker网络的使用/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          Linux下添加网卡及静态网络配置
+          Docker网络的使用
         
       </div>
     </a>
   
   
-    <a href="/2019/07/20/关于文件系统挂载的一点感悟/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">关于文件系统挂载的一点感悟</div>
+    <a href="/2019/12/03/Dockerfile的编写/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Dockerfile的编写</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -378,7 +300,7 @@ gc 全局替换，每次替换前询问
 </article>
 
 
-<div class="ds-share share" data-thread-key="vim常用技巧" data-title="vim常用技巧" data-url="http://gmfdevops.com.com/2019/07/20/vim常用技巧/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="vim常用技巧">
+<div class="ds-share share" data-thread-key="Docker数据卷的使用" data-title="Docker数据卷的使用" data-url="http://gmfdevops.com.com/2019/12/06/Docker数据卷的使用/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Docker数据卷的使用">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>

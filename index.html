@@ -202,6 +202,263 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Docker仓库的搭建与维护" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/06/Docker仓库的搭建与维护/" class="article-date">
+  	<time datetime="2019-12-06T12:00:11.000Z" itemprop="datePublished">2019-12-06</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/06/Docker仓库的搭建与维护/">
+        Docker仓库的搭建与维护
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装harbor：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.首先安装docker环境：</span><br><span class="line">    参考阿里云，华为云的安装方式：https://developer.aliyun.com/mirror/docker-ce?spm=a2c6h.13651102.0.0.53322f70SdHjMS</span><br><span class="line">    apt-get -y install apt-transport-https ca-certificates curl software-properties-common</span><br><span class="line">    curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line">    add-apt-repository &quot;deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&quot;</span><br><span class="line">    apt-get -y update</span><br><span class="line">    apt-get -y install docker-ce=5:18.09.9~3-0~ubuntu-bionic</span><br><span class="line">2.下载harbor的离线包：</span><br><span class="line">    wget https://storage.googleapis.com/harbor-releases/release-1.7.0/harbor-offline-installer-v1.7.6.tgz</span><br><span class="line">3.安装docker-compose：</span><br><span class="line">    apt  install -y python-pip</span><br><span class="line">    pip install docker-compose</span><br><span class="line">    或者：</span><br><span class="line">    curl -L https://github.com/docker/compose/releases/download/1.25.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose</span><br><span class="line">    chmod +x /usr/local/bin/docker-compose</span><br><span class="line">4.安装harbor：</span><br><span class="line">    tar -xvf harbor-offline-installer-v1.7.6.tgz</span><br><span class="line">    cd harbor</span><br><span class="line">    vim harbor.cfg</span><br><span class="line">        hostname = 192.168.38.202</span><br><span class="line">        harbor_admin_password = testroot</span><br><span class="line">    ./install.sh</span><br><span class="line">5.默认harbor监听80端口，默认用户名为admin。</span><br></pre></td></tr></table></figure>
+<p><strong><em>注意在docker重启后，需要在docker-compose的安装目录重启docker-compose</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose start</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>2) 将本地镜像上传到harbor:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">1.打标签：</span><br><span class="line">    docker tag edbe434432c9 192.168.38.202/gmf-test/tomcat-app1:v1</span><br><span class="line">2.更改本地dockerd，信任私有harbor仓库：</span><br><span class="line">    vim /lib/systemd/system/docker.service</span><br><span class="line">        ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --insecure-registry=192.168.38.202 --insecure-registry=192.168.38.204</span><br><span class="line">    systemctl daemon-reload</span><br><span class="line">    systemctl restart docker</span><br><span class="line">3.登录harbor仓库服务器：</span><br><span class="line">    root@gmf:~# docker login 192.168.38.202</span><br><span class="line">        Username: admin</span><br><span class="line">        Password:</span><br><span class="line">4.将本地镜像上传至harbor:</span><br><span class="line">    docker push 192.168.38.202/gmf-test/tomcat-app1:v1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 在打镜像的服务器实现镜像的自动上传：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim build.sh</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    docker build -t 192.168.38.202/gmf-test/nginx-by:v1 .</span><br><span class="line">    docker push 192.168.38.202/gmf-test/nginx-by:v1</span><br><span class="line">    docker rmi 192.168.38.202/gmf-test/nginx-by:v1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 在其它节点配置从harbor上拉取镜像：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /lib/systemd/system/docker.service</span><br><span class="line">    ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --insecure-registry=192.168.38.202 --insecure-registry=192.168.38.204</span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl restart docker</span><br><span class="line">docker login 192.168.38.202   </span><br><span class="line">docker pull 192.168.38.202/gmf-test/nginx-by:v1</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/06/Docker仓库的搭建与维护/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Docker仓库的搭建与维护">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Docker网络的使用" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/06/Docker网络的使用/" class="article-date">
+  	<time datetime="2019-12-06T12:00:10.000Z" itemprop="datePublished">2019-12-06</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/06/Docker网络的使用/">
+        Docker网络的使用
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 同一宿主机的容器互联：</p>
+</blockquote>
+<p><strong><em>默认容器的IP是DHCP自动分配的，因此在容器间相互访问时不太方便（需要进入容器查看IP,并且在容器销毁重建以后IP地址会发生变化），故而通常采用容器名称或者别名来实现容器之间的相互访问。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1.启动一个Tomcat容器用于被Nginx调用：</span><br><span class="line">    docker run -itd --name web1  edbe434432c9</span><br><span class="line">2.启动一个Nginx容器，作为Tomcat的七层代理（--link 链接Tomcat）：</span><br><span class="line">    docker run -itd -p 80:80 --link web1 4f183a656f6b</span><br><span class="line">    同时可以指定别名：</span><br><span class="line">        docker run -itd -p 80:80 --link web1:tomcat-server1 4f183a656f6b</span><br><span class="line">3.Tomcat的容器名在Nginx中自动被解析为IP:</span><br><span class="line">    [root@26035559dda4 /]# cat /etc/hosts</span><br><span class="line">        127.0.0.1       localhost</span><br><span class="line">        ::1     localhost ip6-localhost ip6-loopback</span><br><span class="line">        fe00::0 ip6-localnet</span><br><span class="line">        ff00::0 ip6-mcastprefix</span><br><span class="line">        ff02::1 ip6-allnodes</span><br><span class="line">        ff02::2 ip6-allrouters</span><br><span class="line">        172.17.0.2      web1 e1f466fb2463</span><br><span class="line">        172.17.0.3      26035559dda4</span><br><span class="line">4.在Nginx中调用Tomcat:</span><br><span class="line">        location /gmf &#123;</span><br><span class="line">            proxy_pass http://web1:8080;</span><br><span class="line">         &#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>2) Docker的四种网络模型：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1.bridge: 默认模式，可以使用 --net=bridge 指定，可以之定义IP地址。</span><br><span class="line">2.host:   使用 --net=host 指定，共享宿主机的网络命名空间，直接使用物理机 IP，并监听物理机 IP 监听端口。</span><br><span class="line">    docker run -it --rm --net=host 4f183a656f6b</span><br><span class="line">3.none:   使用 --net=none 指定，没有网卡及单机模式。</span><br><span class="line">    root@gmf:~# docker run -it --rm --net=none 4f183a656f6b bash</span><br><span class="line">    [root@69575bc4e35e /]# ip a</span><br><span class="line">    1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">        inet 127.0.0.1/8 scope host lo</span><br><span class="line">        valid_lft forever preferred_lft forever</span><br><span class="line">4.Container：使用 --net=container:容器名或ID 指定，此模式创建的容器需指定一个已经存在的容器与其共享一个网络命名空间。</span><br><span class="line">        docker run -it --rm --net=container:42e653aa90dc 4f183a656f6b</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) docker跨主机通信：</p>
+</blockquote>
+<p><strong><em>默认宿主机的 docker0 网卡都是172.17.0.x/24网段，故而要实现容器跨主机之间的通信势必先更改Docker的默认网段，使其不在同一网络。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1. 更改两台宿主机docker的默认网段：</span><br><span class="line">    vim /lib/systemd/system/docker.service</span><br><span class="line">        ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --bip=10.100.0.1/24</span><br><span class="line"></span><br><span class="line">    vim /lib/systemd/system/docker.service</span><br><span class="line">        ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --bip=10.200.0.1/24</span><br><span class="line">2. 在两台宿主机添加静态路由及iptables规制：</span><br><span class="line">    ip route add 10.200.0.0/24 via 192.168.38.203</span><br><span class="line">    iptables -A FORWARD -s 192.168.38.0/24 -j ACCEPT</span><br><span class="line">    ip route add 10.100.0.0/24 via 192.168.38.202</span><br><span class="line">    iptables -A FORWARD -s 192.168.38.0/24 -j ACCEPT</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 自定义网络：</p>
+</blockquote>
+<p><strong><em>docker 的自定义网络可以自定义 IP 地范围和网关。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1.创建一个自定义网络：</span><br><span class="line">    docker network create -d bridge --subnet 10.10.0.0/24 --gateway 10.10.0.1 gmf-test</span><br><span class="line">2.创建一个该网络的容器：</span><br><span class="line">    docker run -itd -p 81:80 --net=gmf-test 4f183a656f6b</span><br><span class="line">3.让自定义的网络与docker默认的桥接网络通信：</span><br><span class="line">    iptables-save &gt; iptables.txt</span><br><span class="line">    将iptables规制中的两条规制注释：</span><br><span class="line">    vim iptables.txt</span><br><span class="line">    #-A DOCKER-ISOLATION-STAGE-2 -o br-e6d6fa045197 -j DROP</span><br><span class="line">    #-A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP</span><br><span class="line">4.导入iptables规制：</span><br><span class="line">    iptables-restore &lt; iptables.txt</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/06/Docker网络的使用/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Docker网络的使用">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Docker数据卷的使用" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/06/Docker数据卷的使用/" class="article-date">
+  	<time datetime="2019-12-06T12:00:09.000Z" itemprop="datePublished">2019-12-06</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/06/Docker数据卷的使用/">
+        Docker数据卷的使用
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。</em></strong></p>
+<blockquote>
+<p>1) 使用数据卷的有点：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。</span><br><span class="line">2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。</span><br><span class="line">3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。</span><br><span class="line">4. 在容器里面的写入数据不会影响到镜像本身。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 将宿主机目录映射到容器内部：（将目录或者文件映射进容器时注意权限问题）</p>
+</blockquote>
+<p><strong><em>使用-v 参数，将宿主机目录映射到容器内部，web2 的 的 ro 标示在容器内对该目录只读，默认是可读写的</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在容器中/apps/nginx/html该目录仅仅能读不能修改（宿主机仍然可以修改，在宿主机可以使用chattr +i xxx 进行控制）。</span><br><span class="line">    root@gmf:~# docker run -itd -p 83:80 -v /data/html/web2/:/apps/nginx/html:ro 4f183a656f6b</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 同时在容器中挂载多个文件或目录：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# docker run -it --rm -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh -v /data/html/:/data/app1 -p 80:8080 edbe434432c9</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) JVM的优化参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=&quot;-server -Xms4g -Xmx4g -Xss512k -Xmn1g -XX:CMSInitiatingOccupancyFraction=65 -XX:+UseFastAccessorMethods -XX:+AggressiveOpts -XX:+UseBiasedLocking -XX:+DisableExplicitGC -XX:MaxTenuringThreshold=10 -XX:NewSize=2048M -XX:MaxNewSize=2048M -XX:NewRatio=2 -XX:PermSize=128m -XX:MaxPermSize=512m -XX:CMSFullGCsBeforeCompaction=5 -XX:+ExplicitGCInvokesConcurrent -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods&quot;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>5) 数据卷容器的使用：</p>
+</blockquote>
+<p><strong><em>停止 volume server 可以创建新容器，将 volume server 删除，不能创建容器，已经运行的容器不受任何影响。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.创建存储卷server：</span><br><span class="line">    docker run -d -v /data/html:/data/app1/ -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh:ro --name vserver edbe434432c9</span><br><span class="line">2.基于存储卷server创建容器：</span><br><span class="line">    docker run -d -p 80:8080 --volumes-from vserver --name=web1 edbe434432c9</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/06/Docker数据卷的使用/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Docker数据卷的使用">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Dockerfile的编写" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -819,289 +1076,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/25/Openvpn客户端证书的管理/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Openvpn客户端证书的管理">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Openvpn的搭建与配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/25/Openvpn的搭建与配置/" class="article-date">
-  	<time datetime="2019-11-25T10:09:24.000Z" itemprop="datePublished">2019-11-25</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/25/Openvpn的搭建与配置/">
-        Openvpn的搭建与配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 安装Openvpn及easy-rsa：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.安装：</span><br><span class="line">    yum install -y  easy-rsa openvpn   #easy-rsa简单的证书管理工具。</span><br><span class="line">2.复制相应的配置文件到指定得位置：</span><br><span class="line">    cp /usr/share/doc/openvpn-2.4.8/sample/sample-config-files/server.conf /etc/openvpn/</span><br><span class="line">    cp -ra /usr/share/easy-rsa /etc/openvpn/easyrsa-server</span><br><span class="line">    cp /usr/share/doc/easy-rsa-3.0.6/vars.example /etc/openvpn/easyrsa-server/3/vars</span><br><span class="line">3.初始化PKI:</span><br><span class="line">    cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">    ./easyrsa init-pki      #生成pki目录用于保存证书。</span><br><span class="line">4.创建CA，用于签发服务端与客户端证书：</span><br><span class="line">    ./easyrsa build-ca nopass  </span><br><span class="line">              公钥：/etc/openvpn/easyrsa-server/3/pki/ca.crt。</span><br><span class="line">              私钥：/etc/openvpn/easyrsa-server/3/pki/private/ca.key。</span><br><span class="line">5.创建服务端证书：</span><br><span class="line">    ./easyrsa gen-req server nopass</span><br><span class="line">              私钥：/etc/openvpn/easyrsa-server/3/pki/private/server.key。</span><br><span class="line">       证书申请文件：/etc/openvpn/easyrsa-server/3/pki/reqs/server.req。</span><br><span class="line">    ./easyrsa sign-req server server</span><br><span class="line">        服务端公钥，发送给客户端，用于通信加密使用。</span><br><span class="line">        /etc/openvpn/easyrsa-server/3/pki/issued/server.crt</span><br><span class="line">6.创建dh文件（用于密钥交换）：</span><br><span class="line">    ./easyrsa  gen-dh</span><br><span class="line">        /etc/openvpn/easyrsa-server/3/pki/dh.pem</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 创建客户端证书：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1.复制创建客户端证书的配置文件：</span><br><span class="line">    cp -ar /usr/share/easy-rsa/ /etc/openvpn/easyrsa-client/</span><br><span class="line">    cp /usr/share/doc/easy-rsa-3.0.6/vars.example /etc/openvpn/easyrsa-client/3/vars</span><br><span class="line">    cd /etc/openvpn/easyrsa-client/3/</span><br><span class="line">2.生成PKI目录：</span><br><span class="line">    ./easyrsa init-pki</span><br><span class="line">3.生成客户端私钥及证书申请文件：</span><br><span class="line">    ./easyrsa gen-req gmf nopass</span><br><span class="line">    证书申请文件：/etc/openvpn/easyrsa-client/3/pki/reqs/gmf.req</span><br><span class="line">            私钥：/etc/openvpn/easyrsa-client/3/pki/private/gmf.key</span><br><span class="line">4.签发客户端证书：</span><br><span class="line">    cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">    ./easyrsa  import-req /etc/openvpn/easyrsa-client/3/pki/reqs/gmf.req  gmf  #导入证书</span><br><span class="line">    ./easyrsa sign-req client gmf</span><br><span class="line">        生成证书：/etc/openvpn/easyrsa-server/3/pki/issued/gmf.crt</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 整理签发的服务端证书：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/openvpn/certs</span><br><span class="line">cd /etc/openvpn/certs</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/dh.pem .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/ca.crt .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/issued/server.crt .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/private/server.key .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/private/ca.key .</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 整理签发的客户端证书：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/openvpn/client/gmf</span><br><span class="line">cd /etc/openvpn/client/gmf</span><br><span class="line">    cp /etc/openvpn/easyrsa-server/3/pki/ca.crt .</span><br><span class="line">    cp /etc/openvpn/easyrsa-server/3/pki/issued/gmf.crt .</span><br><span class="line">    cp /etc/openvpn/easyrsa-client/3/pki/private/gmf.key .</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 准备服务端配置文件：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/openvpn/server.conf</span><br><span class="line">    local 192.168.38.101</span><br><span class="line">    port 1194</span><br><span class="line">    proto tcp</span><br><span class="line">    dev tun</span><br><span class="line">    ca /etc/openvpn/certs/ca.crt</span><br><span class="line">    cert /etc/openvpn/certs/server.crt</span><br><span class="line">    key /etc/openvpn/certs/server.key</span><br><span class="line">    dh /etc/openvpn/certs/dh.pem</span><br><span class="line">    server 10.30.0.0 255.255.0.0</span><br><span class="line">    push &quot;route 10.20.0.0 255.255.0.0&quot;</span><br><span class="line">    client-to-client</span><br><span class="line">    keepalive 10 120</span><br><span class="line">    cipher AES-256-CBC</span><br><span class="line">    max-clients 100</span><br><span class="line">    user openvpn</span><br><span class="line">    group openvpn</span><br><span class="line">    persist-key</span><br><span class="line">    persist-tun</span><br><span class="line">    status openvpn-status.log</span><br><span class="line">    log-append /var/log/openvpn/openvpn.log</span><br><span class="line">    verb 9</span><br><span class="line">    mute 20</span><br><span class="line">配置防火墙规制：</span><br><span class="line">    yum install iptables-services iptables -y</span><br><span class="line">    systemctl enable --now iptables.service</span><br><span class="line">    iptables -F</span><br><span class="line">    iptables -X</span><br><span class="line">    iptables -F</span><br><span class="line">    iptables -t nat -A POSTROUTING -s 10.30.0.0/16 -j MASQUERADE</span><br><span class="line">    ########iptables -t nat -A POSTROUTING -s 10.30.0.0/16 -o eth0 -j MASQUERADE</span><br><span class="line">    iptables -A INPUT -p TCP --dport 1194 -j ACCEPT</span><br><span class="line">    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line">    service iptables save</span><br><span class="line">修改内核参数：</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        net.ipv4.ip_forward = 1</span><br><span class="line">    sysctl -p</span><br><span class="line">创建日志目录并授权：</span><br><span class="line">    mkdir /var/log/openvpn</span><br><span class="line">    chown nobody.nobody /var/log/openvpn</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) 准备客户端的配置文件：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vim client.ovpn</span><br><span class="line">client</span><br><span class="line">dev tun</span><br><span class="line">proto tcp</span><br><span class="line">remote 192.168.38.101 1194</span><br><span class="line">resolv-retry infinite</span><br><span class="line">nobind</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert gmf.crt</span><br><span class="line">key  gmf.key</span><br><span class="line">remote-cert-tls server</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">verb 3</span><br><span class="line">mute 20</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>7) 将/etc/openvpn/client/gmf目录下的文件与client.ovpn打包发给用户，放到openvpn的config目录下。</p>
-</blockquote>
-<blockquote>
-<p>8) 关于server.conf的详细配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">local 172.18.200.101 #本机监听IP</span><br><span class="line">port 1194 #端口</span><br><span class="line"># TCP or UDP server?</span><br><span class="line">proto tcp #协议，指定OpenVPN创建的通信隧道类型</span><br><span class="line">#proto udp</span><br><span class="line">#dev tap：创建一个以太网隧道，以太网使用tap</span><br><span class="line">dev tun：创建一个路由IP隧道，互联网使用tun一个TUN设备大多时候，被用于基于IP协议的通讯。一个TAP设</span><br><span class="line">备允许完整的以太网帧通过Openvpn隧道，因此提供非ip协议的支持，比如IPX协议和AppleTalk协议</span><br><span class="line">#dev-node MyTap #TAP-Win32适配器。非windows不需要</span><br><span class="line">#topology subnet #网络拓扑，不需要配置</span><br><span class="line">server 10.8.0.0 255.255.255.0 #客户端连接后分配IP的地址池，服务器默认会占用第一个IP 10.8.0.1</span><br><span class="line">#ifconfig-pool-persist ipp.txt #为客户端分配固定IP，不需要配置</span><br><span class="line">#server-bridge 10.8.0.4 255.255.255.0 10.8.0.50 10.8.0.100 #配置网桥模式，不需要</span><br><span class="line">push &quot;route 10.20.0.0 255.255.0.0&quot; #给客户端生成的静态路由表，下一跳为openvpn服务器的</span><br><span class="line">10.8.0.1,地址段为openvpn服务器后的公司内部网络，可以是多个网段</span><br><span class="line">push &quot;route 172.31.0.0 255.255.248.0&quot;</span><br><span class="line">;client-config-dir ccd #为指定的客户端添加路由，改路由通常是客户端后面的内网网段而不是服务端的，</span><br><span class="line">也不需要设置</span><br><span class="line">;route 192.168.40.128 255.255.255.248</span><br><span class="line">;client-config-dir ccd</span><br><span class="line">;route 10.9.0.0 255.255.255.252</span><br><span class="line">;learn-address ./script #运行外部脚本，创建不同组的iptables 规则，不配置</span><br><span class="line">;push &quot;redirect-gateway def1 bypass-dhcp&quot; #启用后，客户端所有流量都将通过VPN服务器，因此不</span><br><span class="line">需要配置</span><br><span class="line">#;push &quot;dhcp-option DNS 208.67.222.222&quot; #推送DNS服务器，不需要配置</span><br><span class="line">#;push &quot;dhcp-option DNS 208.67.220.220&quot;</span><br><span class="line">#client-to-client #允许不同的client通过openvpn server直接通信，不开启</span><br><span class="line">;duplicate-cn #多个用户共用一个账户，一般用于测试环境，生产环境都是一个用户一个证书</span><br><span class="line">keepalive 10 120 #设置服务端检测的间隔和超时时间，默认为每 10 秒 ping一次，如果 120 秒没有回应</span><br><span class="line">则认为对方已经 down</span><br><span class="line">#tls-auth /etc/openvpn/server/ta.key 0 #可使用以下命令来生成：openvpn –genkey –secret</span><br><span class="line">ta.key #服务器和每个客户端都需要拥有该密钥的一个拷贝。第二个参数在服务器端应该为’0’，在客户端应该</span><br><span class="line">为’1’</span><br><span class="line">cipher AES-256-CBC #加密算法</span><br><span class="line">;compress lz4-v2 #启用压缩</span><br><span class="line">;push &quot;compress lz4-v2&quot;</span><br><span class="line">;comp-lzo #旧户端兼容的压缩配置，需要客户端配置开启压缩</span><br><span class="line">;max-clients 100 #最大客户端数</span><br><span class="line">;user nobody #运行openvpn服务的用户和组</span><br><span class="line">;group nobody</span><br><span class="line">#persist-key #重启OpenVPN服务，重新读取keys文件，保留使用第一次的keys文件，不开启</span><br><span class="line">#persist-tun #重启OpenVPN服务，一直保持tun或者tap设备是up的，否则会先down然后再up，不开启</span><br><span class="line">status openvpn-status.log #openVPN状态记录文件，每分钟会记录一次</span><br><span class="line">#;log openvpn.log #日志记录方式和路径，log会在openvpn启动的时候清空日志文件</span><br><span class="line">log-append /var/log/openvpn/openvpn.log #重启openvpn后在之前的日志后面追加新的日志</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>9) 关于客户端的配置文件：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">client #声明自己是个客户端</span><br><span class="line">dev tun #接口类型，必须和服务端保持一致</span><br><span class="line">proto tcp #使用的协议，必须和服务端保持一致</span><br><span class="line">remote 172.18.200.101 1194 #server端的ip和端口，可以写域名但是需要可以解析成IP</span><br><span class="line">resolv-retry infinite #如果是写的server端的域名，那么就始终解析，如果域名发生变化，会重新连接到</span><br><span class="line">新的域名对应的IP</span><br><span class="line">nobind #本机不绑定监听端口，客户端是随机打开端口连接到服务端的1194</span><br><span class="line">persist-key #</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert zhangshijie.crt</span><br><span class="line">key zhangshijie.key</span><br><span class="line">remote-cert-tls server #指定采用服务器校验方式</span><br><span class="line">#tls-auth ta.key 1</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">verb 3</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/25/Openvpn的搭建与配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Openvpn的搭建与配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Tomcat共享session" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/23/Tomcat共享session/" class="article-date">
-  	<time datetime="2019-11-22T17:25:24.000Z" itemprop="datePublished">2019-11-23</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/23/Tomcat共享session/">
-        Tomcat共享session
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。</em></strong></p>
-<blockquote>
-<p>1)使用MSM管理Tomcat的session，需要以下三种类：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。</span><br><span class="line">2.Session数据的序列化、反序列化类。</span><br><span class="line">3.驱动类，用于连接Reids和memcached的客户端。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 基于memcache的session共享配置(sticky模式)：</p>
-</blockquote>
-<p><strong><em>当请求结束时Tomcat的session会送给memcached备份。即Tomcat session为主session，memcached session为备session，使用memcached相当于备份了一份Session。查询Session时Tomcat会优先使用自己内存的Session，Tomcat通过jvmRoute发现不是自己的Session，便从memcached中找到该Session，更新本机Session，请求完成后更新memcached。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">1.安装memcached：  </span><br><span class="line">    yum install -y memcached</span><br><span class="line">        关于memcache的运行参数：</span><br><span class="line">            -u username memcached运行的用户身份，必须普通用户</span><br><span class="line">            -p 绑定的端口，默认11211</span><br><span class="line">            -m num 最大内存，单位MB，默认64MB</span><br><span class="line">            -c num 最大连接数，缺省1024</span><br><span class="line">            -d 守护进程方式运行</span><br><span class="line">            -f 增长因子Growth Factor，默认1.25</span><br><span class="line">            -v 详细信息，-vv能看到详细信息</span><br><span class="line">            -M 内存耗尽，不许LRU</span><br><span class="line">            -U 设置UDP监听端口，0表示禁用UDP</span><br><span class="line">2.把需要的三种类放到全局的 lib 目录下。</span><br><span class="line">    asm-5.2.jar</span><br><span class="line">    kryo-3.0.3.jar</span><br><span class="line">    kryo-serializers-0.45.jar</span><br><span class="line">    memcached-session-manager-2.3.2.jar</span><br><span class="line">    memcached-session-manager-tc8-2.3.2.jar</span><br><span class="line">    minlog-1.3.1.jar</span><br><span class="line">    msm-kryo-serializer-2.3.2.jar</span><br><span class="line">    objenesis-2.6.jar</span><br><span class="line">    reflectasm-1.11.9.jar</span><br><span class="line">    spymemcached-2.12.3.jar</span><br><span class="line">3.配置Tomcat的全局context.xml文件（放到&lt;Context&gt;内）：</span><br><span class="line">    vim /usr/local/tomcat/conf/context.xml</span><br><span class="line">        &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">                memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">                failoverNodes=&quot;m105&quot;            #配置备用的memcached，在sticky模式下是自己。</span><br><span class="line">                requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">                transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">        /&gt;</span><br><span class="line">    memcached的节点们；n1、n2只是别名，可以重新命名。</span><br><span class="line">    failoverNodes故障转移节点，n1是备用节点，n2是主存储节点。另一台Tomcat将n1改为n2，其主节点是n1，备用节点是n2。</span><br><span class="line">    配置成功会在日志显示如下信息：</span><br><span class="line">        de.javakaffee.web.msm.MemcachedSessionService.startInternal --------</span><br><span class="line">        - finished initialization:</span><br><span class="line">        - sticky: true</span><br><span class="line">        - operation timeout: 1000</span><br><span class="line">        - node ids: [m105]</span><br><span class="line">        - failover node ids: [m104]</span><br><span class="line">        - storage key prefix: null</span><br><span class="line">        - locking mode: null (expiration: 5s)</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>3) 配置non-sticky模式：</p>
-</blockquote>
-<p><strong><em>从msm 1.4.0之后开始支持non-sticky模式。Tomcat session为中转Session，如果n1为主session，n2为备session。产生的新的Session会发送给主、备memcached，并清除本地Session。n1下线，n2转正。n1再次上线，n2依然是主Session存储节点。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">仅仅需要修改全局context.xml文件中的内容，其它需要的类保持不变。</span><br><span class="line"> &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">        memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">        sticky=&quot;false&quot;</span><br><span class="line">        sessionBackupAsync=&quot;false&quot;</span><br><span class="line">        lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">        requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">        transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line"> /&gt;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>4) 配置Redis的Session共享：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">       memcachedNodes=&quot;redis://192.168.38.105:6379&quot;</span><br><span class="line">       sticky=&quot;false&quot;</span><br><span class="line">       sessionBackupAsync=&quot;false&quot;</span><br><span class="line">       lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">       requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">       transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/23/Tomcat共享session/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Tomcat共享session">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Tomcat的反向代理" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/23/Tomcat的反向代理/" class="article-date">
-  	<time datetime="2019-11-22T17:25:23.000Z" itemprop="datePublished">2019-11-23</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/23/Tomcat的反向代理/">
-        Tomcat的反向代理
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) Nginx 实现Tomcat的动静分离：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">        server_name www.test.com;</span><br><span class="line">        listen 80;</span><br><span class="line">        location / &#123;</span><br><span class="line">                root /var/www/html;</span><br><span class="line">                index index.html;</span><br><span class="line">        &#125;</span><br><span class="line">        location ~* \.jsp$ &#123;</span><br><span class="line">                proxy_pass http://www.test.com:8080;  #在使用域名是注意修改本机的/etc/hosts文件。</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) httpd 代理Tomcat:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">需要Httpd安装相应的代理模块：</span><br><span class="line">    [root@localhost ~]# httpd -M | grep proxy</span><br><span class="line">        proxy_module (shared)</span><br><span class="line">        proxy_ajp_module (shared)</span><br><span class="line">        proxy_balancer_module (shared)</span><br><span class="line">        proxy_connect_module (shared)</span><br><span class="line">        proxy_express_module (shared)</span><br><span class="line">        proxy_fcgi_module (shared)</span><br><span class="line">        proxy_fdpass_module (shared)</span><br><span class="line">        proxy_ftp_module (shared)</span><br><span class="line">        proxy_http_module (shared)</span><br><span class="line">        proxy_scgi_module (shared)</span><br><span class="line">        proxy_wstunnel_module (shared)</span><br><span class="line">    vim /etc/httpd/conf.d/proxy.conf</span><br><span class="line">        &lt;VirtualHost *:80&gt;</span><br><span class="line">            ServerName      www.test.com</span><br><span class="line">            ProxyRequests   off         #正向代理必须关闭。</span><br><span class="line">            Proxyvia        on          #在响应报文的head部分添加一个‘Via: 1.1 www.test.com’。</span><br><span class="line">            ProxyPreserveHost on        #该项将请求报文中head部分的Host通过代理传递到后端的Tomcat。</span><br><span class="line">            ProxyPass / http://127.0.0.1:8080/  #反向代理指令。</span><br><span class="line">            ProxyPassReverse / http://127.0.0.1:8080/   #保留代理的响应头不被重写。</span><br><span class="line">        &lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) htppd中的ajp协议的使用：</p>
-</blockquote>
-<p><strong><em>ajp是一个二进制协议，效率比较高，但是仅仅httpd支持。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">        ServerName      www.test.com</span><br><span class="line">        ProxyRequests   off</span><br><span class="line">        Proxyvia        on</span><br><span class="line">        ProxyPreserveHost on</span><br><span class="line">        ProxyPass / ajp://127.0.0.1:8009/   #注意端口和协议。</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>4) 使用 Nginx 代理后端多台Tomcat:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">（1）以下为index.jsp调试代码：</span><br><span class="line">    &lt;%@ page import=&quot;java.util.*&quot; %&gt;</span><br><span class="line">    &lt;!DOCTYPE html&gt;</span><br><span class="line">    &lt;html lang=&quot;en&quot;&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">    &lt;meta charset=&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;title&gt;lbjsptest&lt;/title&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">    &lt;div&gt;On &lt;%=request.getServerName() %&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div&gt;&lt;%=request.getLocalAddr() + &quot;:&quot; + request.getLocalPort() %&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div&gt;SessionID = &lt;span style=&quot;color:blue&quot;&gt;&lt;%=session.getId() %&gt;&lt;/span&gt;&lt;/div&gt;</span><br><span class="line">    &lt;%=new Date()%&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">    &lt;/html&gt;</span><br><span class="line">（2）配置Nginx：</span><br><span class="line">    vim /etc/nginx/nginx.con</span><br><span class="line">            upstream tomcats &#123;          #在http字段配置。</span><br><span class="line">                #ip_hash;  #仅仅做原地址hash，不做session共享，在服务器宕机后关于session的数据同样丢失。</span><br><span class="line">                server www.test104.com:8080;</span><br><span class="line">                server www.test105.com:8080;</span><br><span class="line">            &#125;</span><br><span class="line">            location ~* \.(jsp|do)$ &#123;   #在server字段引用。</span><br><span class="line">                proxy_pass http://tomcats;</span><br><span class="line">                &#125;</span><br><span class="line">需要在Nginx主机上修改/etc/hosts文件，在重启Nginx。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 使用httpd代理Tomcat：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">httpd必须含有proxy_balancer_module该模块，用来实现负载均衡。</span><br><span class="line">（1）关闭httpd默认的主机：</span><br><span class="line">    vim /etc/httpd/confhttpd.conf</span><br><span class="line">        #DocumentRoot &quot;/var/www/html&quot;</span><br><span class="line">（2）配置代理：</span><br><span class="line">    vim /etc/httpd/conf.d/proxy.conf </span><br><span class="line">        &lt;VirtualHost *:80&gt;</span><br><span class="line">        ServerName www.test.com</span><br><span class="line">        ProxyRequests Off</span><br><span class="line">        ProxyVia On</span><br><span class="line">        ProxyPreserveHost On</span><br><span class="line">        ProxyPass / balancer://lbtomcats/</span><br><span class="line">        ProxyPassReverse / balancer://lbtomcats/</span><br><span class="line">        &lt;/VirtualHost&gt;</span><br><span class="line">        &lt;Proxy balancer://lbtomcats&gt;</span><br><span class="line">        BalancerMember http://www.test105.com:8080 loadfactor=1 route=jvm5</span><br><span class="line">        BalancerMember http://www.test104.com:8080 loadfactor=1 route=jvm4</span><br><span class="line">        &lt;/Proxy&gt;</span><br><span class="line">（3）其中的参数含义：</span><br><span class="line">    loadfactor：定义负载均衡后端服务器权重，取值范围1 - 100。</span><br><span class="line">    lbmethod负载均衡调度方法：</span><br><span class="line">                byrequests （默认）基于权重的统计请求个数进行调度；</span><br><span class="line">                bytrafficz 执行基于权重的流量计数调度；</span><br><span class="line">                bybusyness 通过考量每个后端服务器当前负载进行调度。</span><br><span class="line">    maxattempts：放弃请求前实现故障转移的次数，默认为1，其最大值不应该大于总的节点数。</span><br><span class="line">    nofailover：如果后端服务器没有Session副本，可以设置为On不允许故障转移，Off（默认）故障可以转移。</span><br><span class="line">    stickysession：调度器的sticky session名字，根据web后台编程语言不同，可以设置为JSESSIONID或PHPSESSIONID。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) httpd调度的session粘性：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Header add Set-Cookie &quot;ROUTEID=.%&#123;BALANCER_WORKER_ROUTE&#125;e; path=/&quot;</span><br><span class="line">env=BALANCER_ROUTE_CHANGED</span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">ServerName node1.magedu.com</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyVia On</span><br><span class="line">ProxyPreserveHost On</span><br><span class="line">ProxyPass / balancer://lbtomcats/</span><br><span class="line">ProxyPassReverse / balancer://lbtomcats/</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line">&lt;Proxy balancer://lbtomcats&gt;</span><br><span class="line">BalancerMember http://t1.magedu.com:8080 loadfactor=1 route=Tomcat1</span><br><span class="line">BalancerMember http://t2.magedu.com:8080 loadfactor=2 route=Tomcat2</span><br><span class="line">ProxySet stickysession=ROUTEID</span><br><span class="line">&lt;/Proxy&gt;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>7) Tomcat集群的创建：</p>
-</blockquote>
-<p><strong><em>在客户端无论是基于源IP哈希，还是基于sessionID的哈希，都没有在后端服务器做到Session共享，因此当后端的服务器宕机，都会引起请求的转移此时因为没有session共享，还是会引起数据的丢失及sessionID的改变。</em></strong></p>
-<p><strong><em>Tomcat 集群就是让多个tomcat节点之间的Session信息相互传递。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">1.将以下配置放入server.xml配置文件中。</span><br><span class="line">        &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;</span><br><span class="line">                 channelSendOptions=&quot;8&quot;&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Manager className=&quot;org.apache.catalina.ha.session.DeltaManager&quot;</span><br><span class="line">                   expireSessionsOnShutdown=&quot;false&quot;</span><br><span class="line">                   notifyListenersOnReplication=&quot;true&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Channel className=&quot;org.apache.catalina.tribes.group.GroupChannel&quot;&gt;</span><br><span class="line">            &lt;Membership className=&quot;org.apache.catalina.tribes.membership.McastService&quot;</span><br><span class="line">                        address=&quot;228.0.0.4&quot;</span><br><span class="line">                        port=&quot;45564&quot;</span><br><span class="line">                        frequency=&quot;500&quot;</span><br><span class="line">                        dropTime=&quot;3000&quot;/&gt;</span><br><span class="line">            &lt;Receiver className=&quot;org.apache.catalina.tribes.transport.nio.NioReceiver&quot;</span><br><span class="line">                      address=&quot;auto&quot;</span><br><span class="line">                      port=&quot;4000&quot;</span><br><span class="line">                      autoBind=&quot;100&quot;</span><br><span class="line">                      selectorTimeout=&quot;5000&quot;</span><br><span class="line">                      maxThreads=&quot;6&quot;/&gt;</span><br><span class="line"></span><br><span class="line">            &lt;Sender className=&quot;org.apache.catalina.tribes.transport.ReplicationTransmitter&quot;&gt;</span><br><span class="line">              &lt;Transport className=&quot;org.apache.catalina.tribes.transport.nio.PooledParallelSender&quot;/&gt;</span><br><span class="line">            &lt;/Sender&gt;</span><br><span class="line">            &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.TcpFailureDetector&quot;/&gt;</span><br><span class="line">            &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.MessageDispatchInterceptor&quot;/&gt;</span><br><span class="line">          &lt;/Channel&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Valve className=&quot;org.apache.catalina.ha.tcp.ReplicationValve&quot;</span><br><span class="line">                 filter=&quot;&quot;/&gt;</span><br><span class="line">          &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;Deployer className=&quot;org.apache.catalina.ha.deploy.FarmWarDeployer&quot;</span><br><span class="line">                    tempDir=&quot;/tmp/war-temp/&quot;</span><br><span class="line">                    deployDir=&quot;/tmp/war-deploy/&quot;</span><br><span class="line">                    watchDir=&quot;/tmp/war-listen/&quot;</span><br><span class="line">                    watchEnabled=&quot;false&quot;/&gt;</span><br><span class="line"></span><br><span class="line">          &lt;ClusterListener className=&quot;org.apache.catalina.ha.session.ClusterSessionListener&quot;/&gt;</span><br><span class="line">        &lt;/Cluster&gt;</span><br><span class="line">            Cluster 集群配置</span><br><span class="line">            Manager 会话管理器配置</span><br><span class="line">            Channel 信道配置</span><br><span class="line">            Membership 成员判定。使用什么多播地址、端口多少、间隔时长ms、超时时长ms。同一个多播地址和端口认为同属一个组。</span><br><span class="line">            使用时修改这个多播地址，以防冲突。</span><br><span class="line">            Receiver 接收器，多线程接收多个其他节点的心跳、会话信息。默认会从4000到4100依次尝试可用端口。</span><br><span class="line">            address=&quot;auto&quot;，auto可能绑定到127.0.0.1上，所以一定要改为可以用的IP上去。</span><br><span class="line">            Sender 多线程发送器，内部使用了tcp连接池。</span><br><span class="line">            Interceptor 拦截器。</span><br><span class="line">            Valve</span><br><span class="line">            ReplicationValve 检测哪些请求需要检测Session，Session数据是否有了变化，需要启动复制过程。</span><br><span class="line">            ClusterListener</span><br><span class="line">            ClusterSessionListener 集群session侦听器。</span><br><span class="line"></span><br><span class="line">            使用 &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;/&gt;</span><br><span class="line">            添加到 &lt;Engine&gt; 所有虚拟主机都可以启用Session复制</span><br><span class="line">            添加到 &lt;Host&gt; ，该虚拟主机可以启用Session复制</span><br><span class="line">            最后，在应用程序内部启用了才可以使用</span><br><span class="line">2. cp /usr/local/tomcat/conf/web.xml /data/webapp/ROOT/WEB-INF/</span><br><span class="line">   为web.xml的 &lt;web-app&gt; 标签增加子标签 &lt;distributable/&gt; 来开启该应用程序的分布式。</span><br><span class="line">   重启全部Tomcat，通过负载均衡调度到不同节点，返回的SessionID不变了。</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/23/Tomcat的反向代理/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Tomcat的反向代理">
          &nbsp;
         view
     </span>
