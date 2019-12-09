@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Jumpservrer安装配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) 准备mysql数据库:  12345678910111213141516171819202122232425262728291.准备镜像：docker pull mysql:5.6.462.准备配置文件：mkdir -pv /etc/mysql/mysql.conf.d/vim /etc/mysql/mysql.conf.d/mysqld.cnf[mysqld]pid-file">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jumpservrer安装配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/12/09/Jumpservrer安装配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) 准备mysql数据库:  12345678910111213141516171819202122232425262728291.准备镜像：docker pull mysql:5.6.462.准备配置文件：mkdir -pv /etc/mysql/mysql.conf.d/vim /etc/mysql/mysql.conf.d/mysqld.cnf[mysqld]pid-file">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-09T13:42:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jumpservrer安装配置">
+<meta name="twitter:description" content="1) 准备mysql数据库:  12345678910111213141516171819202122232425262728291.准备镜像：docker pull mysql:5.6.462.准备配置文件：mkdir -pv /etc/mysql/mysql.conf.d/vim /etc/mysql/mysql.conf.d/mysqld.cnf[mysqld]pid-file">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-Jumpservrer安装配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/09/Jumpservrer安装配置/" class="article-date">
+  	<time datetime="2019-12-09T12:00:09.000Z" itemprop="datePublished">2019-12-09</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Jumpservrer安装配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/12/09/Jumpservrer安装配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Jumpservrer安装配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 准备mysql数据库:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">1.准备镜像：</span><br><span class="line">docker pull mysql:5.6.46</span><br><span class="line"></span><br><span class="line">2.准备配置文件：</span><br><span class="line">mkdir -pv /etc/mysql/mysql.conf.d/</span><br><span class="line">vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">pid-file        = /var/run/mysqld/mysqld.pid</span><br><span class="line">socket          = /var/run/mysqld/mysqld.sock</span><br><span class="line">datadir         = /var/lib/mysql</span><br><span class="line">symbolic-links=0</span><br><span class="line">character-set-server=utf8</span><br><span class="line"></span><br><span class="line">mkdir -pv /etc/mysql/conf.d/</span><br><span class="line">vim /etc/mysql/conf.d/mysql.cnf</span><br><span class="line">[mysql]</span><br><span class="line">default-character-set=utf8</span><br><span class="line"></span><br><span class="line">3.创建数据目录，防止容器出现异常，引起jumpserver的数据丢失：</span><br><span class="line">mkdir /data/mysql -p</span><br><span class="line"></span><br><span class="line">4.运行mysql容器：</span><br><span class="line">docker run -it -d -p 3306:3306 -v /etc/mysql/mysql.conf.d/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf \</span><br><span class="line">                               -v /etc/mysql/conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf \</span><br><span class="line">                               -v /data/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=&quot;testroot&quot; mysql:5.6.46</span><br><span class="line"></span><br><span class="line">5.进入容器为jumpserver创建数据库并授权：</span><br><span class="line">    create database jumpserver default charset &apos;utf8&apos;;</span><br><span class="line">    grant all on jumpserver.* to &apos;jumpserver&apos;@&apos;192.168.38.%&apos; identified by &apos;testroot&apos;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 安装redis；</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apt-cache madison redis</span><br><span class="line">apt install -y redis=5:4.0.9-1ubuntu0.2</span><br><span class="line">修改如下两项：</span><br><span class="line">vim /etc/redis/redis.conf</span><br><span class="line">    bind 192.168.38.205</span><br><span class="line">    requirepass testroot</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 启动jumpserver容器：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1.生成key和token:</span><br><span class="line">    if [ &quot;$SECRET_KEY&quot; = &quot;&quot; ]; then SECRET_KEY=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 50`; echo &quot;SECRET_KEY=$SECRET_KEY&quot; &gt;&gt; ~/.bashrc; echo $SECRET_KEY; else echo $SECRET_KEY; fi</span><br><span class="line">    if [ &quot;$BOOTSTRAP_TOKEN&quot; = &quot;&quot; ]; then BOOTSTRAP_TOKEN=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 16`; echo &quot;BOOTSTRAP_TOKEN=$BOOTSTRAP_TOKEN&quot; &gt;&gt; ~/.bashrc; echo $BOOTSTRAP_TOKEN; else echo $BOOTSTRAP_TOKEN; fi</span><br><span class="line">2.拉取jumpserver镜像;</span><br><span class="line">    docker pull jumpserver/jms_all:1.4.10</span><br><span class="line">3.启动容器：</span><br><span class="line">docker run --name jms_all -d \</span><br><span class="line">    -v /opt/jumpserver:/opt/jumpserver/data/media \</span><br><span class="line">    -p 80:80 \</span><br><span class="line">    -p 2222:2222 \</span><br><span class="line">    -e SECRET_KEY=aDsuxpjtGZ3YtdMC2S0BYVO85GXDDfd6aM9NANhWraITRWsumH \</span><br><span class="line">    -e BOOTSTRAP_TOKEN=LLfYIMS3Wbj7Vi5e \</span><br><span class="line">    -e DB_HOST=192.168.38.205 \</span><br><span class="line">    -e DB_PORT=3306 \</span><br><span class="line">    -e DB_USER=jumpserver \</span><br><span class="line">    -e DB_PASSWORD=testroot \</span><br><span class="line">    -e DB_NAME=jumpserver \</span><br><span class="line">    -e REDIS_HOST=192.168.38.205 \</span><br><span class="line">    -e REDIS_PORT=6379 \</span><br><span class="line">    -e REDIS_PASSWORD=testroot \</span><br><span class="line">    jumpserver/jms_all:1.4.10</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/12/08/Docker的资源限制/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Docker的资源限制</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="Jumpservrer安装配置" data-title="Jumpservrer安装配置" data-url="http://gmfdevops.com.com/2019/12/09/Jumpservrer安装配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Jumpservrer安装配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

@@ -202,6 +202,181 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Ubuntu的基础配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/27/Ubuntu的基础配置/" class="article-date">
+  	<time datetime="2019-11-27T12:00:09.000Z" itemprop="datePublished">2019-11-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/27/Ubuntu的基础配置/">
+        Ubuntu的基础配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 修改主机名：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# cat /etc/hostname </span><br><span class="line">gmf.testroot.com</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 修改网卡名：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# cat /etc/default/grub</span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;net.ifnames=0 biosdevname=0&quot;</span><br><span class="line"></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 配置Ubuntu的root用户连接：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# vim /etc/ssh/sshd_config </span><br><span class="line">PermitRootLogin yes</span><br><span class="line">PasswordAuthentication yes</span><br><span class="line">sudo su - root  #切换root设置密码。</span><br><span class="line">systemctl restart sshd #重启ssh服务并测试root用户远程ssh连接</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 配置Ubuntu的网卡：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">ubuntu 17.04及之前的静态IP配置方式：</span><br><span class="line">    cat /etc/network/interfaces</span><br><span class="line">        # interfaces(5) file used by ifup(8) and ifdown(8)</span><br><span class="line">        auto lo</span><br><span class="line">        iface lo inet loopback</span><br><span class="line">        auto eth0 #网卡自启动，写自己要配置IP的实际网卡名称</span><br><span class="line">        iface eth0 inet static #配置静态IP，写自己要配置IP的实际网卡名称</span><br><span class="line">        address 172.18.3.12 #IP地址</span><br><span class="line">        netmask 255.255.0.0 #掩码</span><br><span class="line">        gateway 172.18.0.1 #网关</span><br><span class="line">        dns-nameservers 223.6.6.6 #DNS</span><br><span class="line">        dns-nameservers 223.5.5.5</span><br><span class="line">    #重启网络服务</span><br><span class="line">    /etc/init.d/networking restart</span><br><span class="line">    systemctl restart networking.service</span><br><span class="line">ubuntu 18.04配置静态IP地址:</span><br><span class="line">    vim /etc/netplan/01-netcfg.yaml</span><br><span class="line">        network:</span><br><span class="line">            version: 2</span><br><span class="line">            renderer: networkd</span><br><span class="line">            ethernets:</span><br><span class="line">                eth0:</span><br><span class="line">                    dhcp4: no</span><br><span class="line">                    addresses: [192.168.38.201/24]</span><br><span class="line">                    gateway4: 192.168.38.2</span><br><span class="line">                    nameservers:</span><br><span class="line">                            addresses: [192.168.38.2]</span><br><span class="line">                            </span><br><span class="line">                eth1:</span><br><span class="line">                    dhcp4: no</span><br><span class="line">                    addresses: [172.18.8.201/16]</span><br><span class="line">                    routes:</span><br><span class="line">                        - to: 172.30.0.0/16</span><br><span class="line">                        via: 172.18.0.1</span><br><span class="line">                        - to: 172.17.0.0/16</span><br><span class="line">                        via: 172.18.0.1</span><br><span class="line">    netplan apply  #是当前配置生效。</span><br><span class="line">vim ~/.vimrc #取消vim 自动缩进功能</span><br><span class="line">set past</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 配置网卡桥接：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line"></span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">          addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">          - eth0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 多网卡绑定（bond）:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">第一种模式：mod=0，即：(balance-rr) Round-robin policy（平衡抡循环策略）</span><br><span class="line">特点：传输数据包顺序是依次传输（即：第1个包走eth0，下一个包就走eth1….一直循环下去，直到最后一个传</span><br><span class="line">输完毕），此模式提供负载平衡和容错能力。</span><br><span class="line">第二种模式：mod=1，即： (active-backup) Active-backup policy（主-备份策略）</span><br><span class="line">特点：只有一个设备处于活动状态，当一个宕掉另一个马上由备份转换为主设备。mac地址是外部可见得，从外面</span><br><span class="line">看来，bond的MAC地址是唯一的，以避免switch(交换机)发生混乱。此模式只提供了容错能力；由此可见此算法</span><br><span class="line">的优点是可以提供高网络连接的可用性，但是它的资源利用率较低，只有一个接口处于工作状态，在有 N 个网络</span><br><span class="line">接口的情况下，资源利用率为1/N。</span><br><span class="line">第三种模式：mod=2，即：(balance-xor) XOR policy（平衡策略）</span><br><span class="line">特点：基于指定的传输HASH策略传输数据包。缺省的策略是：(源MAC地址 XOR 目标MAC地址) % slave数量。</span><br><span class="line">其他的传输策略可以通过xmit_hash_policy选项指定，此模式提供负载平衡和容错能力。</span><br><span class="line">第四种模式：mod=3，即：broadcast（广播策略）</span><br><span class="line">特点：在每个slave接口上传输每个数据包，此模式提供了容错能力。</span><br><span class="line">第五种模式：mod=4，即：(802.3ad) IEEE 802.3adDynamic link aggregation（IEEE 802.3ad 动态</span><br><span class="line">链接聚合）</span><br><span class="line">特点：创建一个聚合组，它们共享同样的速率和双工设定。根据802.3ad规范将多个slave工作在同一个激活的聚</span><br><span class="line">合体下。</span><br><span class="line">必要条件：</span><br><span class="line">条件1：ethtool支持获取每个slave的速率和双工设定。</span><br><span class="line">条件2：switch(交换机)支持IEEE 802.3ad Dynamic link aggregation。</span><br><span class="line">条件3：大多数switch(交换机)需要经过特定配置才能支持802.3ad模式。</span><br><span class="line">第六种模式：mod=5，即：(balance-tlb) Adaptive transmit load balancing（适配器传输负载均</span><br><span class="line">衡）</span><br><span class="line">特点：不需要任何特别的switch(交换机)支持的通道bonding。在每个slave上根据当前的负载（根据速度计</span><br><span class="line">算）分配外出流量。如果正在接受数据的slave出故障了，另一个slave接管失败的slave的MAC地址。</span><br><span class="line">该模式的必要条件：</span><br><span class="line">ethtool支持获取每个slave的速率</span><br><span class="line">第七种模式：mod=6，即：(balance-alb) Adaptive load balancing（适配器适应性负载均衡）</span><br><span class="line">特点：该模式包含了balance-tlb模式，同时加上针对IPV4流量的接收负载均衡(receive load balance,</span><br><span class="line">rlb)，而且不需要任何switch(交换机)的支持。</span><br><span class="line">一般根据情况大多用0,1,4策略。</span><br><span class="line"></span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">    eth1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">  bonds:</span><br><span class="line">    bond0:</span><br><span class="line">      interfaces:</span><br><span class="line">        - eth0</span><br><span class="line">        - eth1</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">        addresses: [192.168.38.2]</span><br><span class="line">      parameters:</span><br><span class="line">        mode: active-backup</span><br><span class="line">        mii-monitor-interval: 100</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) 基于bond的桥接：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">    eth1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line">  bonds:</span><br><span class="line">    bond0:</span><br><span class="line">      interfaces:</span><br><span class="line">        - eth0</span><br><span class="line">        - eth1</span><br><span class="line">      parameters:</span><br><span class="line">        mode: active-backup</span><br><span class="line">        mii-monitor-interval: 100</span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">        addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">        - bond0</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/27/Ubuntu的基础配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Ubuntu的基础配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Openvpn客户端证书的管理" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/25/Openvpn客户端证书的管理/" class="article-date">
+  	<time datetime="2019-11-25T10:09:26.000Z" itemprop="datePublished">2019-11-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/25/Openvpn客户端证书的管理/">
+        Openvpn客户端证书的管理
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 证书的自动过期：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">vim vars</span><br><span class="line">    set_var EASYRSA_CA_EXPIRE       3650</span><br><span class="line">    set_var EASYRSA_CERT_EXPIRE     90      #三个月自动过期</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 证书的手动注销：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/openvpn/easyrsa-server/3/pki/index.txt  #查看证书得可用状态，R为吊销。V为可用。</span><br><span class="line">1.吊销证书：</span><br><span class="line">    cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">    ./easyrsa revoke gmf2       #吊销gmf2的证书。</span><br><span class="line">    ./easyrsa gen-crl           </span><br><span class="line">        生成证书吊销文件：/etc/openvpn/easyrsa-server/3/pki/crl.pem</span><br><span class="line">2.编辑服务端配置文件调用证书吊销文件（首次吊销文件需要配置）：</span><br><span class="line">    vim /etc/openvpn/server.conf</span><br><span class="line">        crl-verify /etc/openvpn/easyrsa-server/3/pki/crl.pem （放最后）</span><br><span class="line">    systemctl restart openvpn@server</span><br><span class="line">3.查看证书得可用状态</span><br><span class="line">    cat /etc/openvpn/easyrsa-server/3/pki/index.txt</span><br><span class="line">4.之后吊销证书仅仅：</span><br><span class="line">    cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">    ./easyrsa revoke gmf2</span><br><span class="line">    ./easyrsa gen-crl</span><br><span class="line">    systemctl restart openvpn@server</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>1) Openvpn的客户端证书颁发脚本：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">ClientName=$1</span><br><span class="line">Pass=$2</span><br><span class="line"></span><br><span class="line">#安装依赖的工具：</span><br><span class="line">rpm -ql expect &amp;&gt;/dev/null || yum install -y -q expect</span><br><span class="line"></span><br><span class="line">#生成client证书申请文件：</span><br><span class="line">if [ -d /etc/openvpn/easyrsa-client/3 ];then</span><br><span class="line">	cd /etc/openvpn/easyrsa-client/3/</span><br><span class="line">	if [ $? -eq 0 ];then</span><br><span class="line">		echo `pwd`</span><br><span class="line">	fi</span><br><span class="line">else</span><br><span class="line">	echo &quot;Please Create Client PKI Dir!!!&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">expect &lt;&lt;EOF</span><br><span class="line">	set timeout 10</span><br><span class="line">	spawn ./easyrsa gen-req $ClientName</span><br><span class="line">        expect &#123;</span><br><span class="line">        &quot;Enter PEM pass phrase&quot; &#123;send &quot;$Pass\n&quot;;exp_continue&#125;</span><br><span class="line">        &quot;Verifying - Enter PEM pass phrase&quot; &#123;send &quot;$PASS\n&quot;;exp_continue&#125;</span><br><span class="line">	&quot;Common Name&quot; &#123;send &quot;\n&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        expect eof	</span><br><span class="line">EOF</span><br><span class="line">#签发客户端证书：</span><br><span class="line">if [ -d /etc/openvpn/easyrsa-server/3 ];then</span><br><span class="line">	cd /etc/openvpn/easyrsa-server/3/</span><br><span class="line">	if [ $? -eq 0 ];then</span><br><span class="line">	    echo `pwd`	</span><br><span class="line">	fi</span><br><span class="line">else</span><br><span class="line">	echo &quot;Please Create Server PKI Dir!!!&quot;</span><br><span class="line">fi</span><br><span class="line">./easyrsa  import-req /etc/openvpn/easyrsa-client/3/pki/reqs/$&#123;ClientName&#125;.req  $ClientName</span><br><span class="line">expect &lt;&lt;EOF</span><br><span class="line">	set timeout 10</span><br><span class="line">	spawn ./easyrsa sign-req client $ClientName</span><br><span class="line">	expect &#123;</span><br><span class="line">	&quot;Confirm request details&quot; &#123;send &quot;yes\n&quot;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	expect eof</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">#整理客户端证书：</span><br><span class="line">mkdir /etc/openvpn/client/$ClientName</span><br><span class="line">if [ $? -eq 0 ];then</span><br><span class="line">	echo &apos;Dir Create Successful!!!&apos;</span><br><span class="line">fi</span><br><span class="line">cd /etc/openvpn/client/$ClientName</span><br><span class="line">cp /etc/openvpn/easyrsa-server/3/pki/ca.crt .</span><br><span class="line">cp /etc/openvpn/easyrsa-server/3/pki/issued/$&#123;ClientName&#125;.crt .</span><br><span class="line">cp /etc/openvpn/easyrsa-client/3/pki/private/$&#123;ClientName&#125;.key .</span><br><span class="line">tar -cvf $&#123;ClientName&#125;.tar *</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/25/Openvpn客户端证书的管理/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Openvpn客户端证书的管理">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Openvpn的搭建与配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -912,162 +1087,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/13/Redis的Cluster集群/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Redis的Cluster集群">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Redis哨兵机制" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/13/Redis哨兵机制/" class="article-date">
-  	<time datetime="2019-11-13T12:07:24.000Z" itemprop="datePublished">2019-11-13</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/13/Redis哨兵机制/">
-        Redis哨兵机制
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>实现Redis的哨兵机制之前，必须实现Redis的主从复制，有3台以上机器构成的集群。</em></strong></p>
-<blockquote>
-<p>1) 配置哨兵进程的配置文件sentinel.conf：</p>
-</blockquote>
-<p><strong><em>该文件在源码包解压后的目录中，可以拷贝到/apps/redis/etc/目录下，哨兵可以不和Redis服务器部署在一起。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">1. 修改配置文件：</span><br><span class="line">    vim /apps/redis/etc/sentinel.conf</span><br><span class="line">        bind 0.0.0.0</span><br><span class="line">        port 26379</span><br><span class="line">        daemonize yes</span><br><span class="line">        pidfile &quot;redis-sentinel.pid&quot;</span><br><span class="line">        logfile &quot;sentinel_26379.log&quot;</span><br><span class="line">        dir &quot;/apps/redis/data/&quot;</span><br><span class="line">        sentinel monitor mymaster 192.168.38.105 6379 2 #法定人数限制(quorum，该数量必须大于集群数量的一半)，即有几个slave认为master down了就进行故障转移。</span><br><span class="line">        sentinel auth-pass mymaster testroot</span><br><span class="line">        sentinel down-after-milliseconds mymaster 30000 #(SDOWN)主观下线的时间。</span><br><span class="line">        sentinel parallel-syncs mymaster 1 #发生故障转移时候同时向新master同步数据的slave数量，数字越小总同步时间越长。</span><br><span class="line">        sentinel failover-timeout mymaster 180000 #所有slaves指向新的master所需的超时时间。</span><br><span class="line">        sentinel deny-scripts-reconfig yes #禁止修改脚本。</span><br><span class="line">2. 在其它的Redis节点配置同样的哨兵配置：</span><br><span class="line">    vim /apps/redis/etc/sentinel.conf</span><br><span class="line">        bind 0.0.0.0</span><br><span class="line">        port 26379</span><br><span class="line">        daemonize yes</span><br><span class="line">        pidfile &quot;redis-sentinel.pid&quot;</span><br><span class="line">        logfile &quot;sentinel_26379.log&quot;</span><br><span class="line">        dir &quot;/apps/redis/data/&quot;</span><br><span class="line">        sentinel monitor mymaster 192.168.38.105 6379 2 </span><br><span class="line">        sentinel auth-pass mymaster testroot</span><br><span class="line">        sentinel down-after-milliseconds mymaster 30000 </span><br><span class="line">        sentinel parallel-syncs mymaster 1 </span><br><span class="line">        sentinel failover-timeout mymaster 180000 </span><br><span class="line">        sentinel deny-scripts-reconfig yes </span><br><span class="line">3. 启动每一台机器哨兵进程：</span><br><span class="line">    redis-sentinel /apps/redis/etc/sentinel.conf</span><br><span class="line">4. 检查哨兵的信息：</span><br><span class="line">    redis-cli  -p 26379 </span><br><span class="line">        127.0.0.1:26379&gt; info</span><br><span class="line">            # Sentinel</span><br><span class="line">            sentinel_masters:1</span><br><span class="line">            sentinel_tilt:0</span><br><span class="line">            sentinel_running_scripts:0</span><br><span class="line">            sentinel_scripts_queue_length:0</span><br><span class="line">            sentinel_simulate_failure_flags:0</span><br><span class="line">            master0:name=mymaster,status=ok,address=192.168.38.105:6379,slaves=2,sentinels=3  #重点该行是否与实际情况相符。</span><br><span class="line">5. 测试能否自动切换主节点：</span><br><span class="line">    关闭主节点。</span><br><span class="line">6.再让原来主节点加入集群时必须清理原来的配置，并让其成为新主节点的从节点。</span><br><span class="line">    vim /apps/redis/etc/redis.conf</span><br><span class="line">        slaveof 192.168.38.104 6379         #指向新的主节点。</span><br><span class="line">        masterauth testroot</span><br><span class="line">7. 可以查看redis.conf和sentinel.conf 相关配置已经发生修改。</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/13/Redis哨兵机制/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Redis哨兵机制">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Redis主从与常用命令" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/13/Redis主从与常用命令/" class="article-date">
-  	<time datetime="2019-11-13T12:06:25.000Z" itemprop="datePublished">2019-11-13</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/13/Redis主从与常用命令/">
-        Redis主从与常用命令
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) Redis 的常用命令：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">查看key的过期时间: TTL key</span><br><span class="line">设置key的过期时间:EXPIRE key 86400</span><br><span class="line">取消key的过期时间：PERSIST key</span><br><span class="line"></span><br><span class="line">config 命令用于查看当前redis配置、以及不重启服务的情况下更改redis配置等。</span><br><span class="line">CONFIG set maxmemory 8589934592</span><br><span class="line">CONFIG get maxmemory</span><br><span class="line">CONFIG get maxmemory</span><br><span class="line">CONFIG SET requirepass 123456   #临时设置密码。</span><br><span class="line"></span><br><span class="line">select [1-16] #更换使用当前库，默认为16个。</span><br><span class="line"></span><br><span class="line">BGSAVE  #手动在后台执行RDB持久化操作。</span><br><span class="line"></span><br><span class="line">DBSIZE  #返回当前库下的所有key 数量。</span><br><span class="line"></span><br><span class="line">FLUSHDB #强制清空当前库中的所有key。</span><br><span class="line"></span><br><span class="line">FLUSHALL #强制清空当前redis服务器所有数据库中的所有key，即删除所有数据。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 配置Redis主从：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">注意事项：</span><br><span class="line">    1.在设置主从时确保Redis大版本一致。</span><br><span class="line">    2.在开启安全模式但是没有bind地址，没有设置密码。</span><br><span class="line">    3.最好保持主从节点的密码一致，否则在主节点宕机后，前端应用会因为密码不一致连接Redis失败。</span><br><span class="line">具体步骤：</span><br><span class="line">    1) 主节点：</span><br><span class="line">        vim /apps/redis/etc/redis.conf </span><br><span class="line">            bind 0.0.0.0    </span><br><span class="line">            requirepass testroot</span><br><span class="line">            appendonly yes</span><br><span class="line">            dir /apps/redis/data</span><br><span class="line">    2) 从节点：</span><br><span class="line">        vim /apps/redis/etc/redis.conf</span><br><span class="line">            bind 0.0.0.0    </span><br><span class="line">            requirepass testroot</span><br><span class="line">            appendonly yes</span><br><span class="line">            dir /apps/redis/data</span><br><span class="line">            slaveof 192.168.38.105 6379 #主节点IP和端口</span><br><span class="line">            masterauth testroot         #主节点密码</span><br><span class="line">    3) 动态添加（在slave节点）：</span><br><span class="line">            slaveof 192.168.38.105 6379</span><br><span class="line">            config  set masterauth testroot</span><br><span class="line"></span><br><span class="line">主从同步的具体过程：</span><br><span class="line">    1）从服务器连接主服务器，发送SYNC命令；</span><br><span class="line">    2）主服务器接收到SYNC命名后，开始执行BGSAVE命令生成RDB快照文件并使用缓冲区记录此后执行的所有写命令；</span><br><span class="line">    3）主服务器BGSAVE执行完后，向所有从服务器发送快照文件，并在发送期间继续记录被执行的写命令；</span><br><span class="line">    4）从服务器收到快照文件后丢弃所有旧数据，载入收到的快照；</span><br><span class="line">    5）主服务器快照发送完毕后开始向从服务器发送缓冲区中的写命令；</span><br><span class="line">    6）从服务器完成对快照的载入，开始接收命令请求，并执行来自主服务器缓冲区的写命令；</span><br><span class="line">    7）后期同步会先发送自己slave_repl_offset位置，只同步新增加的数据，不再全量同步。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 主从同步优化：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1. repl-diskless-sync no #是否使用无盘同步RDB文件，默认为no，no为不使用无盘，需要将RDB文件保存到磁盘后</span><br><span class="line">再发送给slave，yes为支持无盘，支持无盘就是RDB文件不需要保存至本地磁盘，而且直接通过socket文件发送给slave。</span><br><span class="line">2. repl-diskless-sync-delay 5 #Master准备好RDB文件后等待传输时间。 </span><br><span class="line">3. repl-ping-slave-period 10 #slave端向server端发送ping的时间区间设置，默认为10秒 。</span><br><span class="line">4. repl-timeout 60 #设置超时时间一定大于repl-ping-slave-period的设置时间。</span><br><span class="line">5.repl-disable-tcp-nodelay no #是否启用TCP_NODELAY，如设置成yes，则redis会合并小的TCP包从而节省带宽，</span><br><span class="line">但会增加同步延迟（40ms），造成master与slave数据不一致，假如设置成no，则redis master会立即发送同步数</span><br><span class="line">据，没有延迟，前者关注性能，后者关注redis服务中的数据一致性。</span><br><span class="line">6. repl-backlog-size 1mb #master的写入数据缓冲区，用于记录自上一次同步后到下一次同步过程中间的写入命</span><br><span class="line">令，计算公式：repl-backlog-size = 允许从节点最大中断时长 * 主实例offset每秒写入量，比如master每秒最大写</span><br><span class="line">入64mb，最大允许60秒，那么就要设置为64mb*60秒=3840MB(3.8G)。</span><br><span class="line">7. repl-backlog-ttl 3600 #如果一段时间后没有slave连接到master，则backlog size的内存将会被释放。如果值为0则</span><br><span class="line">表示永远不释放这部份内存。</span><br><span class="line">8. slave-priority 100 #slave端的优先级设置，值是一个整数，数字越小表示优先级越高。当master故障时将会按照优先</span><br><span class="line">级来选择slave端进行恢复，如果值设置为0，则表示该slave永远不会被选择。</span><br><span class="line">9.  #min-slaves-to-write 1 #设置一个master端的可用slave少于多少个。</span><br><span class="line">10. #min-slaves-max-lag 20 #设置所有slave延迟时间都大于多少秒时，master不接收写操作(拒绝写入)，该时间如果设置</span><br><span class="line">要设置的长一点，否则在网络拥堵时可能会引起master不能写，引起服务不可用。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) Master节点宕机后，提升从节点为主节点：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1. 首先清理slave节点的从节点的相关信息，因为默认从节点是不能写入数据的。</span><br><span class="line">    127.0.0.1:6379&gt; INFO replication</span><br><span class="line">                    # Replication</span><br><span class="line">                    role:slave</span><br><span class="line">                    master_host:192.168.38.106</span><br><span class="line">                    master_port:6379</span><br><span class="line">                    master_link_status:up</span><br><span class="line">                    master_last_io_seconds_ago:3</span><br><span class="line">                    master_sync_in_progress:0</span><br><span class="line">                    slave_repl_offset:5188</span><br><span class="line">                    slave_priority:100</span><br><span class="line">                    slave_read_only:1</span><br><span class="line">                    connected_slaves:0</span><br><span class="line">                    master_replid:489bf4401fc81f179c52c80b84a6dc51006c364f</span><br><span class="line">                    master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">                    master_repl_offset:5188</span><br><span class="line">                    second_repl_offset:-1</span><br><span class="line">                    repl_backlog_active:1</span><br><span class="line">                    repl_backlog_size:1048576</span><br><span class="line">                    repl_backlog_first_byte_offset:3831</span><br><span class="line">                    repl_backlog_histlen:1358</span><br><span class="line">    127.0.0.1:6379&gt; SLAVEOF no one          #清理slave节点的从节点的相关信息，在重启服务以后会回到从节点配置，需要修改配置文件。</span><br><span class="line">                    OK</span><br><span class="line">    127.0.0.1:6379&gt; INFO replication</span><br><span class="line">                    # Replication</span><br><span class="line">                    role:master</span><br><span class="line">                    connected_slaves:0</span><br><span class="line">                    master_replid:68a2bba1477df0b7e564835147da806447a1e7a0</span><br><span class="line">                    master_replid2:489bf4401fc81f179c52c80b84a6dc51006c364f</span><br><span class="line">                    master_repl_offset:5216</span><br><span class="line">                    second_repl_offset:5217</span><br><span class="line">                    repl_backlog_active:1</span><br><span class="line">                    repl_backlog_size:1048576</span><br><span class="line">                    repl_backlog_first_byte_offset:3831</span><br><span class="line">                    repl_backlog_histlen:1386</span><br><span class="line">2.测试是否具有写权限。</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/13/Redis主从与常用命令/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Redis主从与常用命令">
          &nbsp;
         view
     </span>

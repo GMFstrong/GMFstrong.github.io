@@ -202,6 +202,233 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Linux文件系统的特殊权限设置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/27/Linux文件系统的特殊权限设置/" class="article-date">
+  	<time datetime="2019-07-27T09:09:47.000Z" itemprop="datePublished">2019-07-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/27/Linux文件系统的特殊权限设置/">
+        Linux文件系统的特殊权限设置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="关于SUID，SGID，Sticky的介绍："><a href="#关于SUID，SGID，Sticky的介绍：" class="headerlink" title="关于SUID，SGID，Sticky的介绍："></a>关于SUID，SGID，Sticky的介绍：</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SUID只对二进制可执行程序有效</span><br><span class="line">SUID设置在目录上无意义</span><br><span class="line">权限设定：</span><br><span class="line">chmod u+s FILE</span><br><span class="line">chmod u-s FILE</span><br></pre></td></tr></table></figure>
+<pre><code>[root@localhost ~]# ll /etc/shadow
+----------. 1 root root 1305 Jul 27 10:40 /etc/shadow
+[root@localhost ~]# su - tom
+Last login: Sat Jul 27 16:27:48 CST 2019 on pts/0
+[tom@localhost ~]$ cat /etc/shadow
+cat: /etc/shadow: Permission denied
+</code></pre><blockquote>
+<p>在设置了SUID以后：</p>
+</blockquote>
+<pre><code>[root@localhost ~]# ll /usr/bin/cat
+-rwxr-xr-x. 1 root root 54048 Nov 20  2015 /usr/bin/cat
+[root@localhost ~]# chmod 4755 /usr/bin/cat
+[root@localhost ~]# ll /usr/bin/cat
+-rwsr-xr-x. 1 root root 54048 Nov 20  2015 /usr/bin/cat
+[root@localhost ~]# su - tom
+Last login: Sat Jul 27 17:15:46 CST 2019 on pts/1
+[tom@localhost ~]$ cat /etc/shadow
+root:$6$jKdGQ3pHIKpx.rHy$Z8Vvbme3U29FF36Gi6d6w2U9g1O7V8x3RMzBUv9A.sgL9QzKVfpGVPePMsA8GO7Jk61mfu6MGlO9mEb2njMdQ/::0:99999:7:::
+bin:*:16659:0:99999:7:::
+daemon:*:16659:0:99999:7:::
+adm:*:16659:0:99999:7:::
+</code></pre><p><strong><em>SUID可以让一个程序的发起者临时借用该程序属主的权限。</em></strong></p>
+<blockquote>
+<p>在设置了SGID以后：</p>
+</blockquote>
+<p><strong><em>(1)作用于二进制可执行程序，当用户执行此程序时，将会临时继承此程序所属组的权限</em></strong></p>
+<p><strong><em>(2)作用于目录，当用户在此目录下创建新文件时，文件的所属组会自动继承此目录的所属组</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-xr-x. 2 root  root     6 Jul 27 17:29 dir2</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chown :test dir2</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-xr-x. 2 root  test     6 Jul 27 17:29 dir2</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br></pre></td></tr></table></figure>
+<p>正常情况下在dir2目录下建文件，所建文件的属组是创建文件者的主组。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost dir2]# touch f1</span><br><span class="line">[root@localhost dir2]# ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r--. 1 root root 0 Jul 27 17:33 f1</span><br></pre></td></tr></table></figure>
+<p>在针对dir2目录设置SGID以后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# chmod 2755 dir2</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-sr-x. 2 root  test    15 Jul 27 17:33 dir2</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost dir2]# touch f2</span><br><span class="line">[root@localhost dir2]# ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r--. 1 root root 0 Jul 27 17:33 f1</span><br><span class="line">-rw-r--r--. 1 root test 0 Jul 27 17:36 f2</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>在设置stikcy以后：</p>
+</blockquote>
+<p><strong><em>stikcy:作用于目录，用户只能删除自已的文件,在目录设置Sticky 位，只有文件的所有者或root可以删除该文件</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[jim@localhost dir3]$ ll</span><br><span class="line">total 0</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim1</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim2</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom1</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在正常情况下jim可以删除tom的文件，tom也可以删除jim的文件：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[jim@localhost dir3]$ rm tom1</span><br><span class="line">rm: remove write-protected regular empty file ‘tom1’? y</span><br><span class="line">[jim@localhost dir3]$ ll</span><br><span class="line">total 0</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim1</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim2</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在dir3目录设置stikcy后：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# chmod 1777 dir3</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-sr-x. 2 root  test    24 Jul 27 17:36 dir2</span><br><span class="line">drwxrwxrwt. 2 root  root    39 Jul 27 18:20 dir3</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# cd dir3/</span><br><span class="line">[root@localhost dir3]# ll</span><br><span class="line">total 0</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim1</span><br><span class="line">-rw-rw-r--. 1 jim jim 0 Jul 27 18:18 jim2</span><br><span class="line">-rw-rw-r--. 1 tom tom 0 Jul 27 18:17 tom2</span><br><span class="line">[root@localhost dir3]# su tom</span><br><span class="line">[tom@localhost dir3]$ rm jim1</span><br><span class="line">rm: cannot remove ‘jim1’: Operation not permitted</span><br></pre></td></tr></table></figure>
+<h2 id="设置文件或目录不能被修改："><a href="#设置文件或目录不能被修改：" class="headerlink" title="设置文件或目录不能被修改："></a>设置文件或目录不能被修改：</h2><pre><code>chattr +i 不能删除，改名，更改
+chattr +a 只能追加内容
+lsattr 显示特定属性
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x. 2 root  root    45 Jul 27 15:07 dir1</span><br><span class="line">drwxr-sr-x. 2 root  test    24 Jul 27 17:36 dir2</span><br><span class="line">drwxrwxrwt. 2 root  root    39 Jul 27 18:20 dir3</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# rm -rf dir1</span><br><span class="line">[root@localhost date]# ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-sr-x. 2 root  test    24 Jul 27 17:36 dir2</span><br><span class="line">drwxrwxrwt. 2 root  root    39 Jul 27 18:20 dir3</span><br><span class="line">-rwxrw-r--. 1 user1 user1 1162 Jul 26 20:46 f1.txt</span><br><span class="line">[root@localhost date]# chattr +i dir2</span><br><span class="line">[root@localhost date]# rm -rf dir2</span><br><span class="line">rm: cannot remove ‘dir2/f1’: Permission denied</span><br><span class="line">rm: cannot remove ‘dir2/f2’: Permission denied</span><br><span class="line">[root@localhost date]# cd dir2</span><br><span class="line">[root@localhost dir2]# ls</span><br><span class="line">f1  f2</span><br><span class="line">[root@localhost dir2]# touch f3</span><br><span class="line">touch: cannot touch ‘f3’: Permission denied</span><br><span class="line">[root@localhost date]# lsattr </span><br><span class="line">---------------- ./f1.txt</span><br><span class="line">----i----------- ./dir2</span><br><span class="line">---------------- ./dir3</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/07/27/Linux文件系统的特殊权限设置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Linux文件系统的特殊权限设置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Linux用户组的添加及属性的更改" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/27/Linux用户组的添加及属性的更改/" class="article-date">
+  	<time datetime="2019-07-27T02:45:58.000Z" itemprop="datePublished">2019-07-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/27/Linux用户组的添加及属性的更改/">
+        Linux用户组的添加及属性的更改
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>用户组的创建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">groupadd [OPTION]  组名</span><br><span class="line">    -g GID 指明GID号；[GID_MIN, GID_MAX]</span><br><span class="line">    -r 创建系统组</span><br><span class="line">        CentOS 6: ID&lt;500</span><br><span class="line">        CentOS 7: ID&lt;1000</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>用户组的修改</p>
+</blockquote>
+<pre><code>groupmod [OPTION]  组名
+    -n group_name: 新名字
+    -g GID: 新的GID
+</code></pre><blockquote>
+<p>用户组的删除</p>
+</blockquote>
+<pre><code>groupdel 组名
+</code></pre><blockquote>
+<p>更改和查看组成员：</p>
+</blockquote>
+<pre><code>groupmems [options] [action]
+    options：
+        -g, --group groupname 更改为指定组 (只有root)
+    actions:
+        -a, --add username 指定用户加入组
+        -d, --delete username 从组中删除用户
+        -p, --purge 从组中清除所有成员
+        -l, --list 显示组成员列表
+</code></pre><blockquote>
+<p>首先通过groupadd 组名创建一个新组。并通过groupmems -a 用户名 -g 组名添加一个用户到某个组中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# groupadd test</span><br><span class="line">[root@localhost ~]# getent group test</span><br><span class="line">test:x:1008:</span><br><span class="line">[root@localhost ~]# groupmems -a tom -g test</span><br><span class="line">[root@localhost ~]# groupmems -a jim -g test</span><br><span class="line">[root@localhost ~]# groupmems -a user1 -g test</span><br><span class="line">[root@localhost ~]# groupmems -a user2 -g test</span><br><span class="line">[root@localhost ~]# getent group test</span><br><span class="line">test:x:1008:tom,jack,jim,user1,user2</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>添加删除用户到组中的另一种方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# gpasswd -a tom jim</span><br><span class="line">Adding user tom to group jim</span><br><span class="line">[root@localhost ~]# gpasswd -d tom test</span><br><span class="line">Removing user tom from group test</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>通过groupmems -l -g 组名，列出该组的成员。</p>
+</blockquote>
+<pre><code>[root@localhost ~]# groupmems -l -g test
+    tom  jack  jim  user1  user2 
+</code></pre><blockquote>
+<p>groups [OPTION].[USERNAME]  查看用户所属组列表</p>
+</blockquote>
+<pre><code>[root@localhost ~]# groups tom
+tom : tom jim
+[root@localhost ~]# id tom
+uid=1000(tom) gid=1000(tom) groups=1000(tom),1001(jim)
+</code></pre>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/07/27/Linux用户组的添加及属性的更改/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Linux用户组的添加及属性的更改">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-ACL权限控制总结" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -626,82 +853,6 @@ ELOTIcFBGE01
 
 
   
-    <article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" class="article-date">
-  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/20/Linux下添加网卡及静态网络配置/">
-        Linux下添加网卡及静态网络配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）<br>添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。</p>
-<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">GATEWAY=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>在centos7中修改网卡为默认的命名方式：</p>
-</blockquote>
-<p>（1） vim /etc/default/grub<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRUB_CMDLINE_LINUX=&quot;rhgb quiet net.ifnames=0&quot;</span><br></pre></td></tr></table></figure></p>
-<p>（2）生成配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub2-mkconfig -o /etc/grub2.cfg</span><br></pre></td></tr></table></figure></p>
-<p>（3）重启：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/07/20/Linux下添加网卡及静态网络配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Linux下添加网卡及静态网络配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
     <article id="post-vim常用技巧" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -969,6 +1120,82 @@ gc 全局替换，每次替换前询问
 
 
   
+    <article id="post-Linux下添加网卡及静态网络配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/07/20/Linux下添加网卡及静态网络配置/" class="article-date">
+  	<time datetime="2019-07-20T02:44:01.000Z" itemprop="datePublished">2019-07-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/07/20/Linux下添加网卡及静态网络配置/">
+        Linux下添加网卡及静态网络配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>无论是在生产还是测试环境中，为服务器添加网卡都是经常遇到的需求，今天闲暇之余碰到了添加网卡并要为其配置静态IP的情况，特来记录一下：（在centos7环境下）<br>添加完物理网卡后，进入/etc/sysconfig/network-script/，通过查看并没有关于新添加的网卡的配置文件。</p>
+<p>所以，我们首先需要通过nmcli con show查看设备名，然后通过nmcli con add con-name eno33554960 type ethernet ifname eno33554960，再在/etc/sysconfig/network-script/查看发现出现了关于添加网卡的配置文件。我们可以通过修改该配置文件定义自己的网络配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BOOTPROTO=static</span><br><span class="line"></span><br><span class="line">IPADDR=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">NETMASK=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">GATEWAY=XXX.XXX.XXX.XXX</span><br><span class="line"></span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line">DNS1=xxx.xxx.xxx</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>在centos7中修改网卡为默认的命名方式：</p>
+</blockquote>
+<p>（1） vim /etc/default/grub<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRUB_CMDLINE_LINUX=&quot;rhgb quiet net.ifnames=0&quot;</span><br></pre></td></tr></table></figure></p>
+<p>（2）生成配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub2-mkconfig -o /etc/grub2.cfg</span><br></pre></td></tr></table></figure></p>
+<p>（3）重启：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/network/">network</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/07/20/Linux下添加网卡及静态网络配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Linux下添加网卡及静态网络配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-文件查找_locate-find" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1083,274 +1310,6 @@ gc 全局替换，每次替换前询问
 <div class="counter-tag counter">
     <span id="/2019/07/17/文件查找_locate-find/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="文件查找_locate-find">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-文本处理-sed" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/17/文本处理-sed/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/文本处理-sed/">
-        文本处理-sed
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>sed作为三剑客之一，在处理文本特别是在更改配置文件时特别方便，它的工作机制和grep类似，都是逐行处理文件，不同的时sed会事先将需要处理的行读入临时缓冲区（模式空间），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕，然后读入下行，执行下一个循环。</em></strong></p>
-<blockquote>
-<p>sed命令的用法：</p>
-</blockquote>
-<pre><code>sed 选项 &apos;脚本script&apos; 目标文件
-</code></pre><blockquote>
-<p>常用选项：-n</p>
-</blockquote>
-<pre><code>不输出模式空间的内容到屏幕上。场合&apos;script&apos;中的“p”命令配合。
-</code></pre><blockquote>
-<p>效果如下:</p>
-</blockquote>
-<pre><code>[root@localhost ~]#sed &apos;p&apos; /etc/passwd
-root:x:0:0:root:/root:/bin/bash
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/sbin/nologin
-bin:x:1:1:bin:/bin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-</code></pre><p><strong><em>在没有-n选项时，会打印两次</em></strong></p>
-<pre><code>[root@localhost ~]#sed -n &apos;p&apos; /etc/passwd
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-</code></pre><p><strong><em>因为默认会将模式空间输出的行一次，‘p’命令又会将模式匹配的行输出一次，故而会输出两次。</em></strong></p>
-<pre><code>[root@localhost ~]#sed  &apos;/^root/p&apos; /etc/passwd  
-root:x:0:0:root:/root:/bin/bash
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/sbin/nologin
-daemon:x:2:2:daemon:/sbin:/sbin/nologin
-adm:x:3:4:adm:/var/adm:/sbin/nologin
-lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
-</code></pre><blockquote>
-<p>常用选项：-i.bak -i</p>
-</blockquote>
-<pre><code>&quot;-i.bak&quot;会在原文件中更改模式匹配到的行（更改原文件），同时并复制原文件并在原文件名后加上“.bak”的后缀。
-&quot;-i&quot;选项不会备份原文件。
-</code></pre><p>例如：</p>
-<pre><code>[root@localhost date]#sed -i.bak &apos;/^jim/a +++++++++++++++&apos; passwd 
-[root@localhost date]#ls
-access_log  fstab  passwd  passwd.bak  script
-[root@localhost date]#cat passwd
-jim:x:1001:1001::/home/jim:/bin/bash
-+++++++++++++++
-jack:x:1002:1002::/home/jack:/bin/bash
-nginx:x:995:993::/home/nginx:/sbin/nologin
-user1:x:1005:1005:This is test!:/home/user1:/sbin/csh
-</code></pre><p><strong><em>在原文件做出修改并备份原文件，其中‘a’命令为在匹配到的模式所在的行后边追加一行+++++++</em></strong></p>
-<blockquote>
-<p>常用选项： -r</p>
-</blockquote>
-<pre><code>支持使用正则表达式。
-</code></pre><p>例如：</p>
-<pre><code>[root@localhost date]#sed -r &apos;s/^(SELINUX=)disabled/\1enforcing/&apos; seconfig 
-
- # This file controls the state of SELinux on the system.
- # SELINUX= can take one of these three values:
- #     enforcing - SELinux security policy is enforced.
- #     permissive - SELinux prints warnings instead of enforcing.
- #     disabled - No SELinux policy is loaded.
- SELINUX=enforcing
- # SELINUXTYPE= can take one of three two values: 
-</code></pre><p><strong><em>由于没有使用“-i”选项这里并没有对原文件做出修改。”s/1/2/“命令是搜索1处的内容并替换为2处的内容。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">替换标记：</span><br><span class="line">g 行内全局替换</span><br><span class="line">p 显示替换成功的行</span><br><span class="line">w /PATH/FILE 将替换成功的行保存至文件中</span><br></pre></td></tr></table></figure></p>
-<pre><code>[root@localhost date]#sed &apos;s/root/@@@@@@@/g&apos; passwd
-@@@@@@@:x:0:0:@@@@@@@:/@@@@@@@:/bin/bash
-</code></pre><p>其他选项如下：</p>
-<pre><code>-e 多点编辑
--f /PATH/SCRIPT_FILE 从指定文件中读取编辑脚本
-</code></pre><p>以上是有关选项的介绍下面介绍一下有关’script(命令的介绍)’：</p>
-<blockquote>
-<p>不给地址，默认对全文处理。如下：（由于没有使用-n默认打印两次）</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed &apos;p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>单地址,’#’代表数字，’$’打印最后一行，’/正则表达式/‘打印匹配到到的行。（在不使用-n选项的情况下，会将进入模式空间的行也打印出来，所以结果如下：）</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed  &apos;3p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;$p&apos; passwd  </span><br><span class="line">alice:x:1008:1013::/home/alice:/bin/bash</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/p&apos; passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>地址范围：’n,m’ 打印第n到第m之间的行，’n,+m’打印第n行开始之后m行之后的内容，’/正则1/,/正则2/‘打印匹配两个正则之间的行，’n，/正则/‘打印第n行到正则匹配到的之间的所有行。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;3,5p&apos; passwd</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;3,+5p&apos; passwd</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br><span class="line">shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown</span><br><span class="line">halt:x:7:0:halt:/sbin:/sbin/halt</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^b/,/^o/p&apos; passwd </span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br><span class="line">shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown</span><br><span class="line">halt:x:7:0:halt:/sbin:/sbin/halt</span><br><span class="line">mail:x:8:12:mail:/var/spool/mail:/sbin/nologin</span><br><span class="line">operator:x:11:0:operator:/root:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;2,/^sync/p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br><span class="line">sync:x:5:0:sync:/sbin:/bin/sync</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>‘~’：步进，’1~2’打印奇数行，’2~2’打印偶数行。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#seq 10 | sed -n &apos;1~2p&apos;</span><br><span class="line">1</span><br><span class="line">3</span><br><span class="line">5</span><br><span class="line">7</span><br><span class="line">9</span><br></pre></td></tr></table></figure>
-<p><strong><em>以上命令是有关地址控制的，下面介绍一下常用的编辑命令</em></strong></p>
-<blockquote>
-<p>p,a命令在此前已经用过，也做过介绍。</p>
-</blockquote>
-<pre><code>p 打印当前模式空间内容，追加到默认输出之后。
-a [\]text 在指定行后面追加文本，支持使用\n实现多行追加
-i [\]text 在行前面插入文本
-= 为模式空间中的行打印行号
-! 模式空间中匹配行取反处理
-c [\]text 替换行为单行或多行文本
-w /path/file 保存模式匹配的行至指定文件
-r /path/file 读取指定文件的文本至模式空间中匹配到的行后
-</code></pre><p>下面对 ‘i’，‘=’，‘!’几个常用命令举例：</p>
-<blockquote>
-<p>在第二行之前追加“=============”</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed &apos;2i=============&apos; passwd </span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">=============</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>显示模式匹配行的行号：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^jim/=&apos; passwd</span><br><span class="line">24</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>打印没有被匹配到的行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost date]#sed -n &apos;/^root/!p&apos; passwd</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/07/17/文本处理-sed/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="文本处理-sed">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linux下的桥接网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/17/Linux下的桥接网卡配置/" class="article-date">
-  	<time datetime="2019-07-16T19:56:45.000Z" itemprop="datePublished">2019-07-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/Linux下的桥接网卡配置/">
-        Linux下的桥接网卡配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p> （1）桥设备不支持NetworkManager服务，故必须把该服务关掉。<br>         chkconfig –list NetworkManager<br> （2）改为network服务<br>         chkconfig –list network<br>  (3)安装桥设备管理工具。<br>          yum install bridge-utils<br>          rpm -ql bridge-utils 查看安装了哪些包及安装位置。<br>  (4)运用brctl创建桥设备：<br>      （1）添加桥接网卡：brctl addbr br0<br>       (2)拆除原来网卡的ip地址：ifconfig ens33 0 up<br>       (3)将br0桥接到ens33：brctl addif br0 ens33<br>       (4)添加br0的ip地址：ifconfig br0 xxx.xxx.xxx.xxx/24 up<br>       (5)添加网关：route add default gw 192.168.1.1<br>     可以通过shell脚本，添加桥设备，防止断网。<br><strong><em>通过修改配置文件来配置桥设备(永久生效)：</em></strong></p>
-<blockquote>
-<p>(1)cd /etc/syscoonfig/network-scripts</p>
-</blockquote>
-<blockquote>
-<p>(2)vim ifcfg-br0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-br0     </span><br><span class="line">DEVICE=br0</span><br><span class="line">TYPE=BRIDGE</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>(3)vim ifcfg-eth0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>(4)vim ifcfg-eth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">BRIDGE=br0</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/07/17/Linux下的桥接网卡配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Linux下的桥接网卡配置">
          &nbsp;
         view
     </span>

@@ -202,6 +202,160 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-HAproxy的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的编译安装/" class="article-date">
+  	<time datetime="2019-11-05T12:04:01.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/05/HAproxy的编译安装/">
+        HAproxy的编译安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 准备Lua环境，默认版本的Lua不支持HAproxy2.0版本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libtermcap-devel ncurses-devel libevent-devel readline-devel gcc</span><br><span class="line">wget http://www.lua.org/ftp/lua-5.3.5.tar.gz</span><br><span class="line">tar -xvf lua-5.3.5.tar.gz </span><br><span class="line">cd lua-5.3.5</span><br><span class="line">make linux test</span><br><span class="line">cd src</span><br><span class="line">[root@localhost src]#./lua -v</span><br><span class="line">Lua 5.3.5  Copyright (C) 1994-2018 Lua.org, PUC-Rio</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 编译安装HAproxy：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">yum install -y gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel net-tools vim iotop bc zip unzip zlib-devel lrzsz tree screen lsof tcpdump wget ntpdate</span><br><span class="line">tar -xvf haproxy-2.0.8.tar.gz</span><br><span class="line">cd haproxy-2.0.8 </span><br><span class="line">make ARCH=x86_64 TARGET=linux-glibc USE_PCRE=1 USE_ZLIB=1 USE_SYSTEMD=1 USE_CPU_AFFINITY=1  USE_OPENSSL=1   USE_LUA=1 LUA_INC=/root/lua-5.3.5/src LUA_LIB=/root/lua-5.3.5/src PREFIX=/apps/haproxy</span><br><span class="line">#或者make install PREFIX=/apps/haproxy</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vim  /usr/lib/systemd/system/haproxy.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg -c -q</span><br><span class="line">ExecStart=/apps/haproxy/sbin/haproxy -Ws -f /apps/haproxy/haproxy.cfg -p /var/lib/haproxy/haproxy.pid</span><br><span class="line">ExecReload=/bin/kill -USR2 $MAINPID</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.targe</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vim /apps/haproxy/haproxy.cfg </span><br><span class="line">global</span><br><span class="line">maxconn 100000</span><br><span class="line">chroot /apps/haproxy</span><br><span class="line">stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">uid 99</span><br><span class="line">gid 99</span><br><span class="line">daemon</span><br><span class="line">#nbproc 4</span><br><span class="line">#cpu-map 1 0</span><br><span class="line">#cpu-map 2 1</span><br><span class="line">#cpu-map 3 2</span><br><span class="line">#cpu-map 4 3</span><br><span class="line">pidfile /var/lib/haproxy/haproxy.pid</span><br><span class="line">log 127.0.0.1 local3 info</span><br><span class="line">defaults</span><br><span class="line">option http-keep-alive</span><br><span class="line">option forwardfor</span><br><span class="line">maxconn 100000</span><br><span class="line">mode http</span><br><span class="line">timeout connect 300000ms</span><br><span class="line">timeout client 300000ms</span><br><span class="line">timeout server 300000ms</span><br><span class="line">listen stats</span><br><span class="line"> mode http</span><br><span class="line"> bind 0.0.0.0:9999</span><br><span class="line"> stats enable</span><br><span class="line"> log global</span><br><span class="line"> stats uri     /haproxy-status</span><br><span class="line"> stats auth   haadmin:q1w2e3r4ys</span><br><span class="line">listen web_port</span><br><span class="line"> bind 192.168.38.67:80</span><br><span class="line"> mode http</span><br><span class="line"> log global</span><br><span class="line"> server web1 127.0.0.1:8080 check inter 3000 fall 2 rise 5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> mkdir /var/lib/haproxy</span><br><span class="line"> chown 99.99 /var/lib/haproxy/ -R</span><br><span class="line"> systemctl start haproxy</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) RPM安装HAproxy:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">wget https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64//haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br><span class="line">#系统默认的Lua版本太低。</span><br><span class="line">wget https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64//lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm</span><br><span class="line">yum install lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm</span><br><span class="line">rpm -qpl lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm </span><br><span class="line">yum install -y haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br><span class="line">rpm -qpl haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的编译安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的编译安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Tengine的安装与配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/01/Tengine的安装与配置/" class="article-date">
+  	<time datetime="2019-11-01T13:44:55.000Z" itemprop="datePublished">2019-11-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/01/Tengine的安装与配置/">
+        Tengine的安装与配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 编译安装tengine：</p>
+</blockquote>
+<p>在安装编译tengine时，tengine编译选项的支持取决于底层Nginx的版本。(例如Nginx1.18版本刚刚支持的一些编译选项，在基于1.16<br>版本的Tengine中不支持。)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1. 编译安装tengine:</span><br><span class="line">    ./configure --prefix=/apps/tengine --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-file-aio</span><br><span class="line">    make &amp;&amp; make install</span><br><span class="line">2. tengine 支持不停服务动态加载模块的功能：</span><br><span class="line">    ./configure --prefix=/apps/tengine --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-file-aio --with-http_concat_module=shared</span><br><span class="line">    make dso_install</span><br><span class="line">   以上操作后默认会在/apps/tengine/modules/目录下添加一个模块：ngx_http_concat_module.so</span><br><span class="line">   之后需要在tengine的主配置文件conf/nginx.conf中加载该模块：</span><br><span class="line">    dso &#123;</span><br><span class="line">     load ngx_http_concat_module.so;       </span><br><span class="line">        &#125;</span><br><span class="line">    最后可以在location中引用以上模块。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>2) Tengine模块中的concat模块使用：</p>
+</blockquote>
+<p>网站中的css、js等文件都是小文件，单个文件大小几k甚至几个字节，所以文件的特点是小而多，会造成网站加载<br>时http请求较多，且网络传输时间比较短，甚至有时候请求时间比传输时间还长，当公司网站中的这类小文件很多<br>时，大量的http请求就会造成传输效率低，影响网站的访问速度和客户端体验，这时合并http请求就非常有必要<br>了，concat模块就提供了合并文件http请求的功能，这个模块由淘宝开发，功能和apache的mod_concat模块类<br>似。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">也可以在编译Tengine中直接添加编译选项：--with-http_concat_module</span><br></pre></td></tr></table></figure></p>
+<p>在Tengine中启用Lua相关功能需要安装一下两个包：<br>yum install lua lua-devel</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/01/Tengine的安装与配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tengine的安装与配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Nginx下配置php" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -914,175 +1068,6 @@
 <div class="counter-tag counter">
     <span id="/2019/10/17/实现实时同步/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="实现实时同步">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-NFS文件系统配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/NFS文件系统配置/" class="article-date">
-  	<time datetime="2019-10-17T11:07:21.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/NFS文件系统配置/">
-        NFS文件系统配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 安装nfs：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nfs-utils</span><br><span class="line">systemct enable --now nfs-server</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 该服务依赖于rpcbind服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpcbind监听在tcp,udp的111端口。</span><br><span class="line">rpcinfo -p hostname</span><br><span class="line">rpcinfo –s hostname 查看RPC注册程序</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3)关于nfs服务的选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exportfs</span><br><span class="line">–v 查看本机所有NFS共享</span><br><span class="line">–r 重读配置文件，并共享目录</span><br><span class="line">–a 输出本机所有共享</span><br><span class="line">–au 停止本机所有共享</span><br><span class="line">showmount -e hostname</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 默认的配置文件：/etc/exports    /etc/exports.d/*.exports<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/exports</span><br><span class="line">/data/www1/  *</span><br><span class="line">/data/www2/  *</span><br><span class="line">fg（默认）前台挂载，bg后台挂载</span><br><span class="line">hard（默认）持续请求，soft 非持续请求</span><br><span class="line">intr 和hard配合，请求可中断</span><br><span class="line">rsize和wsize 一次读和写数据最大字节数，rsize=32768</span><br><span class="line">_netdev 无网络不挂载</span><br><span class="line">基于安全考虑，建议使用nosuid,nodev,noexec挂载选项</span><br><span class="line">vim /etc/fstab</span><br><span class="line">172.16.0.1:/public /mnt/nfs nfs defaults,_netdev 0 0</span><br><span class="line">vim /etc/auto.misc</span><br><span class="line">nfs2    -fstype=nfs,rw                  192.168.38.47:/data/www2</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) nfs权限的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">• 默认选项：(ro,sync,root_squash,no_all_squash)</span><br><span class="line">• ro,rw 只读和读写</span><br><span class="line">• async 异步，数据变化后不立即写磁盘，性能高</span><br><span class="line">• sync（1.0.0后为默认）同步，数据在请求时立即写入共享</span><br><span class="line">• no_all_squash （默认）保留共享文件的UID和GID</span><br><span class="line">• all_squash 所有远程用户(包括root)都变成nfsnobody</span><br><span class="line">• root_squash （默认）远程root映射为nfsnobody,UID为65534，早期版本是4294967294 (nfsnobody)</span><br><span class="line">• no_root_squash 远程root映射成root用户</span><br><span class="line">• anonuid和anongid 指明匿名用户映射为特定用户UID和组GID，而非nfsnobody,可配合all_squash使用</span><br><span class="line">setfacl -m u:nfsnobody:rwx /data/www1/</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/NFS文件系统配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="NFS文件系统配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-PHP编译安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/PHP编译安装/" class="article-date">
-  	<time datetime="2019-10-17T11:06:49.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/PHP编译安装/">
-        PHP编译安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 关于安装LAMP:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">安装清华的epel源：</span><br><span class="line">yum install https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">yum install  httpd  php73-php-fpm php73-php-mysqlnd  php73-php-opcache -y</span><br><span class="line">vim  /etc/httpd/conf.d/test.conf </span><br><span class="line">DirectoryIndex index.php</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/var/www/html/$1</span><br><span class="line">UDS模式：</span><br><span class="line">vi /etc/opt/remi/php73/php-fpm.d/www.conf</span><br><span class="line">listen=/var/run/php.sock </span><br><span class="line">listen.owner = apache</span><br><span class="line">listen.group = apache</span><br><span class="line">listen.mode = 0660   </span><br><span class="line"></span><br><span class="line">vim /etc/httpd/conf.d/test.conf </span><br><span class="line">DirectoryIndex index.php</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ unix:/var/run/php.sock|fcgi://localhost/var/www/html/$1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 关于PHP的加速器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">在Centos7上编译安装Xcache，实现PHP加速。</span><br><span class="line">1. 安装需要的工具包：</span><br><span class="line">yum install gcc php-devel</span><br><span class="line">2. 编译安装xcache：</span><br><span class="line">tar xvf xcache-3.2.0.tar.gz</span><br><span class="line">phpize --clean &amp;&amp; phpize</span><br><span class="line">cd xcache-3.2.0</span><br><span class="line">./configure --enable-xcache</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp xcache.ini /etc/php.d/</span><br><span class="line">systemctl restart httpd.service</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 编译安装php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">yum install libxml2-devel bzip2-devel libmcrypt-devel</span><br><span class="line">tar xvf php-7.3.10.tar.xz</span><br><span class="line">cd php-7.3.10</span><br><span class="line">./configure --prefix=/apps/php \</span><br><span class="line">--enable-mysqlnd \</span><br><span class="line">--with-mysqli=mysqlnd \</span><br><span class="line">--with-pdo-mysql=mysqlnd \</span><br><span class="line">--with-openssl \</span><br><span class="line">--with-freetype-dir \</span><br><span class="line">--with-jpeg-dir \</span><br><span class="line">--with-png-dir \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-libxml-dir=/usr \</span><br><span class="line">--with-config-file-path=/etc \</span><br><span class="line">--with-config-file-scan-dir=/etc/php.d \</span><br><span class="line">--enable-mbstring \</span><br><span class="line">--enable-xml \</span><br><span class="line">--enable-sockets \</span><br><span class="line">--enable-fpm \</span><br><span class="line">--enable-maintainer-zts \</span><br><span class="line">--disable-fileinfo</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp php.ini-production /etc/php.ini</span><br><span class="line">cp sapi/fpm/php-fpm.service  /usr/lib/systemd/system/</span><br><span class="line">cp /app/php/etc/php-fpm.conf.default /app/php/etc/php-fpm.conf </span><br><span class="line">cp /app/php/etc/php-fpm.d/www.conf.default /app/php/etc/php-fpm.d/www.conf</span><br><span class="line">vim /app/php/etc/php-fpm.d/www.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br><span class="line">useradd -r -s /sbin/nologin apache</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl status php-fpm.service </span><br><span class="line">systemctl enable --now  php-fpm.service</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 修改httpd使其支持php-fpm：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so</span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so</span><br><span class="line">修改下面行</span><br><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line">DirectoryIndex index.php index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line">加下面四行</span><br><span class="line">AddType application/x-httpd-php .php</span><br><span class="line">AddType application/x-httpd-php-source .phps</span><br><span class="line">ProxyRequests Off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd/htdocs/$1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 支持opcache:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/php.ini</span><br><span class="line">[opcache]</span><br><span class="line">zend_extension=/app/php/lib/php/extensions/no-debug-zts-20180731/opcache.so                               </span><br><span class="line">opcache.enable=1</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>6) 实现虚拟主机：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">servername wordpress.magedu.net</span><br><span class="line">documentroot /data/wordpress</span><br><span class="line">&lt;directory /data/wordpress&gt;</span><br><span class="line">require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/data/wordpress/$1</span><br><span class="line">CustomLog &quot;logs/access_wordpress_log&quot; common</span><br><span class="line">&lt;/virtualhost&gt;</span><br><span class="line"></span><br><span class="line">&lt;virtualhost *:80&gt;</span><br><span class="line">servername discuz.magedu.net</span><br><span class="line">documentroot /app/httpd24/htdocs/</span><br><span class="line">&lt;directory /app/httpd24/htdocs/&gt;</span><br><span class="line">require all granted</span><br><span class="line">&lt;/directory&gt;</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd24/htdocs/$1</span><br><span class="line">CustomLog &quot;logs/access_discuz_log&quot; common</span><br><span class="line">&lt;/virtualhost&gt;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/PHP编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="PHP编译安装">
          &nbsp;
         view
     </span>
