@@ -202,6 +202,90 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-K8S的五大组件及adm安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/12/K8S的五大组件及adm安装/" class="article-date">
+  	<time datetime="2019-12-12T12:00:09.000Z" itemprop="datePublished">2019-12-12</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/12/K8S的五大组件及adm安装/">
+        K8S的五大组件及adm安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 五大组件及etcd的作用：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1.Master节点的3大组件：</span><br><span class="line">    APIserver：整个集群的网关（入口），负责认证工作，同时负责接收响应用户的请求，所有其他组件通过它进行交互。</span><br><span class="line">    scheduler：调度器，集群在接到API请求后，根据集群当前资源状态，以及请求的所需资源要求做出合理调度。需要考虑独</span><br><span class="line">               立的和集体的资源需求、服务质量需求、硬件/软件/策略限制、亲和与反亲和规范、数据位置、内部负载接口、</span><br><span class="line">               截止时间等。</span><br><span class="line">    controller：控制器，集群内部的管理控制中心，确保集群始终处于预期的工作状态，负责集群内的 Node、Pod 副本、服务</span><br><span class="line">               端点（Endpoint）、命名空间（Namespace）、服务账号（ServiceAccount）、资源定额（ResourceQuota）的管理，</span><br><span class="line">               在以上资源意外停止服务，控制器负责还原至期望状态。</span><br><span class="line">2.Node节点的两大组件：</span><br><span class="line">    kube-proxy：负责维护各个节点间的pod,service的网络通信，引导访问当前service的请求到正确的pod对象。主要依靠生成的iptables</span><br><span class="line">                或者IPVS规制工作。</span><br><span class="line">    kubelet：工作在Node节点的代理客户端，会在Master注册当前节点并负责监视监视分配给自己节点的pod，主要功能如下：</span><br><span class="line">                （1）向 master 汇报 node 节点的状态信息（cup，内存，磁盘，网络IO的使用情况，便于Master做出合理调度。）</span><br><span class="line">                （2）负责接收APIserver发送的pod配置信息，并确保Pod在当前节点处于期望状态。</span><br><span class="line">                （3）准备 Pod 所需的数据卷，在 node 节点执行容器健康检查。</span><br><span class="line">3.关于etcd:</span><br><span class="line">    用于存储当前集群状态信息，并提供了watch（监听机制），当etcd的键值发生变化时，会主动推送变化到APIserver确保集群的高效协同。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于kubeadm安装K8S:</p>
+</blockquote>
+<p><strong><em>可以通过阿里云的镜像仓库把镜像先提前下载下来，可以避免后期因镜像下载异常而导致 k8s 部署异常。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">1.安装前准备:</span><br><span class="line">    1.禁用swap,selinux,iptables。</span><br><span class="line">        vim /etc/fstab</span><br><span class="line">            #/swapfile                                 none            swap    sw              0       0</span><br><span class="line">        swapoff -a</span><br><span class="line">    2.准备docker运行环境（注意docker版本，必须被K8S版本支持）。</span><br><span class="line">2.安装Master节点：</span><br><span class="line">    1.安装kubelet kubeadm kubectl：</span><br><span class="line">        apt-get update &amp;&amp; apt-get install -y apt-transport-https</span><br><span class="line">        curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -</span><br><span class="line">        echo &apos;deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main&apos; &gt;&gt; /etc/apt/sources.list</span><br><span class="line">        apt-get update</span><br><span class="line">        apt-cache madison kubectl</span><br><span class="line">        apt-get install -y kubelet=1.16.1-00 kubeadm=1.16.1-00 kubectl=1.16.1-00  #确保版本一致。</span><br><span class="line">    2.基于Keepalived实现双Master高可用：</span><br><span class="line">        apt install -y keepalived</span><br><span class="line">        cp /usr/share/doc/keepalived/samples/keepalived.conf.vrrp /etc/keepalived/keepalived.conf</span><br><span class="line">    3.Master初始化：</span><br><span class="line">        kubeadm config images list --kubernetes-version v1.16.1   #查看需要的镜像有哪些。</span><br><span class="line"></span><br><span class="line">        --apiserver-advertise-address string #API Server 将要监听的监听地址，为本机 IP</span><br><span class="line">        --control-plane-endpoint   #VIP的地址</span><br><span class="line">        --apiserver-bind-port int32 #API Server 绑定的端口,默认为 6443</span><br><span class="line">        --kubernetes-version string #选择 k8s 版本，默认为 stable-1</span><br><span class="line">        --pod-network-cidr #设置 pod ip 地址范围</span><br><span class="line">        --service-cidr #设置 service 网络地址范围</span><br><span class="line">        --service-dns-domain string #设置 k8s 内部域名，默认为 cluster.local，会有相应的 DNS 服务</span><br><span class="line">          (kube-dns/coredns)解析生成的域名记录。</span><br><span class="line">        --image-repository string #设置一个镜像仓库，默认为 k8s.gcr.io</span><br><span class="line"></span><br><span class="line">        kubeadm  init  --apiserver-advertise-address=192.168.38.206 \</span><br><span class="line">                       --control-plane-endpoint=192.168.38.66 \</span><br><span class="line">                       --apiserver-bind-port=6443 \</span><br><span class="line">                       --kubernetes-version=v1.16.1 \</span><br><span class="line">                       --pod-network-cidr=10.10.0.0/16 \</span><br><span class="line">                       --service-cidr=172.66.0.0/16 \</span><br><span class="line">                       --service-dns-domain=gmf.local \</span><br><span class="line">                       --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers</span><br><span class="line"></span><br><span class="line">    4.安装flannel插件：</span><br><span class="line">        wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml</span><br><span class="line">        vim kube-flannel.yml</span><br><span class="line">            &quot;Network&quot;: &quot;10.10.0.0/16&quot;   # 和--pod-network-cidr保持一致。</span><br><span class="line">        kubectl apply -f kube-flannel.yml</span><br><span class="line">    5.为集群添加另一个Master:</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy:v1.16.1    </span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.3.15-0</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.2</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.1</span><br><span class="line">        生成一个--certificate-key：</span><br><span class="line">            kubeadm init phase upload-certs --upload-certs</span><br><span class="line"></span><br><span class="line">            kubeadm join 192.168.38.66:6443 --token vohtj2.ggikgjmbrm6tkd3m \</span><br><span class="line">                --discovery-token-ca-cert-hash sha256:1d0956ac42f9eff52f34ab9472c7dca4df153de430b90ac3b57e05e780f67209 \</span><br><span class="line">                --control-plane --certificate-key d8e606d50f404d009fffdde36e0aee7503145f498e9cad1a0468155e47c619e4</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 添加Node节点:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.在node节点安装kubelet=1.16.1-00 kubeadm=1.16.1-00。</span><br><span class="line">2.添加节点：</span><br><span class="line">    kubeadm join 192.168.38.66:6443 --token vohtj2.ggikgjmbrm6tkd3m \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:1d0956ac42f9eff52f34ab9472c7dca4df153de430b90ac3b57e05e780f67209</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) kubeadm init初始化流程图：</p>
+</blockquote>
+<img src="/2019/12/12/K8S的五大组件及adm安装/k8s-1.jpg">
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/12/K8S的五大组件及adm安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="K8S的五大组件及adm安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Jumpservrer安装配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -418,7 +502,11 @@
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /lib/systemd/system/docker.service</span><br><span class="line">    ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --insecure-registry=192.168.38.202 --insecure-registry=192.168.38.204</span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl restart docker</span><br><span class="line">docker login 192.168.38.202   </span><br><span class="line">docker pull 192.168.38.202/gmf-test/nginx-by:v1</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>2) docker-compose.yaml的编写实例：</p>
+<p>5) harbor仓库的https模式的搭建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1.创建证书存放目录：</span><br><span class="line">    mkdir /usr/local/src/harbor/certs/</span><br><span class="line">2.生成私钥key:</span><br><span class="line">    openssl genrsa -out /usr/local/src/harbor/certs/harbor-ca.key 2048</span><br><span class="line">3.生成公钥（证书）：</span><br><span class="line">    touch /root/.rnd</span><br><span class="line">    openssl req -x509 -new -nodes -key /usr/local/src/harbor/certs/harbor-ca.key -subj &quot;/CN=harbor.gmf.com&quot; -days 7120 -out /usr/local/src/harbor/certs/harbor-ca.crt</span><br><span class="line">4.修改harbor.cfg 中的如下五行：</span><br><span class="line">    hostname = harbor.gmf.com</span><br><span class="line">    ui_url_protocol = https</span><br><span class="line">    ssl_cert = /usr/local/src/harbor/certs/harbor-ca.crt</span><br><span class="line">    ssl_cert_key = /usr/local/src/harbor/certs/harbor-ca.key</span><br><span class="line">    harbor_admin_password = testroot</span><br><span class="line">5.同步harbor证书到node节点：</span><br><span class="line">    在node节点创建：</span><br><span class="line">        mkdir /etc/docker/certs.d/harbor.gmf.com/ -pv</span><br><span class="line">        scp 192.168.38.202:/usr/local/src/harbor/certs/harbor-ca.crt /etc/docker/certs.d/harbor.gmf.com/</span><br><span class="line">    在主节点登录harbor后才可push镜像，也需要harbor的证书。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) docker-compose.yaml的编写实例：</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">nginx-server:</span><br><span class="line">        image: nginx_by:v1</span><br><span class="line">        container_name: nginx_web1</span><br><span class="line">        links:</span><br><span class="line">          - tomcat-server1</span><br><span class="line">          - tomcat-server2</span><br><span class="line">        volumes:</span><br><span class="line">          - /data2/nginx.conf:/apps/nginx/conf/nginx.conf</span><br><span class="line">        ports:</span><br><span class="line">          - &quot;8080:80&quot;</span><br><span class="line">          - &quot;8443:443&quot;</span><br><span class="line"></span><br><span class="line">tomcat-server1:</span><br><span class="line">        image: tomcat_app1:v1</span><br><span class="line">        container_name: tomcat_1</span><br><span class="line">        volumes:</span><br><span class="line">          - /data2/app1/:/data/app1/app1/</span><br><span class="line">        ports:</span><br><span class="line">          - &quot;8081:8080&quot;</span><br><span class="line"></span><br><span class="line">tomcat-server2:</span><br><span class="line">        image: tomcat_app1:v1</span><br><span class="line">        container_name: tomcat_2</span><br><span class="line">        volumes:</span><br><span class="line">          - /data2/app2/:/data/app1/app1/</span><br><span class="line">        ports:</span><br><span class="line">          - &quot;8082:8080&quot;</span><br></pre></td></tr></table></figure>
       
@@ -1003,100 +1091,9 @@
 
 
   
-    <article id="post-Ubuntu的源配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/27/Ubuntu的源配置/" class="article-date">
-  	<time datetime="2019-11-27T12:00:10.000Z" itemprop="datePublished">2019-11-27</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/27/Ubuntu的源配置/">
-        Ubuntu的源配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 更改Ubuntu的软件仓库：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">阿里云仓库地址：https://opsx.alibaba.com/mirror</span><br><span class="line">中科大：http://mirrors.ustc.edu.cn/help/ubuntu.html</span><br><span class="line">清华大学：https://mirror.tuna.tsinghua.edu.cn/help/ubuntu/</span><br><span class="line">华为：https://mirrors.huaweicloud.com/</span><br><span class="line"></span><br><span class="line">cp -a /etc/apt/sources.list /etc/apt/sources.list.bak</span><br><span class="line">sed -i &quot;s@http://.*archive.ubuntu.com@http://mirrors.huaweicloud.com@g&quot; /etc/apt/sources.list</span><br><span class="line">sed -i &quot;s@http://.*security.ubuntu.com@http://mirrors.huaweicloud.com@g&quot; /etc/apt/sources.list</span><br><span class="line">apt update  #更新索引</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 常用的apt命令：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># apt list #apt列出仓库软件包，等于yum list</span><br><span class="line"># apt search NAME #搜索安装包</span><br><span class="line"># apt show apache2 #查看某个安装包的详细信息</span><br><span class="line"># apt install apache2 #在线安装软件包</span><br><span class="line"># apt remove apache2 #卸载单个软件包但是保留配置文件</span><br><span class="line"># apt autoremove apache2 #删除安装包并解决依赖关系</span><br><span class="line"># apt update #更新本地软件包列表索引，修改了apt仓库后必须执行</span><br><span class="line"># apt purge apache2 #卸载单个软件包删除配置文件</span><br><span class="line"># apt upgrade #升级所有已安装且可升级到新版本的软件包</span><br><span class="line"># apt full-upgrade #升级整个系统，必要时可以移除旧软件包。</span><br><span class="line"># apt edit-sources #编辑source源文件</span><br><span class="line"># apt-cache madison nginx #查看仓库中软件包有哪些版本可以安装</span><br><span class="line"># apt install nginx=1.14.0-0ubuntu1.6 #安装软件包的时候指定安装具体的版本</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 安装Ubuntu常用的命令以及库：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt purge ufw lxd lxd-client lxcfs lxc-common  #卸载不常用的包及软件。</span><br><span class="line">apt install -y iproute2 ntpdate tcpdump telnet traceroute nfs-kernel-server nfs-common lrzsz tree openssl libssl-dev libpcre3 libpcre3-dev zlib1g-dev gcc openssh-server lrzsz  iotop unzip zip</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) dpkg管理工具：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># dpkg -i gitlab-ce_11.9.8-ce.0_amd64.deb #安装某个软件包</span><br><span class="line"># dpkg -r gitlab-ce #删除某个软件包保留配置文件</span><br><span class="line"># dpkg -r -P gitlab-ce #删除某个软件包不保留配置文件</span><br><span class="line"># dpkg -I gitlab-ce_11.9.8-ce.0_amd64.deb #查看软件包信息</span><br><span class="line"># dpkg -c gitlab-ce_11.9.8-ce.0_amd64.deb #查看软件包内的文件及目录内容</span><br><span class="line"># dpkg -l #列出本机已经安装的所有软件</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 内核参数调优：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"># Controls source route verification</span><br><span class="line">net.ipv4.conf.default.rp_filter = 1</span><br><span class="line">net.ipv4.ip_nonlocal_bind = 1</span><br><span class="line">net.ipv4.ip_forward = 1</span><br><span class="line"># Do not accept source routing</span><br><span class="line">net.ipv4.conf.default.accept_source_route = 0</span><br><span class="line"># Controls the System Request debugging functionality of the kernel</span><br><span class="line">kernel.sysrq = 0</span><br><span class="line"># Controls whether core dumps will append the PID to the core filename.</span><br><span class="line"># Useful for debugging multi-threaded applications.</span><br><span class="line">kernel.core_uses_pid = 1</span><br><span class="line"># Controls the use of TCP syncookies</span><br><span class="line">net.ipv4.tcp_syncookies = 1</span><br><span class="line"># Disable netfilter on bridges.</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 0</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 0</span><br><span class="line">net.bridge.bridge-nf-call-arptables = 0</span><br><span class="line"># Controls the default maxmimum size of a mesage queue</span><br><span class="line">kernel.msgmnb = 65536</span><br><span class="line"># # Controls the maximum size of a message, in bytes</span><br><span class="line">kernel.msgmax = 65536</span><br><span class="line"># Controls the maximum shared segment size, in bytes</span><br><span class="line">kernel.shmmax = 68719476736</span><br><span class="line"># # Controls the maximum number of shared memory segments, in pages</span><br><span class="line">kernel.shmall = 4294967296</span><br><span class="line"># TCP kernel paramater</span><br><span class="line">net.ipv4.tcp_mem = 786432 1048576 1572864</span><br><span class="line">net.ipv4.tcp_rmem = 4096 87380 4194304</span><br><span class="line">net.ipv4.tcp_wmem = 4096 16384 4194304</span><br><span class="line">net.ipv4.tcp_window_scaling = 1</span><br><span class="line">net.ipv4.tcp_sack = 1</span><br><span class="line"># socket buffer</span><br><span class="line">net.core.wmem_default = 8388608</span><br><span class="line">net.core.rmem_default = 8388608</span><br><span class="line">net.core.rmem_max = 16777216</span><br><span class="line">net.core.wmem_max = 16777216</span><br><span class="line">net.core.netdev_max_backlog = 262144</span><br><span class="line">net.core.somaxconn = 20480</span><br><span class="line">net.core.optmem_max = 81920</span><br><span class="line"># TCP conn</span><br><span class="line">net.ipv4.tcp_max_syn_backlog = 262144</span><br><span class="line">net.ipv4.tcp_syn_retries = 3</span><br><span class="line">net.ipv4.tcp_retries1 = 3</span><br><span class="line">net.ipv4.tcp_retries2 = 15</span><br><span class="line"># tcp conn reuse</span><br><span class="line">net.ipv4.tcp_timestamps = 0</span><br><span class="line">net.ipv4.tcp_tw_reuse = 0</span><br><span class="line">net.ipv4.tcp_tw_recycle = 0</span><br><span class="line">net.ipv4.tcp_fin_timeout = 1</span><br><span class="line">net.ipv4.tcp_max_tw_buckets = 20000</span><br><span class="line">net.ipv4.tcp_max_orphans = 3276800</span><br><span class="line">net.ipv4.tcp_synack_retries = 1</span><br><span class="line">net.ipv4.tcp_syncookies = 1</span><br><span class="line"># keepalive conn</span><br><span class="line">net.ipv4.tcp_keepalive_time = 300</span><br><span class="line">net.ipv4.tcp_keepalive_intvl = 30</span><br><span class="line">net.ipv4.tcp_keepalive_probes = 3</span><br><span class="line">net.ipv4.ip_local_port_range = 10001 65000</span><br><span class="line"># swap</span><br><span class="line">vm.overcommit_memory = 0</span><br><span class="line">vm.swappiness = 10</span><br><span class="line">#net.ipv4.conf.eth1.rp_filter = 0</span><br><span class="line">#net.ipv4.conf.lo.arp_ignore = 1</span><br><span class="line">#net.ipv4.conf.lo.arp_announce = 2</span><br><span class="line">#net.ipv4.conf.all.arp_ignore = 1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) 系统资源限制优化：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/security/limits.conf </span><br><span class="line">root soft core unlimited</span><br><span class="line">root hard core unlimited</span><br><span class="line">root soft nproc 1000000</span><br><span class="line">root hard nproc 1000000</span><br><span class="line">root soft nofile 1000000</span><br><span class="line">root hard nofile 1000000</span><br><span class="line">root soft memlock 32000</span><br><span class="line">root hard memlock 32000</span><br><span class="line">root soft msgqueue 8192000</span><br><span class="line">root hard msgqueue 8192000</span><br><span class="line">* soft core unlimited</span><br><span class="line">* hard core unlimited</span><br><span class="line">* soft nproc 1000000</span><br><span class="line">* hard nproc 1000000</span><br><span class="line">* soft nofile 1000000</span><br><span class="line">* hard nofile 1000000</span><br><span class="line">* soft memlock 32000</span><br><span class="line">* hard memlock 32000</span><br><span class="line">* soft msgqueue 8192000</span><br><span class="line">* hard msgqueue 8192000</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/27/Ubuntu的源配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Ubuntu的源配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </div>

@@ -202,6 +202,79 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-火狐浏览器优化" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/07/火狐浏览器优化/" class="article-date">
+  	<time datetime="2018-12-06T23:40:01.000Z" itemprop="datePublished">2018-12-07</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/07/火狐浏览器优化/">
+        火狐优化
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>无意间看到一篇博客，是关于渗透测试过程中，火狐浏览器常见插件配置的，所以在闲来无事之际，亲身实践了一波，并记录以下过程，方便以后配置安装。</p>
+<p>在渗透测试过程中，有以下插件比较常用：<br>（1）Wappalyzer<br>（2）Foxyproxy<br>（3）Cookies Manager+<br>（4）HackBar<br>（5）HtppRequester<br>（6）RESTClient<br>（7）User—Agent Swittcher<br>（8）Tampermonkey<br>（9）Tamper Data<br>（10）Tamper Icon Redux</p>
+<p>这些插件的用途如下：</p>
+<p>HackBar:一个非常简单的插件，可以帮助我们尝试不同的输入值，而无需更改或重写完整的URL。在手工检查跨站点脚本编写和注入时，我们将经常使用这种方法。它可以使用F9键激活。<br>cookie Manager+:这个附加组件允许我们查看和修改浏览器从应用程序接收到的cookie的值。<br>User-Agent Switcher:此插件允许我们修改用户代理字符串(浏览器标识符)，该字符串在发送到服务器的所有请求中。应用程序有时使用这个字符串显示或隐藏某些元素，这取决于所使用的浏览器和操作系统。<br>Tamper Data:这个附加组件能够捕获浏览器发送给服务器的任何请求，让我们有机会在应用程序的表单中引入数据并到达服务器之前修改数据。<br>Tamper Data Icon Redux只添加一个图标。<br>FoxyProxy Standard:一个非常有用的插件，允许我们使用用户提供的预设，在一次点击中改变浏览器的代理设置。Wappalyzer:这是一个用来识别网站中使用的平台和开发工具的工具。这对于提取web服务器及其使用的软件非常有用。<br>HttpRequester:使用这个插件，可以处理HTTP请求，包括get、post和put方法，并观察来自服务器的原始响应。<br>RESTClient:这基本上是一个像HTTP请求者一样的请求生成器，但主要关注REST web服务。它包括添加标题、不同的身份验证模式以及get、post、put和delete方法的选项。<br>Tampermonkey:这个插件允许我们在浏览器中安装用户脚本，并在加载之前或之后对web页面内容进行动态更改。从渗透测试的角度来看，这有助于绕过客户端控件和其他客户端代码操作。</p>
+<p>附上图片一张：<br><img src="/2018/12/07/火狐浏览器优化/1.png"></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/websec/">Web安全</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2018/12/07/火狐浏览器优化/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="火狐优化">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-python扫描脚本" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -826,93 +899,9 @@
 
 
   
-    <article id="post-博客常用语法语法" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/01/01/博客常用语法语法/" class="article-date">
-  	<time datetime="2017-12-31T17:25:22.000Z" itemprop="datePublished">2018-01-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/01/博客常用语法语法/">
-        博客常用语法
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>经过一番波折终于把自己的博客搭建起来了，以后也算有了自己的一片小天地….<br>连接：ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a><br>创建项目：hexo new post “***”<br>部署到远程：hexo d -g<br>文字超链接：<a href="http://www.baidu.com" target="_blank" rel="noopener">百度</a><br>更改主题：git clone <a href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">https://github.com/iissnan/hexo-theme-next</a> themes/next<br>          hexo clean 清空之前的主题<br>          hexo g 生成静态文件<br>          hexo s 在本地运行<br>          hexo d 发布到github上<br>部分文字高亮：You a <code>Strong</code> boy!!!</p>
-<ul>
-<li>姓名：小飞飞</li>
-<li>性别：男</li>
-<li><p>爱好：8866</p>
-</li>
-<li><p>编程语言</p>
-<ul>
-<li>脚本语言<ul>
-<li>php</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<img src="/2018/01/01/博客常用语法语法/456.png" title="这是一个博客的图片说明">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2018/01/01/博客常用语法语法/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="博客常用语法">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span>
+      <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
     </nav>
   
 </div>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>K8S的五大组件及adm安装 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) 五大组件及etcd的作用：  12345678910111213141516171.Master节点的3大组件：    APIserver：整个集群的网关（入口），负责认证工作，同时负责接收响应用户的请求，所有其他组件通过它进行交互。    scheduler：调度器，集群在接到API请求后，根据集群当前资源状态，以及请求的所需资源要求做出合理调度。需要考虑独">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8S的五大组件及adm安装">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/12/12/K8S的五大组件及adm安装/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) 五大组件及etcd的作用：  12345678910111213141516171.Master节点的3大组件：    APIserver：整个集群的网关（入口），负责认证工作，同时负责接收响应用户的请求，所有其他组件通过它进行交互。    scheduler：调度器，集群在接到API请求后，根据集群当前资源状态，以及请求的所需资源要求做出合理调度。需要考虑独">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://gmfdevops.com.com/2019/12/12/K8S的五大组件及adm安装/k8s-1.jpg">
+<meta property="og:updated_time" content="2019-12-12T13:37:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="K8S的五大组件及adm安装">
+<meta name="twitter:description" content="1) 五大组件及etcd的作用：  12345678910111213141516171.Master节点的3大组件：    APIserver：整个集群的网关（入口），负责认证工作，同时负责接收响应用户的请求，所有其他组件通过它进行交互。    scheduler：调度器，集群在接到API请求后，根据集群当前资源状态，以及请求的所需资源要求做出合理调度。需要考虑独">
+<meta name="twitter:image" content="http://gmfdevops.com.com/2019/12/12/K8S的五大组件及adm安装/k8s-1.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-K8S的五大组件及adm安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/12/K8S的五大组件及adm安装/" class="article-date">
+  	<time datetime="2019-12-12T12:00:09.000Z" itemprop="datePublished">2019-12-12</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      K8S的五大组件及adm安装
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/12/12/K8S的五大组件及adm安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="K8S的五大组件及adm安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 五大组件及etcd的作用：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1.Master节点的3大组件：</span><br><span class="line">    APIserver：整个集群的网关（入口），负责认证工作，同时负责接收响应用户的请求，所有其他组件通过它进行交互。</span><br><span class="line">    scheduler：调度器，集群在接到API请求后，根据集群当前资源状态，以及请求的所需资源要求做出合理调度。需要考虑独</span><br><span class="line">               立的和集体的资源需求、服务质量需求、硬件/软件/策略限制、亲和与反亲和规范、数据位置、内部负载接口、</span><br><span class="line">               截止时间等。</span><br><span class="line">    controller：控制器，集群内部的管理控制中心，确保集群始终处于预期的工作状态，负责集群内的 Node、Pod 副本、服务</span><br><span class="line">               端点（Endpoint）、命名空间（Namespace）、服务账号（ServiceAccount）、资源定额（ResourceQuota）的管理，</span><br><span class="line">               在以上资源意外停止服务，控制器负责还原至期望状态。</span><br><span class="line">2.Node节点的两大组件：</span><br><span class="line">    kube-proxy：负责维护各个节点间的pod,service的网络通信，引导访问当前service的请求到正确的pod对象。主要依靠生成的iptables</span><br><span class="line">                或者IPVS规制工作。</span><br><span class="line">    kubelet：工作在Node节点的代理客户端，会在Master注册当前节点并负责监视监视分配给自己节点的pod，主要功能如下：</span><br><span class="line">                （1）向 master 汇报 node 节点的状态信息（cup，内存，磁盘，网络IO的使用情况，便于Master做出合理调度。）</span><br><span class="line">                （2）负责接收APIserver发送的pod配置信息，并确保Pod在当前节点处于期望状态。</span><br><span class="line">                （3）准备 Pod 所需的数据卷，在 node 节点执行容器健康检查。</span><br><span class="line">3.关于etcd:</span><br><span class="line">    用于存储当前集群状态信息，并提供了watch（监听机制），当etcd的键值发生变化时，会主动推送变化到APIserver确保集群的高效协同。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于kubeadm安装K8S:</p>
+</blockquote>
+<p><strong><em>可以通过阿里云的镜像仓库把镜像先提前下载下来，可以避免后期因镜像下载异常而导致 k8s 部署异常。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">1.安装前准备:</span><br><span class="line">    1.禁用swap,selinux,iptables。</span><br><span class="line">        vim /etc/fstab</span><br><span class="line">            #/swapfile                                 none            swap    sw              0       0</span><br><span class="line">        swapoff -a</span><br><span class="line">    2.准备docker运行环境（注意docker版本，必须被K8S版本支持）。</span><br><span class="line">2.安装Master节点：</span><br><span class="line">    1.安装kubelet kubeadm kubectl：</span><br><span class="line">        apt-get update &amp;&amp; apt-get install -y apt-transport-https</span><br><span class="line">        curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -</span><br><span class="line">        echo &apos;deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main&apos; &gt;&gt; /etc/apt/sources.list</span><br><span class="line">        apt-get update</span><br><span class="line">        apt-cache madison kubectl</span><br><span class="line">        apt-get install -y kubelet=1.16.1-00 kubeadm=1.16.1-00 kubectl=1.16.1-00  #确保版本一致。</span><br><span class="line">    2.基于Keepalived实现双Master高可用：</span><br><span class="line">        apt install -y keepalived</span><br><span class="line">        cp /usr/share/doc/keepalived/samples/keepalived.conf.vrrp /etc/keepalived/keepalived.conf</span><br><span class="line">    3.Master初始化：</span><br><span class="line">        kubeadm config images list --kubernetes-version v1.16.1   #查看需要的镜像有哪些。</span><br><span class="line"></span><br><span class="line">        --apiserver-advertise-address string #API Server 将要监听的监听地址，为本机 IP</span><br><span class="line">        --control-plane-endpoint   #VIP的地址</span><br><span class="line">        --apiserver-bind-port int32 #API Server 绑定的端口,默认为 6443</span><br><span class="line">        --kubernetes-version string #选择 k8s 版本，默认为 stable-1</span><br><span class="line">        --pod-network-cidr #设置 pod ip 地址范围</span><br><span class="line">        --service-cidr #设置 service 网络地址范围</span><br><span class="line">        --service-dns-domain string #设置 k8s 内部域名，默认为 cluster.local，会有相应的 DNS 服务</span><br><span class="line">          (kube-dns/coredns)解析生成的域名记录。</span><br><span class="line">        --image-repository string #设置一个镜像仓库，默认为 k8s.gcr.io</span><br><span class="line"></span><br><span class="line">        kubeadm  init  --apiserver-advertise-address=192.168.38.206 \</span><br><span class="line">                       --control-plane-endpoint=192.168.38.66 \</span><br><span class="line">                       --apiserver-bind-port=6443 \</span><br><span class="line">                       --kubernetes-version=v1.16.1 \</span><br><span class="line">                       --pod-network-cidr=10.10.0.0/16 \</span><br><span class="line">                       --service-cidr=172.66.0.0/16 \</span><br><span class="line">                       --service-dns-domain=gmf.local \</span><br><span class="line">                       --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers</span><br><span class="line"></span><br><span class="line">    4.安装flannel插件：</span><br><span class="line">        wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml</span><br><span class="line">        vim kube-flannel.yml</span><br><span class="line">            &quot;Network&quot;: &quot;10.10.0.0/16&quot;   # 和--pod-network-cidr保持一致。</span><br><span class="line">        kubectl apply -f kube-flannel.yml</span><br><span class="line">    5.为集群添加另一个Master:</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy:v1.16.1    </span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.3.15-0</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.2</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.1</span><br><span class="line">        生成一个--certificate-key：</span><br><span class="line">            kubeadm init phase upload-certs --upload-certs</span><br><span class="line"></span><br><span class="line">            kubeadm join 192.168.38.66:6443 --token vohtj2.ggikgjmbrm6tkd3m \</span><br><span class="line">                --discovery-token-ca-cert-hash sha256:1d0956ac42f9eff52f34ab9472c7dca4df153de430b90ac3b57e05e780f67209 \</span><br><span class="line">                --control-plane --certificate-key d8e606d50f404d009fffdde36e0aee7503145f498e9cad1a0468155e47c619e4</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 添加Node节点:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.在node节点安装kubelet=1.16.1-00 kubeadm=1.16.1-00。</span><br><span class="line">2.添加节点：</span><br><span class="line">    kubeadm join 192.168.38.66:6443 --token vohtj2.ggikgjmbrm6tkd3m \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:1d0956ac42f9eff52f34ab9472c7dca4df153de430b90ac3b57e05e780f67209</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) kubeadm init初始化流程图：</p>
+</blockquote>
+<img src="/2019/12/12/K8S的五大组件及adm安装/k8s-1.jpg">
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/12/09/Jumpservrer安装配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Jumpservrer安装配置</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="K8S的五大组件及adm安装" data-title="K8S的五大组件及adm安装" data-url="http://gmfdevops.com.com/2019/12/12/K8S的五大组件及adm安装/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="K8S的五大组件及adm安装">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>

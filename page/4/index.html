@@ -202,6 +202,84 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-HAproxy的配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/05/HAproxy的配置/" class="article-date">
+  	<time datetime="2019-11-05T12:04:23.000Z" itemprop="datePublished">2019-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/05/HAproxy的配置/">
+        HAproxy的配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">global全局配置段中定义以下选项：</span><br><span class="line">    global</span><br><span class="line">        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。</span><br><span class="line">        daemon  #以守护进程的方式运行。</span><br><span class="line">        stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">        uid 99 #指定运行HAproxy进程的用户和组。</span><br><span class="line">        gid 99</span><br><span class="line">        nbproc  4     #开启的haproxy进程数，与CPU保持一致。</span><br><span class="line">        cpu-map 1 0   #绑定haproxy 进程至指定CPU核心。</span><br><span class="line">        spread-checks #后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间，防止同时产生大量检测报文。</span><br><span class="line">        pidfile /var/lib/haproxy/haproxy.pid    #指定pid文件路径。</span><br><span class="line">        log 127.0.0.1 local3 info       #定义全局的syslog服务器；最多可以定义两个。</span><br><span class="line">        maxconn    1000000   #每个haproxy进程的最大并发连接数。</span><br><span class="line">        maxsslconn   1000000 #每个haproxy进程ssl最大连接数,用于haproxy配置了证书的场景下。</span><br><span class="line">        maxconnrate   #每个进程每秒创建的最大连接数量。</span><br><span class="line">proxies配置段又包含以下两个字段：</span><br><span class="line">    defaults [name] : 其中定义的内容在frontend、backend和lsiten中没有定义时，为他们的默认选项。及优先级低于frontend、backend和lsiten中的定义。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>1) proxies 中defaults的常见配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">option redispatch     #当server Id对应的服务器挂掉后，强制定向到其他健康的服务器。</span><br><span class="line">option abortonclose   #当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接，根据自己的业务场景，在自己业务处理时间较长时，需要关闭该选项，</span><br><span class="line">否则会出现大量 50X 错误。</span><br><span class="line">option http-keep-alive #开启与客户端的会话保持</span><br><span class="line">mode tcp/http #默认工作类型，一般为了保证HAproxy的性能，设置为TCP模式。http应用层的代理一般由后端Nginx完成。</span><br><span class="line">option forwardfor     #透传客户端真实IP至后端web服务器，便于后端服务器做日志分析。</span><br><span class="line">timeout connect 120s #HAproxy与后端服务器建立TCP三次握手的超时时间，由于是内网，可以适当减小至（3-5秒）。</span><br><span class="line">timeout server 600s  #HAproxy与后端服务器建立TCP三次握手之后，等待后端服务器响应的时长，在一些涉及到写数据库等操作的业务，可能需要很长时间，</span><br><span class="line">所依该值适当调大，否者会出现大量 502 的报错。</span><br><span class="line">timeout client 600s #客户端的最长非活动时间。超过该时间，HAproxy会自动与客户端断开连接。</span><br><span class="line">timeout http-keep-alive 120s #session 会话保持超时时间，范围内会转发到相同的后端服务器。</span><br><span class="line">timeout check   5s   #对后端服务器的检测超时时间。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 通过 listen 配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">listen Apache-PHP1</span><br><span class="line">   bind 192.168.38.57:80    #配置监听的地址与端口，供客户端访问。</span><br><span class="line">   mode http                #配置以http的方式转发给后端服务器。</span><br><span class="line">   option forwardfor        #开启客户端的真实IP透传。</span><br><span class="line">   server web1   192.168.38.26:80   check inter 3000 fall 3 rise 5</span><br><span class="line">   server web2   192.168.38.36:80   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 通过 frontend + backend 的方式配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">frontend 的配置：</span><br><span class="line">    frontend Apache-PHP1</span><br><span class="line">        bind :80</span><br><span class="line">        bind 192.168.38.57:10080,:8801-8810,:8080</span><br><span class="line">        mode tcp     #指定负载协议类型。</span><br><span class="line">        use_backend Apache-group1 #调用的后端服务器组名称。</span><br><span class="line">backend 的配置：</span><br><span class="line">    backend Apache-group1   #该处定义的name需要被frontenf中的use_backend调用。</span><br><span class="line">        mode tcp</span><br><span class="line">        option forwardfor   #开启客户端的真实IP透传。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80    check inter 3000 fall 3 rise 5</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80    check inter 3000 fall 3 rise 5</span><br><span class="line">关于backend中的后端服务器检查存活性的选项：</span><br><span class="line">    check       #对指定real进行健康状态检查，默认不开启</span><br><span class="line">    addr IP     #可指定的健康状态监测IP</span><br><span class="line">    port num    #指定的健康状态监测端口</span><br><span class="line">    inter num   #健康状态检查间隔时间，默认2000 ms</span><br><span class="line">    fall num    #后端服务器失效检查次数，默认为3</span><br><span class="line">    rise num    #后端服务器从下线恢复检查次数，默认为2</span><br><span class="line">    weight      #默认为1，最大值为256，0表示不参与负载均衡</span><br><span class="line">    backup      #将后端服务器标记为备份状态</span><br><span class="line">    disabled    #将后端服务器标记为不可用状态</span><br><span class="line">    redirect prefix http://www.magedu.net/   #将请求临时重定向至其它URL，只适用于http模式</span><br><span class="line">    maxconn &lt;maxconn&gt;：当前后端server的最大并发连接数</span><br><span class="line">    backlog &lt;backlog&gt;：当server的连接数达到上限后的后援队列长度</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/05/HAproxy的配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="HAproxy的配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-HAproxy的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1012,86 +1090,9 @@
 
 
   
-    <article id="post-实现实时同步" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/17/实现实时同步/" class="article-date">
-  	<time datetime="2019-10-17T11:07:44.000Z" itemprop="datePublished">2019-10-17</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/17/实现实时同步/">
-        实现实时同步
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 通过inotify监控指定目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1.linux内核从2.6.13起支持 inotify，通过inotify可以监控文件系统中添加、删除，修改、移动等各种事件。inotify是内核级的。</span><br><span class="line">ls -l /proc/sys/fs/inotify #列出下面的文件，说明服务器内核支持inotify</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_queued_events</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 7 10:10 max_user_instances</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec 6 05:54 max_user_watches</span><br><span class="line">max_queued_events：inotify事件队列最大长度，如值太小会出现 EventQueue Overflow 错误，默认值：16384</span><br><span class="line">max_user_watches：可以监视的文件数量（单进程），默认值：8192</span><br><span class="line">max_user_instances：每个用户创建inotify实例最大值，默认值：128</span><br><span class="line">2.我们需要安装inotify-tools这一用户空间工具对其进行管理。</span><br><span class="line">yum install -y inotify-tools</span><br><span class="line">notify-tools包主要文件：</span><br><span class="line">inotifywait： 在被监控的文件或目录上等待特定文件系统事件（open closedelete等）发生，常用于实时同步的目录监控。</span><br><span class="line">inotifywatch：收集被监控的文件系统使用的统计数据，指文件系统事件发生的次数统计。</span><br><span class="line">inotifywait 命令常见选项</span><br><span class="line"> -m, --monitor 始终保持事件监听</span><br><span class="line"> -d, --daemon 以守护进程方式执行，和-m相似，配合-o使用</span><br><span class="line"> -r, --recursive 递归监控目录数据信息变化</span><br><span class="line"> -q, --quiet 输出少量事件信息</span><br><span class="line"> --exclude &lt;pattern&gt; 指定排除文件或目录，使用扩展的正则表达式匹配的模式实现</span><br><span class="line"> --excludei &lt;pattern&gt; 和exclude相似，不区分大小写</span><br><span class="line"> -o, --outfile &lt;file&gt;打印事件到文件中，相当于标准正确输出</span><br><span class="line"> -s, --syslogOutput 发送错误到syslog相当于标准错误输出</span><br><span class="line"> --timefmt &lt;fmt&gt; 指定时间输出格式</span><br><span class="line"> --format &lt;fmt&gt; 指定的输出格式；即实际监控输出内容</span><br><span class="line"> -e 指定监听指定的事件，如果省略，表示所有事件都进行监听</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 通过rsync服务实现数据同步：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">1.安装rsync的服务端软件：</span><br><span class="line">yum install -y rsync</span><br><span class="line">2.配置rsync：</span><br><span class="line">vim /etc/rsyncd.conf</span><br><span class="line">uid = root</span><br><span class="line">gid = root</span><br><span class="line">use chroot = no</span><br><span class="line">max connections = 0</span><br><span class="line">ignore errors</span><br><span class="line">exclude = lost+found/</span><br><span class="line">log file = /var/log/rsyncd.log</span><br><span class="line">pid file = /var/run/rsyncd.pid</span><br><span class="line">lock file = /var/run/rsyncd.lock</span><br><span class="line">reverse lookup = no</span><br><span class="line">hosts allow = 192.168.8.0/24</span><br><span class="line">[backup]</span><br><span class="line">path = /backup/</span><br><span class="line">comment = backup</span><br><span class="line">read only = no</span><br><span class="line">auth users = rsyncuser</span><br><span class="line">secrets file = /etc/rsync.pass</span><br><span class="line">3.在服务端创建用户密码文件：</span><br><span class="line">echo &quot;rsyncuser:testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">4.创建备份目录：</span><br><span class="line">mkdir /backup</span><br><span class="line">5.启动服务：</span><br><span class="line">systemctl enable --now rsyncd</span><br><span class="line">rsync --daemon 可加入/etc/rc.d/rc.local实现开机启动 Centos6中</span><br><span class="line">6.客户端配置密码文件</span><br><span class="line">echo &quot;testroot&quot; &gt; /etc/rsync.pass</span><br><span class="line">chmod 600 /etc/rsync.pass</span><br><span class="line">7.客户端测试同步数据</span><br><span class="line">rsync -avz --password-file=/etc/rsync.pass /data/ rsyncuser@rsync服务器IP::backup</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 通过以上实现实时同步数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">SRC=&apos;/data/&apos;</span><br><span class="line">DEST=&apos;rsyncuser@rsync服务器IP::backup&apos;</span><br><span class="line">inotifywait -mrq --timefmt &apos;%Y-%m-%d %H:%M&apos; --format &apos;%T %w %f&apos; -e create,delete,moved_to,close_write,attrib $&#123;SRC&#125; |while read DATE TIME DIR FILE;do</span><br><span class="line">    FILEPATH=$&#123;DIR&#125;$&#123;FILE&#125;</span><br><span class="line">    rsync -az --delete --password-file=/etc/rsync.pass $SRC $DEST &amp;&amp;</span><br><span class="line">    echo &quot;At $&#123;TIME&#125; on $&#123;DATE&#125;, file $FILEPATH was backuped up via rsync&quot; &gt;&gt; /var/log/changelist.log</span><br><span class="line">done</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/17/实现实时同步/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="实现实时同步">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
     </nav>
   
 </div>
