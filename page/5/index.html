@@ -202,6 +202,83 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-关于Linux日志" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/10/17/关于Linux日志/" class="article-date">
+  	<time datetime="2019-10-17T11:07:58.000Z" itemprop="datePublished">2019-10-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/17/关于Linux日志/">
+        关于Linux日志
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 各种日志文件的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. /var/log/secure：系统安装日志，文本格式，应周期性分析。</span><br><span class="line">2. /var/log/btmp：当前系统上，用户的失败尝试登录相关的日志信息，二进制格式，lastb命令进行查看。</span><br><span class="line">3. /var/log/wtmp：当前系统上，用户正常登录系统的相关日志信息，二进制格式，last命令可以查看。</span><br><span class="line">4. /var/log/lastlog：每一个用户最近一次的登录信息，二进制格式，lastlog命令可以查看。</span><br><span class="line">5. /var/log/dmesg：系统引导过程中的日志信息，文本格式文本查看工具查看。也可用专用命令dmesg查看。</span><br><span class="line">6. /var/log/messages ：系统中大部分的信息。</span><br><span class="line">7. /var/log/anaconda : anaconda的日志。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>2) 用数据库mysql存储日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. 准备一台mysql服务器用来存放日志信息：</span><br><span class="line">    yum install -y mariadb-server</span><br><span class="line">    systemctl enable --now mariadb</span><br><span class="line">2. 创建一个管理该数据库的用户：</span><br><span class="line">    GRANT ALL ON Syslog.* TO &apos;log&apos;@&apos;192.168.38.%&apos; IDENTIFIED BY &apos;testroot&apos;;</span><br><span class="line">3. 在rsyslog日志服务器上安装与mysql交互的模块：</span><br><span class="line">    yum install -y rsyslog-mysql</span><br><span class="line">    [root@localhost ~]#rpm -ql rsyslog-mysql</span><br><span class="line">    /usr/lib64/rsyslog/ommysql.so</span><br><span class="line">    /usr/share/doc/rsyslog-8.24.0/mysql-createDB.sql</span><br><span class="line">4. 将上面的mysql-createDB.sql传到mysql服务器上运行，生成需要的数据库及表。</span><br><span class="line">    mysql &lt;  mysql-createDB.sql</span><br><span class="line">5. 在日志服务器上修改配置，使其调用ommysql.so与mysql服务器交互。</span><br><span class="line">    #### MODULES ####</span><br><span class="line">    $ModLoad ommysql</span><br><span class="line">    #### RULES ####</span><br><span class="line">    local6.*                                                :ommysql:192.168.38.18,Syslog,log,testroot  #:ommysql:DBHOST,DBNAME,DBUSER, PASSWORD</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 基于loganalyzer管理日志服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install  httpd php php-mysqlnd php-gd</span><br><span class="line">wget http://download.adiscon.com/loganalyzer/loganalyzer-4.1.8.tar.gz</span><br><span class="line">tar xf loganalyzer-4.1.5.tar.gz</span><br><span class="line">cp -a loganalyzer-4.1.5/src /var/www/html/loganalyzer</span><br><span class="line">cd /var/www/html/loganalyzer</span><br><span class="line">touch config.php</span><br><span class="line">chmod 666 config.php</span><br><span class="line">在配置完成以后，要回收config.php权限，为了安全考虑。</span><br><span class="line">chmod 644 config.php</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/10/17/关于Linux日志/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="关于Linux日志">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-实现实时同步" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -973,90 +1050,6 @@
 <div class="counter-tag counter">
     <span id="/2019/09/22/MYSQL用户授权配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="MYSQL用户授权配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-MYSQL多实例配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/09/22/MYSQL多实例配置/" class="article-date">
-  	<time datetime="2019-09-22T13:16:54.000Z" itemprop="datePublished">2019-09-22</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/09/22/MYSQL多实例配置/">
-        MYSQL多实例配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>MYSQL基于不同版本的多实例实现：</em></strong></p>
-<blockquote>
-<p>1) 在同一台主机上安装两个或两个以上版本的mysql。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mariadb-server  #默认为5.5.60-MariaDB版本</span><br><span class="line"></span><br><span class="line">#这里又用二进制安装了一个10.2.27-MariaDB版本</span><br><span class="line">tar -xvf mariadb-VERSION-linux-x86_64.tar.gz -C /usr/local</span><br><span class="line">#具体的安装过程不再记录。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 规划多个实例的数据库，配置文件等的存放目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/mysql/&#123;3306,3307,3308&#125;/&#123;etc,sock,log,pid,data&#125;/ -pv</span><br><span class="line">chown -R mysql:mysql /data/mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 复制 /etc/my.cnf 到 /data/mysql/3308/etc/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cp /etc/my.cnf /data/mysql/3308/etc/</span><br><span class="line">vim /data/mysql/3308/etc/my.cnf</span><br><span class="line">#添加以下内容：</span><br><span class="line">[mysqld]</span><br><span class="line">port=3308</span><br><span class="line">datadir=/data/mysql/3308/data</span><br><span class="line">socket=/data/mysql/3308/sock/mysql.sock</span><br><span class="line">[mysqld_safe]</span><br><span class="line">log-error=/data/mysql/3308/log/mariadb.log</span><br><span class="line">pid-file=/data/mysql/3308/pid/mariadb.pid</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>4) 初始化数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#二进制安装初始化</span><br><span class="line">yum install -y  libaio</span><br><span class="line">/usr/local/mariadb-10.2.27-linux-x86_64/scripts/mysql_install_db --datadir=/data/mysql/3308/data/ --user=mysql</span><br><span class="line">#yum安装初始化</span><br><span class="line">mysql_install_db --datadir=/data/mysql/3306/data/ --user=mysql</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 配置mysql服务启动脚本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">port=3308                                   #根据实例配置不同端口</span><br><span class="line">mysql_user=&quot;root&quot;</span><br><span class="line">mysql_pwd=&quot;&quot;</span><br><span class="line">cmd_path=&quot;/usr/local/mysql-10.2.27/bin&quot;     #指定mysqld_safe所在的目录</span><br><span class="line">mysql_basedir=&quot;/data/mysql&quot;                 #指定规划的多实例mysql的目录</span><br><span class="line">mysql_sock=&quot;$&#123;mysql_basedir&#125;/$&#123;port&#125;/sock/mysql.sock&quot;</span><br><span class="line"></span><br><span class="line">function_start_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">      printf &quot;Starting MySQL...\n&quot;</span><br><span class="line">      $&#123;cmd_path&#125;/mysqld_safe --defaults-file=$&#123;mysql_basedir&#125;/$&#123;port&#125;/etc/my.cnf  &amp;&gt; /dev/null  &amp;</span><br><span class="line">    else</span><br><span class="line">      printf &quot;MySQL is running...\n&quot;</span><br><span class="line">      exit</span><br><span class="line">    fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_stop_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    if [ ! -e &quot;$mysql_sock&quot; ];then</span><br><span class="line">       printf &quot;MySQL is stopped...\n&quot;</span><br><span class="line">       exit</span><br><span class="line">    else</span><br><span class="line">       printf &quot;Stoping MySQL...\n&quot;</span><br><span class="line">       $&#123;cmd_path&#125;/mysqladmin -u $&#123;mysql_user&#125; -p$&#123;mysql_pwd&#125; -S $&#123;mysql_sock&#125; shutdown</span><br><span class="line">   fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_restart_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    printf &quot;Restarting MySQL...\n&quot;</span><br><span class="line">    function_stop_mysql</span><br><span class="line">    sleep 2</span><br><span class="line">    function_start_mysql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">start)</span><br><span class="line">    function_start_mysql</span><br><span class="line">;;</span><br><span class="line">stop)</span><br><span class="line">    function_stop_mysql</span><br><span class="line">;;</span><br><span class="line">restart)</span><br><span class="line">    function_restart_mysql</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">    printf &quot;Usage: $&#123;mysql_basedir&#125;/$&#123;port&#125;/bin/mysqld &#123;start|stop|restart&#125;\n&quot;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/09/22/MYSQL多实例配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="MYSQL多实例配置">
          &nbsp;
         view
     </span>

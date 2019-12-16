@@ -202,6 +202,103 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-K8S通过Ansiable二进制部署" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/16/K8S通过Ansiable二进制部署/" class="article-date">
+  	<time datetime="2019-12-16T08:28:49.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/16/K8S通过Ansiable二进制部署/">
+        K8S通过Ansiable二进制部署
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+<blockquote>
+<p>1) 配置基本的ansiable环境：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">1.在各个节点安装python2.7环境：</span><br><span class="line">    apt-get install python2.7 -y</span><br><span class="line">    ln -s /usr/bin/python2.7 /usr/bin/python</span><br><span class="line">2.在控制端安装ansible，用于推送各种安装命令：</span><br><span class="line">    apt-get install git python-pip -y</span><br><span class="line">    pip install ansible==2.6.18 netaddr==0.7.19 -i https://mirrors.aliyun.com/pypi/simple/</span><br><span class="line">3.在控制端配置免密钥登录：</span><br><span class="line">    ssh-keygen</span><br><span class="line">    ssh-copy-id 192.168.38.206</span><br><span class="line">    ssh-copy-id 192.168.38.205</span><br><span class="line">    ssh-copy-id 192.168.38.204</span><br><span class="line">    ssh-copy-id 192.168.38.203</span><br><span class="line">    ssh-copy-id 192.168.38.202</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 使用github的项目推送K8S:</p>
+</blockquote>
+<p><strong><em>参考链接：<a href="https://github.com/easzlab/kubeasz/" target="_blank" rel="noopener">https://github.com/easzlab/kubeasz/</a></em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">4.下载工具脚本easzup（用于下载项目源码，二进制文件，离线docker镜像，并将其放入/etc/ansilbe）：</span><br><span class="line">    export release=2.0.3</span><br><span class="line">    curl -C- -fLO --retry 3 https://github.com/easzlab/kubeasz/releases/download/$&#123;release&#125;/easzup</span><br><span class="line">    chmod +x ./easzup</span><br><span class="line">5.更改easzup中的配置下载自己的版本：</span><br><span class="line">    export DOCKER_VER=18.09.9</span><br><span class="line">    export KUBEASZ_VER=2.0.3</span><br><span class="line">    export K8S_BIN_VER=v1.15.5</span><br><span class="line">    export EXT_BIN_VER=0.3.0</span><br><span class="line">    export SYS_PKG_VER=0.3.2</span><br><span class="line">6.下载指定的源码，二进制文件，离线docker镜像：</span><br><span class="line">    ./easzup -D</span><br><span class="line">7.配置集群参数（其它一般保持默认）：</span><br><span class="line">    cd /etc/ansible</span><br><span class="line">    cp example/hosts.multi-node hosts</span><br><span class="line">    修改hosts文件：</span><br><span class="line">    vim hosts </span><br><span class="line">    [etcd]</span><br><span class="line">    192.168.38.205 NODE_NAME=etcd1</span><br><span class="line">    192.168.38.206 NODE_NAME=etcd2</span><br><span class="line">    192.168.38.202 NODE_NAME=etcd3</span><br><span class="line"></span><br><span class="line">    [kube-master]</span><br><span class="line">    192.168.38.206</span><br><span class="line">    192.168.38.205</span><br><span class="line"></span><br><span class="line">    [kube-node]</span><br><span class="line">    192.168.38.203</span><br><span class="line">    192.168.38.204</span><br><span class="line"></span><br><span class="line">    CLUSTER_NETWORK=&quot;calico&quot;</span><br><span class="line"></span><br><span class="line">    SERVICE_CIDR=&quot;10.66.0.0/16&quot;</span><br><span class="line"></span><br><span class="line">    CLUSTER_CIDR=&quot;172.88.0.0/16&quot;</span><br><span class="line"></span><br><span class="line">    NODE_PORT_RANGE=&quot;50000-65000&quot;</span><br><span class="line"></span><br><span class="line">    CLUSTER_DNS_DOMAIN=&quot;gmf.com.&quot;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 使用ansiable推送各个二进制程序到各个节点：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">8.在部署之前确保ansiable能ping同各个子节点：</span><br><span class="line">    ansible all -m ping</span><br><span class="line">9.用ansiable推送各个节点所需的组件：</span><br><span class="line">    ansible-playbook 01.prepare.yml #环境初始化</span><br><span class="line">    ansible-playbook 02.etcd.yml #部署etcd</span><br><span class="line">    ansible-playbook 03.docker.yml #部署docker</span><br><span class="line">    ansible-playbook 04.kube-master.yml #部署k8s master</span><br><span class="line">    ansible-playbook 05.kube-node.yml #部署node</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 在节点配置链接harbor：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">10.在各个节点添加harbor的host解析：</span><br><span class="line">    echo &apos;192.168.38.202 harbor.gmf.com&apos; &gt;&gt; /etc/hosts</span><br><span class="line"></span><br><span class="line">11.在各个节点添加harbor的证书：</span><br><span class="line">    mkdir /etc/docker/certs.d/harbor.gmf.com/ -pv</span><br><span class="line">    scp 192.168.38.202:/usr/local/src/harbor/certs/harbor-ca.crt /etc/docker/certs.d/harbor.gmf.com/</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) 配置calico网络组件：</p>
+</blockquote>
+<p><strong><em>参考链接：<a href="https://github.com/projectcalico/calico/releases/download/v3.4.4/release-v3.4.4.tgz" target="_blank" rel="noopener">https://github.com/projectcalico/calico/releases/download/v3.4.4/release-v3.4.4.tgz</a></em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">12.将calico镜像推送到仓库：</span><br><span class="line">    </span><br><span class="line">    docker login harbor.gmf.com</span><br><span class="line">    docker tag calico/node:v3.4.4 harbor.gmf.com/k8s/node:v3.4.4</span><br><span class="line">    docker push harbor.gmf.com/k8s/node:v3.4.4</span><br><span class="line">    docker tag calico/cni:v3.4.4 harbor.gmf.com/k8s/cni:v3.4.4</span><br><span class="line">    docker push harbor.gmf.com/k8s/cni:v3.4.4</span><br><span class="line">    docker tag calico/kube-controllers:v3.4.4 harbor.gmf.com/k8s/kube-controllers:v3.4.4</span><br><span class="line">    docker push harbor.gmf.com/k8s/kube-controllers:v3.4.4</span><br><span class="line"></span><br><span class="line">13.更改ansiable的配置文件中的源：</span><br><span class="line">    vim templates/calico-v3.4.yaml.j2</span><br><span class="line">        image: harbor.gmf.com/k8s/cni:v3.4.4</span><br><span class="line">        image: harbor.gmf.com/k8s/node:v3.4.4</span><br><span class="line">        image: harbor.gmf.com/k8s/kube-controllers:v3.4.4</span><br><span class="line"></span><br><span class="line">14.为K8S集群配置网络：</span><br><span class="line">    ansible-playbook 06.network.yml</span><br><span class="line"></span><br><span class="line">15.测试集群容器的网络连通性：</span><br><span class="line">    kubectl run net-test1 --image=alpine --replicas=2 sleep 360000</span><br><span class="line">    kubectl run --generator=run-pod/v1 net-test2 --image=alpine --replicas=2 sleep 360000</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>7) 为集群配置DNS服务：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">16.部署kube-DNS；</span><br><span class="line">    docker load -i k8s-dns-kube-dns-amd64_1.14.13.tar.gz</span><br><span class="line">    docker tag gcr.io/google-containers/k8s-dns-kube-dns-amd64:1.14.13 harbor.gmf.com/k8s/k8s-dns-kube-dns-amd64:1.14.13</span><br><span class="line">    docker push harbor.gmf.com/k8s/k8s-dns-kube-dns-amd64:1.14.13</span><br><span class="line"></span><br><span class="line">    docker load -i  k8s-dns-dnsmasq-nanny-amd64_1.14.13.tar.gz</span><br><span class="line">    docker tag gcr.io/google-containers/k8s-dns-dnsmasq-nanny-amd64:1.14.13 harbor.gmf.com/k8s/k8s-dns-dnsmasq-nanny-amd64:1.14.13</span><br><span class="line">    docker push harbor.gmf.com/k8s/k8s-dns-dnsmasq-nanny-amd64:1.14.13</span><br><span class="line"></span><br><span class="line">    docker load -i k8s-dns-sidecar-amd64_1.14.13.tar.gz</span><br><span class="line">    docker tag gcr.io/google-containers/k8s-dns-sidecar-amd64:1.14.13 harbor.gmf.com/k8s/k8s-dns-sidecar-amd64:1.14.13</span><br><span class="line">    docker push harbor.gmf.com/k8s/k8s-dns-sidecar-amd64:1.14.13</span><br><span class="line">    </span><br><span class="line">    vim kube-dns-gmf.yaml（文件自备，修改以下几行：）</span><br><span class="line">        clusterIP: 10.66.0.2</span><br><span class="line">        image: harbor.gmf.com/k8s/k8s-dns-kube-dns-amd64:1.14.13</span><br><span class="line">        - --domain=gmf.com.</span><br><span class="line">        image: harbor.gmf.com/k8s/k8s-dns-dnsmasq-nanny-amd64:1.14.13</span><br><span class="line">        - --server=/gmf.com/127.0.0.1#10053</span><br><span class="line">        image: harbor.gmf.com/k8s/k8s-dns-sidecar-amd64:1.14.13</span><br><span class="line">        - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.gmf.com,5,SRV</span><br><span class="line">        - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.gmf.com,5,SRV</span><br><span class="line"></span><br><span class="line">17.部署core-DNS（在镜像仓库可直接下载）：</span><br><span class="line">    docker pull coredns/coredns:1.6.5</span><br><span class="line">    docker tag coredns/coredns:1.6.5 harbor.gmf.com/k8s/coredns:1.6.5</span><br><span class="line">    docker push harbor.gmf.com/k8s/coredns:1.6.5</span><br><span class="line">    </span><br><span class="line">    vim coredns-gmf.yaml（文件自备，修改以下几行：）</span><br><span class="line">        kubernetes gmf.com in-addr.arpa ip6.arpa &#123;</span><br><span class="line">        image: harbor.gmf.com/k8s/coredns:1.6.5</span><br><span class="line">        clusterIP: 10.66.0.2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>8) 升级K8S集群的各个组件： </p>
+</blockquote>
+<p><strong><em>各个组件的二进制地址：<a href="https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#downloads-for-v1157" target="_blank" rel="noopener">https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#downloads-for-v1157</a></em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">18.升级k8s：</span><br><span class="line">root@master1:/usr/local/src/k8s-1.15.7/kubernetes/server/bin# cat upgrade.sh</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    NODE=&apos;192.168.38.203</span><br><span class="line">    192.168.38.204&apos;</span><br><span class="line">    for ip in $&#123;NODE&#125;;do</span><br><span class="line">            ssh root@$&#123;ip&#125; &quot;systemctl stop  kubelet kube-proxy&quot;</span><br><span class="line">            scp kubectl kubelet kube-proxy $&#123;ip&#125;:/opt/kube/bin/</span><br><span class="line">            ssh root@$&#123;ip&#125; &quot;systemctl start  kubelet kube-proxy&quot;</span><br><span class="line">    done</span><br><span class="line"></span><br><span class="line">root@master1:/usr/local/src/k8s-1.15.7/kubernetes/server/bin# vim update-Master.sh</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    MASTER=&apos;192.168.38.206</span><br><span class="line">    192.168.38.205&apos;</span><br><span class="line">    for ip in $&#123;MASTER&#125;;do</span><br><span class="line">            ssh root@$&#123;ip&#125; &quot;systemctl stop kube-controller-manager kube-apiserver kubelet kube-proxy kube-scheduler&quot;</span><br><span class="line">            scp kubectl kubelet kube-proxy kube-scheduler kube-apiserver kube-controller-manager $&#123;ip&#125;:/opt/kube/bin/</span><br><span class="line">            ssh root@$&#123;ip&#125; &quot;systemctl start kube-controller-manager kube-apiserver kubelet kube-proxy kube-scheduler&quot;</span><br><span class="line">    done</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/16/K8S通过Ansiable二进制部署/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="K8S通过Ansiable二进制部署">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-K8S的五大组件及adm安装" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -974,102 +1071,6 @@
 <div class="counter-tag counter">
     <span id="/2019/12/02/Docker的安装及基础配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Docker的安装及基础配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-KVM的基本配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/29/KVM的基本配置/" class="article-date">
-  	<time datetime="2019-11-29T08:00:09.000Z" itemprop="datePublished">2019-11-29</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/29/KVM的基本配置/">
-        KVM的基本配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) Ubuntu安装：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.安装KVM相关包:</span><br><span class="line">    apt install qemu-kvm virt-manager libvirt-daemon-system</span><br><span class="line">2.确定KVM安装成功：</span><br><span class="line">    root@gmf:~# kvm-ok</span><br><span class="line">        INFO: /dev/kvm exists</span><br><span class="line">        KVM acceleration can be used</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 更改NAT网络的默认网段：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/libvirt/qemu/networks/default.xml  #/etc/libvirt/qemu/networks/autostart/default.xml是软连接。</span><br><span class="line">&lt;network&gt;</span><br><span class="line">  &lt;name&gt;default&lt;/name&gt;</span><br><span class="line">  &lt;uuid&gt;0f60c65a-aa93-42f5-9bf0-e2f2f5db3b53&lt;/uuid&gt;</span><br><span class="line">  &lt;forward mode=&apos;nat&apos;/&gt;</span><br><span class="line">  &lt;bridge name=&apos;virbr0&apos; stp=&apos;on&apos; delay=&apos;0&apos;/&gt;</span><br><span class="line">  &lt;mac address=&apos;52:54:00:0c:b7:d3&apos;/&gt;</span><br><span class="line">  &lt;ip address=&apos;192.168.66.1&apos; netmask=&apos;255.255.255.0&apos;&gt;</span><br><span class="line">    &lt;dhcp&gt;</span><br><span class="line">      &lt;range start=&apos;192.168.66.2&apos; end=&apos;192.168.66.254&apos;/&gt;</span><br><span class="line">    &lt;/dhcp&gt;</span><br><span class="line">  &lt;/ip&gt;</span><br><span class="line">&lt;/network&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 安装NAT网络的KVM：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 /var/lib/libvirt/images/centos.qcow2 20G</span><br><span class="line">virt-install --virt-type kvm \</span><br><span class="line">--name centos7 \</span><br><span class="line">--ram 1024 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos.qcow2 \</span><br><span class="line">--network network=default \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--noautoconsole</span><br></pre></td></tr></table></figure>
-<p><strong><em>使用 virt-manager 管理KVM时，需要在windows安装Xmanager 及Xserver。</em></strong></p>
-<blockquote>
-<p>4) 安装Bridge(桥接网络)的KVM：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">1.创建网桥：</span><br><span class="line">vim /etc/netplan/01-netcfg.yaml </span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">              addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">              - eth0</span><br><span class="line">    br1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [10.6.6.6/23]</span><br><span class="line">      interfaces:</span><br><span class="line">              - eth1              </span><br><span class="line">2.创建KVM虚拟机：</span><br><span class="line">qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-bridge.qcow2 20G</span><br><span class="line">virt-install --virt-type kvm \</span><br><span class="line">--name centos7-ha1 \</span><br><span class="line">--ram 1024 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos7-bridge.qcow2 \</span><br><span class="line">--network bridge=br0 \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--noautoconsole</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) Centos下安装KVM:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">yum install -y qemu-kvm qemu-kvm-tools libvirt libvirt-client virt-manager virt-install</span><br><span class="line">systemctl enable --now libvirtd</span><br><span class="line">创建桥接网络KVM:</span><br><span class="line">  1.创建桥接网卡：</span><br><span class="line">      [root@localhost network-scripts]# cat ifcfg-eth0</span><br><span class="line">          # Generated by dracut initrd</span><br><span class="line">          NAME=&quot;eth0&quot;</span><br><span class="line">          DEVICE=&quot;eth0&quot;</span><br><span class="line">          ONBOOT=yes</span><br><span class="line">          NETBOOT=yes</span><br><span class="line">          IPV6INIT=yes</span><br><span class="line">          BOOTPROTO=static</span><br><span class="line">          TYPE=Ethernet</span><br><span class="line">          BRIDGE=br0   </span><br><span class="line">      [root@localhost network-scripts]# cat ifcfg-br0 </span><br><span class="line">          TYPE=Bridge</span><br><span class="line">          BOOTPROTO=static</span><br><span class="line">          NAME=br0</span><br><span class="line">          DEVICE=br0</span><br><span class="line">          ONBOOT=yes</span><br><span class="line">          IPADDR=192.168.38.106</span><br><span class="line">          GATEWAY=192.168.38.2</span><br><span class="line">          PREFIX=24</span><br><span class="line">          DNS1=192.168.38.2</span><br><span class="line">  2.创建KVM虚拟机：</span><br><span class="line">      qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-ha2.qcow2 20G</span><br><span class="line">      virt-install --virt-type kvm \</span><br><span class="line">      --name centos7-ha2 \</span><br><span class="line">      --ram 1024 \</span><br><span class="line">      --vcpus 1 \</span><br><span class="line">      --cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">      --disk path=/var/lib/libvirt/images/centos7-ha2.qcow2 \</span><br><span class="line">      --network bridge=br0 \</span><br><span class="line">      --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">      --noautoconsole</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) 安装windows-server:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1.下载Virtio驱动（Linux内核默认安装，windows需要自行安装，否则无法驱动raw和qcow2块设备）：</span><br><span class="line">    wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.141-1/virtio-win_amd64.vfd</span><br><span class="line">2.安装windows-server2016的KVM虚拟机：</span><br><span class="line">    qemu-img create -f qcow2 /var/lib/libvirt/images/windows-server.qcow2 100G</span><br><span class="line">    virt-install --virt-type kvm \</span><br><span class="line">    --name windows-server \</span><br><span class="line">    --ram 2048 \</span><br><span class="line">    --vcpus 1 \</span><br><span class="line">    --os-type=windows \</span><br><span class="line">    --cdrom=/usr/local/src/cn_windows_server_2016_x64_dvd_9718765.iso \</span><br><span class="line">    --disk path=/var/lib/libvirt/images/windows-server.qcow2,format=qcow2,bus=virtio \</span><br><span class="line">    --disk path=/usr/local/src/virtio-win_amd64.vfd,device=floppy \</span><br><span class="line">    --network bridge=br0 \</span><br><span class="line">    --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">    --noautoconsole</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>7) virsh的常用命令：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">virsh list #列出当前开机的</span><br><span class="line">virsh list --inactive #列出关闭的虚拟机</span><br><span class="line">virsh list --all #列出所有</span><br><span class="line">virsh shutdown CentOS-7-x86_64 #正常关机</span><br><span class="line">virsh start CentOS-7-x86_64 #正常开机</span><br><span class="line">virsh destroy centos7 #强制停止/关机</span><br><span class="line">virsh undefine Win_2008_r2-x86_64 #强制删除</span><br><span class="line">virsh autostart centos7 #设置当前虚拟机开机自启动</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/29/KVM的基本配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="KVM的基本配置">
          &nbsp;
         view
     </span>

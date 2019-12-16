@@ -202,6 +202,102 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-KVM的基本配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/29/KVM的基本配置/" class="article-date">
+  	<time datetime="2019-11-29T08:00:09.000Z" itemprop="datePublished">2019-11-29</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/29/KVM的基本配置/">
+        KVM的基本配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Ubuntu安装：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.安装KVM相关包:</span><br><span class="line">    apt install qemu-kvm virt-manager libvirt-daemon-system</span><br><span class="line">2.确定KVM安装成功：</span><br><span class="line">    root@gmf:~# kvm-ok</span><br><span class="line">        INFO: /dev/kvm exists</span><br><span class="line">        KVM acceleration can be used</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 更改NAT网络的默认网段：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/libvirt/qemu/networks/default.xml  #/etc/libvirt/qemu/networks/autostart/default.xml是软连接。</span><br><span class="line">&lt;network&gt;</span><br><span class="line">  &lt;name&gt;default&lt;/name&gt;</span><br><span class="line">  &lt;uuid&gt;0f60c65a-aa93-42f5-9bf0-e2f2f5db3b53&lt;/uuid&gt;</span><br><span class="line">  &lt;forward mode=&apos;nat&apos;/&gt;</span><br><span class="line">  &lt;bridge name=&apos;virbr0&apos; stp=&apos;on&apos; delay=&apos;0&apos;/&gt;</span><br><span class="line">  &lt;mac address=&apos;52:54:00:0c:b7:d3&apos;/&gt;</span><br><span class="line">  &lt;ip address=&apos;192.168.66.1&apos; netmask=&apos;255.255.255.0&apos;&gt;</span><br><span class="line">    &lt;dhcp&gt;</span><br><span class="line">      &lt;range start=&apos;192.168.66.2&apos; end=&apos;192.168.66.254&apos;/&gt;</span><br><span class="line">    &lt;/dhcp&gt;</span><br><span class="line">  &lt;/ip&gt;</span><br><span class="line">&lt;/network&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 安装NAT网络的KVM：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 /var/lib/libvirt/images/centos.qcow2 20G</span><br><span class="line">virt-install --virt-type kvm \</span><br><span class="line">--name centos7 \</span><br><span class="line">--ram 1024 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos.qcow2 \</span><br><span class="line">--network network=default \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--noautoconsole</span><br></pre></td></tr></table></figure>
+<p><strong><em>使用 virt-manager 管理KVM时，需要在windows安装Xmanager 及Xserver。</em></strong></p>
+<blockquote>
+<p>4) 安装Bridge(桥接网络)的KVM：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">1.创建网桥：</span><br><span class="line">vim /etc/netplan/01-netcfg.yaml </span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  renderer: networkd</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.38.201/24]</span><br><span class="line">      gateway4: 192.168.38.2</span><br><span class="line">      nameservers:</span><br><span class="line">              addresses: [192.168.38.2]</span><br><span class="line">      interfaces:</span><br><span class="line">              - eth0</span><br><span class="line">    br1:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [10.6.6.6/23]</span><br><span class="line">      interfaces:</span><br><span class="line">              - eth1              </span><br><span class="line">2.创建KVM虚拟机：</span><br><span class="line">qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-bridge.qcow2 20G</span><br><span class="line">virt-install --virt-type kvm \</span><br><span class="line">--name centos7-ha1 \</span><br><span class="line">--ram 1024 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos7-bridge.qcow2 \</span><br><span class="line">--network bridge=br0 \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--noautoconsole</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) Centos下安装KVM:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">yum install -y qemu-kvm qemu-kvm-tools libvirt libvirt-client virt-manager virt-install</span><br><span class="line">systemctl enable --now libvirtd</span><br><span class="line">创建桥接网络KVM:</span><br><span class="line">  1.创建桥接网卡：</span><br><span class="line">      [root@localhost network-scripts]# cat ifcfg-eth0</span><br><span class="line">          # Generated by dracut initrd</span><br><span class="line">          NAME=&quot;eth0&quot;</span><br><span class="line">          DEVICE=&quot;eth0&quot;</span><br><span class="line">          ONBOOT=yes</span><br><span class="line">          NETBOOT=yes</span><br><span class="line">          IPV6INIT=yes</span><br><span class="line">          BOOTPROTO=static</span><br><span class="line">          TYPE=Ethernet</span><br><span class="line">          BRIDGE=br0   </span><br><span class="line">      [root@localhost network-scripts]# cat ifcfg-br0 </span><br><span class="line">          TYPE=Bridge</span><br><span class="line">          BOOTPROTO=static</span><br><span class="line">          NAME=br0</span><br><span class="line">          DEVICE=br0</span><br><span class="line">          ONBOOT=yes</span><br><span class="line">          IPADDR=192.168.38.106</span><br><span class="line">          GATEWAY=192.168.38.2</span><br><span class="line">          PREFIX=24</span><br><span class="line">          DNS1=192.168.38.2</span><br><span class="line">  2.创建KVM虚拟机：</span><br><span class="line">      qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-ha2.qcow2 20G</span><br><span class="line">      virt-install --virt-type kvm \</span><br><span class="line">      --name centos7-ha2 \</span><br><span class="line">      --ram 1024 \</span><br><span class="line">      --vcpus 1 \</span><br><span class="line">      --cdrom=/usr/local/src/CentOS-7-x86_64-Minimal-1511.iso \</span><br><span class="line">      --disk path=/var/lib/libvirt/images/centos7-ha2.qcow2 \</span><br><span class="line">      --network bridge=br0 \</span><br><span class="line">      --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">      --noautoconsole</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) 安装windows-server:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1.下载Virtio驱动（Linux内核默认安装，windows需要自行安装，否则无法驱动raw和qcow2块设备）：</span><br><span class="line">    wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.141-1/virtio-win_amd64.vfd</span><br><span class="line">2.安装windows-server2016的KVM虚拟机：</span><br><span class="line">    qemu-img create -f qcow2 /var/lib/libvirt/images/windows-server.qcow2 100G</span><br><span class="line">    virt-install --virt-type kvm \</span><br><span class="line">    --name windows-server \</span><br><span class="line">    --ram 2048 \</span><br><span class="line">    --vcpus 1 \</span><br><span class="line">    --os-type=windows \</span><br><span class="line">    --cdrom=/usr/local/src/cn_windows_server_2016_x64_dvd_9718765.iso \</span><br><span class="line">    --disk path=/var/lib/libvirt/images/windows-server.qcow2,format=qcow2,bus=virtio \</span><br><span class="line">    --disk path=/usr/local/src/virtio-win_amd64.vfd,device=floppy \</span><br><span class="line">    --network bridge=br0 \</span><br><span class="line">    --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">    --noautoconsole</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>7) virsh的常用命令：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">virsh list #列出当前开机的</span><br><span class="line">virsh list --inactive #列出关闭的虚拟机</span><br><span class="line">virsh list --all #列出所有</span><br><span class="line">virsh shutdown CentOS-7-x86_64 #正常关机</span><br><span class="line">virsh start CentOS-7-x86_64 #正常开机</span><br><span class="line">virsh destroy centos7 #强制停止/关机</span><br><span class="line">virsh undefine Win_2008_r2-x86_64 #强制删除</span><br><span class="line">virsh autostart centos7 #设置当前虚拟机开机自启动</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/29/KVM的基本配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="KVM的基本配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Ubuntu的源配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1008,89 +1104,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/15/Memcache的安装配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Memcache的安装配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Redis集群维护" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/13/Redis集群维护/" class="article-date">
-  	<time datetime="2019-11-13T12:09:24.000Z" itemprop="datePublished">2019-11-13</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/13/Redis集群维护/">
-        Redis集群维护
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 检查Cluster集群状态：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; CLUSTER INFO    #查看集群信息。</span><br><span class="line">127.0.0.1:6379&gt; CLUSTER NODES   #查看node节点的对应关系，与/apps/redis/data/nodes-6379.conf中的信息基本一致。</span><br><span class="line">[root@localhost ~]# redis-trib.rb check 192.168.38.102:6379     #查看集群当前状态。</span><br><span class="line">[root@localhost ~]# redis-trib.rb info 192.168.38.101:6379</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) Cluster 节点的动态增加：</p>
-</blockquote>
-<p>增加Redis node节点，需要与之前的Redis node版本相同、配置一致，然后分别启动两台Redis node，因为一主一从。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">1.在加入集群的节点中一定清楚原来的数据，以及aof文件。</span><br><span class="line">2.加入集群节点：</span><br><span class="line">    [root@localhost ~]# redis-trib.rb add-node 192.168.38.57:6379 192.168.38.101:6379</span><br><span class="line">    [root@localhost ~]# redis-trib.rb check 192.168.38.101:6379         #确保新节点加入集群。</span><br><span class="line">3.为加入的新节点分配槽位（重新分配槽位前，确保备份数据，并清空所有数据。）：</span><br><span class="line">    [root@localhost ~]# redis-trib.rb reshard 192.168.38.57:6379</span><br><span class="line">    [root@localhost ~]# redis-trib.rb check 192.168.38.101:6379         #确保槽位分配成功。</span><br><span class="line">4.为新的节点添加Slave节点：</span><br><span class="line">    [root@localhost ~]# redis-trib.rb add-node 192.168.38.67:6379 192.168.38.101:6379</span><br><span class="line">    [root@localhost ~]# redis-trib.rb check 192.168.38.101:6379         #确保新节点加入集群。</span><br><span class="line">    登录到新加的从节点：</span><br><span class="line">        127.0.0.1:6379&gt; CLUSTER REPLICATE 2acce19639cd35ed49ad44f773d672c1107e9327（为主节点的nodeID）</span><br><span class="line">    [root@localhost ~]# redis-trib.rb info 192.168.38.101:6379          #确保节点添加成功</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>3) Cluster 节点的动态删除：</p>
-</blockquote>
-<p>被迁移Redis master源服务器必须保证没有数据，否则迁移报错并会被强制中断。<br>redis-trib.rb fix 192.168.38.101:6379 #如果迁移失败使用此命令修复集群<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1. 加入新的节点，并将要删除的节点上的槽位移动到新节点：</span><br><span class="line">    [root@localhost ~]# redis-trib.rb add-node 192.168.38.47:6379 192.168.38.101:6379</span><br><span class="line">    [root@localhost ~]# redis-trib.rb check 192.168.38.101:6379</span><br><span class="line">2. 开始移动槽位：</span><br><span class="line">    [root@localhost ~]# redis-trib.rb reshard 192.168.38.47:6379</span><br><span class="line">    [root@localhost ~]# redis-trib.rb check 192.168.38.101:6379 </span><br><span class="line">    默认会替换要删除的主节点，并将原来的从节点连接到新的主节点上。</span><br><span class="line">3. 从集群中删除欲下线的节点（虽然槽位已经迁移完成，但是服务器IP信息还在集群当中，因此还需要将IP信息从集群删除）：</span><br><span class="line">   [root@localhost ~]# redis-trib.rb del-node 192.168.38.103:6379（集群中的任意节点都可以） 7f07db1f8933496734183fee3970b0694b959358（要删除的节点ID）</span><br><span class="line"></span><br><span class="line">注意：节点被山删除之后，其之前的slave自动成为了Redis集群中其他master的slave，此节点如果不需要也可以一并删除。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>4) 验证master与slave：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# redis-trib.rb info 192.168.38.101</span><br><span class="line">Invalid IP or Port (given as 192.168.38.101) - use IP:Port format</span><br><span class="line">[root@localhost ~]# redis-trib.rb info 192.168.38.101:6379</span><br><span class="line">192.168.38.101:6379 (61909c17...) -&gt; 0 keys | 4062 slots | 1 slaves.</span><br><span class="line">192.168.38.102:6379 (095ee7dd...) -&gt; 0 keys | 4061 slots | 1 slaves.</span><br><span class="line">192.168.38.47:6379 (af51fd1e...) -&gt; 0 keys | 4062 slots | 1 slaves.</span><br><span class="line">192.168.38.57:6379 (2acce196...) -&gt; 0 keys | 4199 slots | 1 slaves.</span><br><span class="line">[OK] 0 keys in 4 masters.</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/13/Redis集群维护/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Redis集群维护">
          &nbsp;
         view
     </span>
