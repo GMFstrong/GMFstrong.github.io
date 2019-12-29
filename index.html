@@ -202,6 +202,89 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-ZooKeeper的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/29/ZooKeeper的安装配置/" class="article-date">
+  	<time datetime="2019-12-29T12:00:09.000Z" itemprop="datePublished">2019-12-29</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/29/ZooKeeper的安装配置/">
+        ZooKeeper的安装配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装单机的ZooKeeper：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">1.安装JDK环境：</span><br><span class="line">    apt install -y openjdk-8-jdk</span><br><span class="line">2.安装ZooKeeper:</span><br><span class="line">    mkdir /apps/zookeeper -pv</span><br><span class="line">    cd /apps/zookeeper</span><br><span class="line">    wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz</span><br><span class="line">    tar -xvf zookeeper-3.4.14.tar.gz</span><br><span class="line">    cp zoo_sample.cfg zoo.cfg</span><br><span class="line">3.配置文件介绍：</span><br><span class="line">    tickTime=2000 #服务器与服务器之间的单次心跳检测时间间隔，单位为毫秒</span><br><span class="line"></span><br><span class="line">    initLimit=10 #集群中 leader 服务器与 follower 服务器初始连接心跳次数，即多少个 2000 毫秒，在网络不好时调大。</span><br><span class="line"></span><br><span class="line">    syncLimit=5 # leader 与 follower 之间连接完成之后，后期检测发送和应答的心跳次数，如果该 follower </span><br><span class="line">    在设置的时间内(5*2000)不能与 leader 进行通信，那么此 follower 将被视为不可用。</span><br><span class="line"></span><br><span class="line">    dataDir=/usr/local/zookeeper/data #自定义的 zookeeper 保存数据的目录。</span><br><span class="line"></span><br><span class="line">    clientPort=2181 #客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。</span><br><span class="line"></span><br><span class="line">    maxClientCnxns=4096 #设置最大连接客户端数量。</span><br><span class="line"></span><br><span class="line">    autopurge.snapRetainCount=128 #设置 zookeeper 保存多少次客户端连接的数据。</span><br><span class="line"></span><br><span class="line">    autopurge.purgeInterval=1 #服务器编号=服务器 IP:LF 数据同步端口:LF 选举端口。</span><br><span class="line"></span><br><span class="line">    server.1=172.18.0.101:2888:3888 # server.服务器编号=服务器 IP:LF 数据同步端口(仅仅出现在leader):LF 选举端口。</span><br><span class="line">    server.2=172.18.0.102:2888:3888</span><br><span class="line">    server.3=172.18.0.103:2888:3888</span><br><span class="line">4.启动ZooKeeper:</span><br><span class="line">    /apps/zookeeper/zookeeper-3.4.14/bin/zkServer.sh start</span><br><span class="line">    /apps/zookeeper/zookeeper-3.4.14/bin/zkServer.sh status</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) ZooKeeper的集群配置：</p>
+</blockquote>
+<p><strong><em>这里用3台机器构建一个Zookeeper集群，分别安装JDK环境。</em></strong><br><strong><em>zookeeper 集群特性：整个集群种只要有超过集群数量一半的 zookeeper 工作是正常的，那么整个集群对外就是可用的。</em></strong><br><strong><em>在整个ZooKeeper集群中为了保证数据的一致性，仅有Leader具有写权限。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">1.在各个节点安装ZooKeeper:</span><br><span class="line">    apt install -y openjdk-8-jdk</span><br><span class="line">    mkdir /apps/zookeeper -pv</span><br><span class="line">    cd /apps/zookeeper</span><br><span class="line">    tar -xvf zookeeper-3.4.14.tar.gz</span><br><span class="line">    cd /apps/zookeeper/zookeeper-3.4.14/conf/</span><br><span class="line">    cp zoo_sample.cfg zoo.cfg</span><br><span class="line">    vim zoo.cfg</span><br><span class="line">        tickTime=2000</span><br><span class="line">        initLimit=10</span><br><span class="line">        syncLimit=5</span><br><span class="line">        dataDir=/tmp/zookeeper</span><br><span class="line">        clientPort=2181</span><br><span class="line">        maxClientCnxns=4096</span><br><span class="line">        server.1=192.168.38.208:2888:3888</span><br><span class="line">        server.2=192.168.38.207:2888:3888</span><br><span class="line">        server.3=192.168.38.210:2888:3888</span><br><span class="line">2.创建节点各自在集群中的ID号：</span><br><span class="line">    echo 1 &gt; /tmp/zookeeper/myid</span><br><span class="line">    ‘/tmp/zookeeper/’ 该目录为ZooKeeper的数据目录，‘myid’文件中的ID号必须与配置文件server.1中的一致。</span><br><span class="line">3.启动集群（必须在配置文件中指定的时间内启动所有节点）：</span><br><span class="line">    /apps/zookeeper/zookeeper-3.4.14/bin/zkServer.sh start</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 安装zookeeper 客户端 ZooInspector </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apt install -y maven </span><br><span class="line">git clone https://github.com/zzhang5/zooinspector.git</span><br><span class="line">cd zooinspector/</span><br><span class="line">mvn clean package（注意翻墙，否者很慢）</span><br><span class="line">chmod +x target/zooinspector-pkg/bin/zooinspector.sh</span><br><span class="line">target/zooinspector-pkg/bin/zooinspector.sh （注意开启X11）</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 命令行测试写入数据：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/apps/zookeeper/zookeeper-3.4.14/bin/zkCli.sh -server 192.168.38.207:2181</span><br><span class="line">? 查看支持的命令</span><br><span class="line">create /test &quot;hello&quot; 创建数据</span><br><span class="line">get /test    验证数据</span><br><span class="line">connect 192.168.38.208:2181  到其它节点验证数据是否写入</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/29/ZooKeeper的安装配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="ZooKeeper的安装配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Gitlab的基本使用" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -974,95 +1057,6 @@
 <div class="counter-tag counter">
     <span id="/2019/12/06/Docker数据卷的使用/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Docker数据卷的使用">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Dockerfile的编写" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/12/03/Dockerfile的编写/" class="article-date">
-  	<time datetime="2019-12-03T12:00:10.000Z" itemprop="datePublished">2019-12-03</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/03/Dockerfile的编写/">
-        Dockerfile的编写
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) Nginx镜像的分层构建：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">1.拉取系统基础镜像：</span><br><span class="line">    docker pull  centos:7.7.1908</span><br><span class="line">2.构建镜像分层的目录树;</span><br><span class="line">    mkdir -pv /data/dockerfile/&#123;web/&#123;nginx,tomcat,jdk&#125;,os/&#123;centos,ubuntu,alpine&#125;&#125;</span><br><span class="line">3.安装基础命令：</span><br><span class="line">root@gmf:/data/dockerfile/web/nginx# vim Dockerfile</span><br><span class="line">    FROM centos:7.7.1908</span><br><span class="line">    RUN yum install -y epel-release &amp;&amp; yum install -y vim wget tree lrzsz gcc gcc-c++ automake pcre pcre-devel zlib zlib-devel openssl openssl-devel iproute ne</span><br><span class="line">    t-tools iotop</span><br><span class="line">root@gmf:/data/dockerfile/web/nginx# vim build.sh    </span><br><span class="line">    #!/bin/bash</span><br><span class="line">    docker build -t centos:base1 .</span><br><span class="line">4.下载nginx的源码包：</span><br><span class="line">    root@gmf:/data/dockerfile/web/nginx/1.16# wget http://nginx.org/download/nginx-1.16.1.tar.gz</span><br><span class="line">5.准备Nginx的配置文件：</span><br><span class="line">    可以从其他服务器copy。</span><br><span class="line">    关闭Nginx的后台运行：</span><br><span class="line">        vim nginx.conf</span><br><span class="line">            user nginx;</span><br><span class="line">            worker_processes auto;</span><br><span class="line">            daemon off;</span><br><span class="line">5.编写Dockerfile:</span><br><span class="line">    root@gmf:/data/dockerfile/web/nginx/1.16# vim Dockerfile</span><br><span class="line">        FROM centos:base1</span><br><span class="line">        ADD nginx-1.16.1.tar.gz /usr/local/src/</span><br><span class="line">        RUN cd /usr/local/src/nginx-1.16.1 \</span><br><span class="line">            &amp;&amp; ./configure --prefix=/apps/nginx --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module \</span><br><span class="line">            --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-stream \</span><br><span class="line">            --with-stream_ssl_module --with-stream_realip_module --with-file-aio \</span><br><span class="line">            &amp;&amp; make &amp;&amp; make install \</span><br><span class="line">            &amp;&amp; useradd nginx -u 2019 -s /sbin/nologin \</span><br><span class="line">            &amp;&amp; ln -sv /apps/nginx/sbin/nginx /usr/sbin/nginx \</span><br><span class="line">            &amp;&amp; echo &quot;&lt;h1&gt;Test page!!!&lt;/h1&gt;&quot; &gt; /apps/nginx/html/index.html</span><br><span class="line">        ADD nginx.conf /apps/nginx/conf/nginx.conf</span><br><span class="line">        CMD [&quot;/apps/nginx/sbin/nginx&quot;,&quot;-g&quot;,&quot;daemon off;&quot;]</span><br></pre></td></tr></table></figure>
-<p><strong><em>镜像构建时注意事项：</em></strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在Dockerfile文件中经常变动的文件，尽量放到后面在打入镜像，例如：配置文件，应用代码等。</span><br><span class="line">ADD 会将tar包达到镜像之后自动解压。</span><br><span class="line">CP 不会自动解压tar包。</span><br><span class="line">对于ZIP的压缩包ADD,CP都不会自动解压。</span><br><span class="line">CMD 每个 Dockerfile 只能有一条，如果有多条则只有最后一条被执行。</span><br><span class="line">CMD指定的命令优先级比容器启动时指定的命令优先级低。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) JDK镜像构建：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1. jdk镜像的构建：</span><br><span class="line">    root@gmf:/data/dockerfile/web/jdk# vim Dockerfile </span><br><span class="line">        FROM centos:base1</span><br><span class="line">        ADD profile /etc/profile</span><br><span class="line">        ADD jdk-8u212-linux-x64.tar.gz /apps/jdk/</span><br><span class="line">        ENV JAVA_HOME /apps/jdk/jdk1.8.0_212</span><br><span class="line">        ENV JRE_HOME $JAVA_HOME/jre</span><br><span class="line">        ENV CLASSPATH $JAVA_HOME/lib/:$JRE_HOME/lib/</span><br><span class="line">        ENV PATH $PATH:$JAVA_HOME/bin</span><br><span class="line">        RUN rm -rf /etc/localtime \</span><br><span class="line">                &amp;&amp; ln -sv /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \</span><br><span class="line">                &amp;&amp; echo &quot;Asia/Shanghai&quot; &gt; /etc/timezone</span><br><span class="line">2.准备profile（在最后加入以下几行）：</span><br><span class="line">        export JAVA_HOME=/apps/jdk/jdk1.8.0_212</span><br><span class="line">        export JRE_HOME=$JAVA_HOME/jre</span><br><span class="line">        export CLASSPATH=$JAVA_HOME/lib/:$JRE_HOME/lib/</span><br><span class="line">        export PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">3.利用shell脚本创建镜像（方便记忆镜像名）：</span><br><span class="line">        #!/bin/bash</span><br><span class="line">        docker build -t jdk:v1 .</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) Tomcat镜像构建：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">1.构建基础的Tomcat镜像：</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat# cat Dockerfile </span><br><span class="line">    FROM jdk:v1</span><br><span class="line">    ENV TZ &quot;Asia/Shanghai&quot;</span><br><span class="line">    ENV LANG en_US.UTF-8</span><br><span class="line">    ENV TERM xterm</span><br><span class="line">    ENV TOMCAT_MAJOR_VERSION 8</span><br><span class="line">    ENV TOMCAT_MINOR_VERSION 8.5.45</span><br><span class="line">    ENV CATALINA_HOME /apps/tomcat</span><br><span class="line">    ENV APP_DIR $&#123;CATALINA_HOME&#125;/webapps</span><br><span class="line">    ADD apache-tomcat-8.5.49.tar.gz /apps/</span><br><span class="line">    RUN ln -sv /apps/apache-tomcat-8.5.49 /apps/tomcat</span><br><span class="line">2.基于以上镜像构建tomcat的发布应用镜像：</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat/app1# vim Dockerfile</span><br><span class="line">        FROM tomcat8.5.49:v1</span><br><span class="line">        ADD tomcat_start.sh /apps/tomcat/bin/tomcat_start.sh</span><br><span class="line">        ADD app1.tar.gz /data/app1/</span><br><span class="line">        ADD server.xml /apps/tomcat/conf/server.xml</span><br><span class="line">        RUN useradd  -u 2019  www \</span><br><span class="line">                &amp;&amp; chown www:www /apps/apache-tomcat-8.5.49 /data/app1 -R</span><br><span class="line">        CMD [&quot;/apps/tomcat/bin/tomcat_start.sh&quot;]</span><br><span class="line">3.启动tomcat的shell脚本：</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat/app1# vim tomcat_start.sh </span><br><span class="line">        #!/bin/bash</span><br><span class="line">        su - www -c &quot;/apps/tomcat/bin/catalina.sh start&quot;</span><br><span class="line">        su - www -c &quot;tail -f /etc/hosts&quot;</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat/app1# chmod +x tomcat_start.sh</span><br><span class="line">4.修改server.xml的应用代码放置路径为/data/app1。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 基于alpine制作Nginx的镜像：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1.准备alpine基本系统环境：</span><br><span class="line">    root@gmf:/data/dockerfile/os/alpine# vim Dockerfile</span><br><span class="line">        FROM alpine:3.10.3  </span><br><span class="line">        RUN apk update \</span><br><span class="line">                &amp;&amp; sed -i &quot;s@dl-cdn.alpinelinux.org@mirrors.aliyun.com@g&quot; /etc/apk/repositories \</span><br><span class="line">                &amp;&amp; apk add iotop gcc libgcc libc-dev libcurl libc-utils pcre-dev openssl \</span><br><span class="line">                zlib-dev libnfs make pcre pcre2 zip unzip net-tools pstree wget libevent libevent-dev iproute2</span><br><span class="line">2.基于以上镜像，制作Nginx镜像：</span><br><span class="line">    root@gmf:/data/dockerfile/os/alpine/nginx_1.16# vim Dockerfile</span><br><span class="line">        FROM alpine:base1</span><br><span class="line">        ADD nginx-1.16.1.tar.gz /usr/local/src/</span><br><span class="line">        RUN cd /usr/local/src/nginx-1.16.1 \</span><br><span class="line">                &amp;&amp; ./configure --prefix=/apps/nginx --user=nginx --group=nginx \</span><br><span class="line">                &amp;&amp; make &amp;&amp; make install \</span><br><span class="line">                &amp;&amp; ln -sv /apps/nginx/sbin/nginx /usr/bin/ \</span><br><span class="line">                &amp;&amp; addgroup -g 2019 -S nginx \</span><br><span class="line">                &amp;&amp; adduser -s /sbin/nologin -S -D -u 2019 -G nginx nginx</span><br><span class="line">        COPY nginx.conf /apps/nginx/conf/nginx.conf</span><br><span class="line">        ADD app1.tar.gz /data/nginx/html</span><br><span class="line">        RUN chown nginx.nginx /data/nginx/ /apps/nginx/ -R</span><br><span class="line">        CMD [&quot;nginx&quot;]</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 制作haproxy镜像：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">1.编写Dockerfile:</span><br><span class="line">	FROM centos:7.7.1908</span><br><span class="line">	MAINTAINER ConqUeroR &quot;996941250@qq.com&quot;</span><br><span class="line">	RUN yum install -y yum install gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl \</span><br><span class="line">	        openssl-devel systemd-devel net-tools vim iotop bc zip unzip zlib-devel lrzsz tree \</span><br><span class="line">	        screen lsof tcpdump wget ntpdate</span><br><span class="line">	ADD haproxy-2.0.5.tar.gz /usr/local/src/ </span><br><span class="line">	RUN cd /usr/local/src/haproxy-2.0.5 \</span><br><span class="line">	        &amp;&amp; make ARCH=x86_64 TARGET=linux-glibc USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 USE_SYSTEMD=1 \</span><br><span class="line">	        USE_CPU_AFFINITY=1 PREFIX=/apps/haproxy \</span><br><span class="line">	        &amp;&amp; make install PREFIX=/apps/haproxy \</span><br><span class="line">	        &amp;&amp; mkdir /var/lib/haproxy/ \</span><br><span class="line">	        &amp;&amp; useradd -u 2019 -s /sbin/nologin haproxy \</span><br><span class="line">	        &amp;&amp; chown haproxy:haproxy /var/lib/haproxy/ -R \</span><br><span class="line">	        &amp;&amp; chown haproxy:haproxy /apps/haproxy/ -R </span><br><span class="line">	ADD run_haproxy.sh /usr/bin</span><br><span class="line">	CMD [&quot;/usr/bin/run_haproxy.sh&quot;]</span><br><span class="line">2.编写haproxy的启动脚本：</span><br><span class="line">	root@gmf:/data/dockerfile/web/haproxy# cat run_haproxy.sh</span><br><span class="line">		#!/bin/bash</span><br><span class="line">		/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg</span><br><span class="line">		tail -f /etc/hosts</span><br><span class="line">3.给启动脚本添加执行权限;</span><br><span class="line">	chmod +x run_haproxy.sh</span><br><span class="line">4.制作镜像，上传harbor仓库;</span><br><span class="line">	root@gmf:/data/dockerfile/web/haproxy# cat build.sh</span><br><span class="line">		#!/bin/bash</span><br><span class="line">		docker build -t 192.168.38.202/gmf-test/haproxy:v1 .</span><br><span class="line">		docker push 192.168.38.202/gmf-test/haproxy:v1</span><br><span class="line">		docker rmi 192.168.38.202/gmf-test/haproxy:v1</span><br><span class="line">5.准备haproxy的配置文件;</span><br><span class="line">	root@gmf:~# cat haproxy.cfg </span><br><span class="line">        global</span><br><span class="line">                maxconn 100000</span><br><span class="line">                chroot /apps/haproxy</span><br><span class="line">                stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">                uid 2019</span><br><span class="line">                gid 2019</span><br><span class="line">                daemon</span><br><span class="line">                pidfile /var/lib/haproxy/haproxy.pid</span><br><span class="line">                log 127.0.0.1 local3 info</span><br><span class="line">        defaults</span><br><span class="line">                option http-keep-alive</span><br><span class="line">                option forwardfor</span><br><span class="line">                maxconn 100000</span><br><span class="line">                mode http</span><br><span class="line">                timeout connect 300000ms</span><br><span class="line">                timeout client 300000ms</span><br><span class="line">                timeout server 300000ms</span><br><span class="line">        listen stats</span><br><span class="line">                mode http</span><br><span class="line">                bind 0.0.0.0:9999</span><br><span class="line">                stats enable</span><br><span class="line">                log global</span><br><span class="line">                stats uri     /haproxy-status</span><br><span class="line">                stats auth   admin:testroot</span><br><span class="line">        listen wps</span><br><span class="line">                bind 0.0.0.0:80</span><br><span class="line">                mode http</span><br><span class="line">                log global</span><br><span class="line">                server harbor2 192.168.38.204:80 check inter 2000 fall 2 rise 5</span><br><span class="line">                server harbor1 192.168.38.202:80 check inter 2000 fall 2 rise 5 backup</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/12/03/Dockerfile的编写/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Dockerfile的编写">
          &nbsp;
         view
     </span>

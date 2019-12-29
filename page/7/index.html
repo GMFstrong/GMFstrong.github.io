@@ -202,6 +202,85 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-rsync配合计划任务实现数据备份" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/rsync配合计划任务实现数据备份/" class="article-date">
+  	<time datetime="2019-09-15T12:03:56.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/rsync配合计划任务实现数据备份/">
+        rsync配合计划任务实现数据备份
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>rsync与scp同样具有远程复制数据的功能。但是，scp 却不能根据判断数据的变化灵活复制数据，而是全部复制在一定成都上降低了性能。rsync却是根据文件的变化，只复制不同的文件，所以性能更好，速度更快。</p>
+<p><strong><em>注意：需要确保安装yum install -y openssh-clients</em></strong></p>
+<blockquote>
+<p>rsync的常用选项：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-n 模拟复制过程</span><br><span class="line">-v 显示详细过程</span><br><span class="line">-r 递归复制目录树</span><br><span class="line">-p 保留权限</span><br><span class="line">-t 保留时间戳</span><br><span class="line">-g 保留组信息</span><br><span class="line">-o 保留所有者信息</span><br><span class="line">-l 将软链接文件本身进行复制（默认）</span><br><span class="line">-L 将软链接文件指向的文件复制</span><br><span class="line">-a 存档，相当于–rlptgoD，但不保留ACL（-A）和SELinux属性（-X）</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>注意：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rsync -av /etc server1:/tmp 复制目录和目录下文件</span><br><span class="line">rsync -av /etc/ server1:/tmp 只复制目录下文件</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>结合 crontab 实现数据的同步：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* * * * * /usr/bin/rsync --delete -a root@192.168.38.16:/var/www/html/ /date/</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/rsync配合计划任务实现数据备份/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="rsync配合计划任务实现数据备份">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-CA证书的创建与吊销" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1055,99 +1134,6 @@
 <div class="counter-tag counter">
     <span id="/2019/08/20/Bonding的网卡配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Bonding的网卡配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-LVM的常用配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/12/LVM的常用配置/" class="article-date">
-  	<time datetime="2019-08-12T12:00:09.000Z" itemprop="datePublished">2019-08-12</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/12/LVM的常用配置/">
-        LVM的常用配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="由于使用硬盘分区或者RAID不可以做到弹性扩展，在磁盘空间过于紧张时，如果要做空间的扩容非常不方便，于是就引入了LVM（Logical-Volume-Manager）逻辑卷管理器这一可让空间资源伸缩的逻辑空间设备。"><a href="#由于使用硬盘分区或者RAID不可以做到弹性扩展，在磁盘空间过于紧张时，如果要做空间的扩容非常不方便，于是就引入了LVM（Logical-Volume-Manager）逻辑卷管理器这一可让空间资源伸缩的逻辑空间设备。" class="headerlink" title="由于使用硬盘分区或者RAID不可以做到弹性扩展，在磁盘空间过于紧张时，如果要做空间的扩容非常不方便，于是就引入了LVM（Logical Volume Manager）逻辑卷管理器这一可让空间资源伸缩的逻辑空间设备。"></a>由于使用硬盘分区或者RAID不可以做到弹性扩展，在磁盘空间过于紧张时，如果要做空间的扩容非常不方便，于是就引入了LVM（Logical Volume Manager）逻辑卷管理器这一可让空间资源伸缩的逻辑空间设备。</h3><p><strong><em>在具体介绍LVM的配置以前，先说明一下组成LVM的几个具体单元：PV,PE,VG,LV。</em></strong></p>
-<blockquote>
-<p>PV（物理卷）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pvcreate ：将实体 partition 创建成为 PV ；</span><br><span class="line">pvscan ：搜寻目前系统里面任何具有 PV 的磁碟；</span><br><span class="line">pvdisplay ：显示出目前系统上面的 PV 状态；</span><br><span class="line">pvremove ：将 PV 属性移除，让该 partition 不具有 PV 属性。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>通常就是将底层的物理存储设备或者分区，通过pvcreate创建为pv，之后就可以对pv加以利用。一般需要通过调整系统识别码 (system ID) 成为 8e (LVM 的识别码)，调整 system ID 的方法是就是透过 fdisk，没有配置成为 8e 也没关系， 不过某些 LVM 的侦测命令可能会侦测不到该 partition（分区）。 </p>
-<blockquote>
-<p>VG（卷组）创建 VG 及 VG 相关的命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vgcreate ：就是主要创建 VG 的命令！他的参数比较多，等一下介绍。</span><br><span class="line">vgscan ：搜寻系统上面是否有 VG 存在？</span><br><span class="line">vgdisplay ：显示目前系统上面的 VG 状态；</span><br><span class="line">vgextend ：在 VG 内添加额外的 PV ；</span><br><span class="line">vgreduce ：在 VG 内移除 PV；</span><br><span class="line">vgchange ：配置 VG 是否启动 (active)；</span><br><span class="line">vgremove ：删除一个 VG</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>所谓的 LVM 大磁盘就是将许多 PV 整合成这个 VG 的东西！所以 VG 就是 LVM 组合起来的大磁盘！那么这个大磁盘最大容量与底下要说明的 PE 有关，因为每个 VG 最多仅能包含 65534 个 PE。 如果使用 LVM 默认的参数，则一个 VG 最大可达 256GB 的容量。<strong><em>不过这仅限于 32 位系统，在 64 位系统没有该限制。</em></strong></p>
-<blockquote>
-<p>LV（逻辑卷）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">lvcreate ：创建 LV 啦！</span><br><span class="line">lvscan ：查询系统上面的 LV ；</span><br><span class="line">lvdisplay ：显示系统上面的 LV 状态啊！</span><br><span class="line">lvextend ：在 LV 里面添加容量！</span><br><span class="line">lvreduce ：在 LV 里面减少容量；</span><br><span class="line">lvremove ：删除一个 LV ！</span><br><span class="line">lvresize ：对 LV 进行容量大小的调整！</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>最终的 VG 还会被切成 LV，这个 LV 就是最后可以被格式化使用的类似分区的东西！那么 LV 是否可以随意指定大小呢？ 当然不可以！既然 PE 是整个 LVM 的最小储存单位，那么 LV 的大小就与在此 LV 内的 PE 总数有关，并且只能是PE的整数倍。</p>
-<blockquote>
-<p>PE</p>
-</blockquote>
-<p>LVM 默认使用 4MB 的 PE 区块，而 LVM 的 VG 最多仅能含有 65534 个 PE ，因此默认的 LVM VG 会有 4M<em>65534/(1024M/G)=256G。<br>简单的说，这个 PE 就有点像文件系统里面的 block,所以调整 PE 会影响到 VG 的容量。**</em>不过这仅限于 32 位系统，在 64 位系统没有该限制。***</p>
-<p><strong><em>下面给出创建演示过程(Centos7)：</em></strong><br>确保系统安装了LVM工具：yum install -y lvm2</p>
-<blockquote>
-<p>1.创建PV<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#pvs     #先查看系统当前是否存在物理卷。</span><br><span class="line">[root@localhost ~]#</span><br><span class="line">[root@localhost ~]#lsblk   #通过lsblk查看当前可用的设备。</span><br><span class="line">NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda      8:0    0  200G  0 disk </span><br><span class="line">├─sda1   8:1    0    1G  0 part /boot</span><br><span class="line">├─sda2   8:2    0  100G  0 part /</span><br><span class="line">├─sda3   8:3    0    2G  0 part [SWAP]</span><br><span class="line">├─sda4   8:4    0    1K  0 part </span><br><span class="line">└─sda5   8:5    0   50G  0 part /data</span><br><span class="line">sdb      8:16   0   20G  0 disk </span><br><span class="line">├─sdb1   8:17   0    5G  0 part </span><br><span class="line">├─sdb2   8:18   0    5G  0 part </span><br><span class="line">└─sdb3   8:19   0   10G  0 part </span><br><span class="line">sdc      8:32   0   10G  0 disk</span><br><span class="line">[root@localhost ~]#pvcreate /dev/sdb&#123;2,3&#125; /dev/sdc  #这里用sdb2,sdb3,sdc作物理卷，因为sdb2分区本身被格式化为XFS文件系统，故而会给出警告。可以通过将分区系统识别码改为8e避免。</span><br><span class="line">WARNING: xfs signature detected on /dev/sdb2 at offset 0. Wipe it? [y/n]: y</span><br><span class="line">  Wiping xfs signature on /dev/sdb2.</span><br><span class="line">  Physical volume &quot;/dev/sdb2&quot; successfully created.</span><br><span class="line">  Physical volume &quot;/dev/sdb3&quot; successfully created.   </span><br><span class="line">  Physical volume &quot;/dev/sdc&quot; successfully created.    </span><br><span class="line">[root@localhost ~]#pvs        #物理卷创建成功。pvdisply可以查看更详细信息。</span><br><span class="line">  PV         VG Fmt  Attr PSize   PFree  </span><br><span class="line">  /dev/sdb2     lvm2 ---    5.00g   5.00g</span><br><span class="line">  /dev/sdb3     lvm2 ---  &lt;10.00g &lt;10.00g</span><br><span class="line">  /dev/sdc      lvm2 ---   10.00g  10.00g </span><br><span class="line">[root@localhost ~]#vgcreate -s 16M vg1 /dev/sdc /dev/sdb2  #创建vg -s 指定pe大小</span><br><span class="line">  Volume group &quot;vg1&quot; successfully created</span><br><span class="line">[root@localhost ~]#vgdisplay</span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               vg1</span><br><span class="line">  System ID             </span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        2</span><br><span class="line">  Metadata Sequence No  1</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                0</span><br><span class="line">  Open LV               0</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                2</span><br><span class="line">  Act PV                2</span><br><span class="line">  VG Size               &lt;14.97 GiB</span><br><span class="line">  PE Size               16.00 MiB</span><br><span class="line">  Total PE              958</span><br><span class="line">  Alloc PE / Size       0 / 0   </span><br><span class="line">  Free  PE / Size       958 / &lt;14.97 GiB</span><br><span class="line">  VG UUID               2YqGlA-ikYe-Z5zz-ETmQ-Qmub-mPq8-738Dzw</span><br><span class="line">[root@localhost ~]#vgextend vg1 /dev/sdb3        #扩展一个pv到vg1中</span><br><span class="line">  Volume group &quot;vg1&quot; successfully extended</span><br><span class="line">[root@localhost ~]#lvcreate -L 7G -n lv1 vg1</span><br><span class="line">  Logical volume &quot;lv1&quot; created.</span><br><span class="line">-L  ：后面接容量，容量的单位可以是 M,G,T 等，要注意的是，最小单位为 PE，</span><br><span class="line">      因此这个数量必须要是 PE 的倍数，若不相符，系统会自行计算最相近的容量。</span><br><span class="line">-l  ：后面可以接 PE 的『个数』，而不是数量。若要这么做，得要自行计算 PE 数。</span><br><span class="line">-n  ：后面接的就是 LV 的名称啦！</span><br><span class="line">[root@localhost ~]#mkfs.ext4 /dev/vg1/lv1    #创建文件系统 </span><br><span class="line">mke2fs 1.42.9 (28-Dec-2013)</span><br><span class="line">Filesystem label=</span><br><span class="line">OS type: Linux</span><br><span class="line">Block size=4096 (log=2)</span><br><span class="line">[root@localhost ~]#blkid</span><br><span class="line">/dev/mapper/vg1-lv1: UUID=&quot;4a84bc03-b4ac-44e6-a90e-883d721a7ab7&quot; TYPE=&quot;ext4&quot;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>也可以通过/dev/mapper查看当前存在的LV</em></strong><br>以上就是LVM的创建过程。接下来通过挂载就可以使用了。</p>
-<blockquote>
-<p>下面介绍一下LV的扩容与缩容：<br>通过加入一个新的PV，来为增加VG的大小做准备。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#pvcreate /dev/sdb1</span><br><span class="line">WARNING: ext2 signature detected on /dev/sdb1 at offset 1080. Wipe it? [y/n]: y</span><br><span class="line">  Wiping ext2 signature on /dev/sdb1.</span><br><span class="line">  Physical volume &quot;/dev/sdb1&quot; successfully created.</span><br><span class="line">[root@localhost ~]#vgextend vg1 /dev/sdb1   #把sdb1添加到vg1中。</span><br><span class="line">  Volume group &quot;vg1&quot; successfully extended</span><br><span class="line">[root@localhost ~]#lvresize -L +1G /dev/mapper/vg1-lv1   #可以通过lvresize调整lv的大小。 </span><br><span class="line">  Size of logical volume vg1/lv1 changed from 7.00 GiB (448 extents) to 8.00 GiB (512 extents).</span><br><span class="line">  Logical volume vg1/lv1 successfully resized.</span><br><span class="line">[root@localhost ~]#resize2fs /dev/mapper/vg1-lv1  #扩大文件系统</span><br><span class="line">resize2fs 1.42.9 (28-Dec-2013)</span><br><span class="line">Filesystem at /dev/mapper/vg1-lv1 is mounted on /mnt/lv1; on-line resizing required</span><br><span class="line">old_desc_blocks = 1, new_desc_blocks = 1</span><br><span class="line">The filesystem on /dev/mapper/vg1-lv1 is now 2097152 blocks long.</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/12/LVM的常用配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="LVM的常用配置">
          &nbsp;
         view
     </span>

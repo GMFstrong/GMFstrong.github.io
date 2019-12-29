@@ -202,6 +202,106 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Jdk和Tomcat的安装及配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Jdk和Tomcat的安装及配置/" class="article-date">
+  	<time datetime="2019-11-22T17:25:22.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/23/Jdk和Tomcat的安装及配置/">
+        Jdk和Tomcat的安装及配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装配置JDK：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.使用rpm包安装：</span><br><span class="line">    yum install -y jdk-8u191-linux-x64.rpm </span><br><span class="line">2.配置全局的环境变量（默认安装在/usr/java）：</span><br><span class="line">    [root@localhost]# vim /etc/profile.djdk.sh</span><br><span class="line">        export JAVA_HOME=/usr/java/default</span><br><span class="line">        export PATH=$JAVA_HOME/bin:$PATH</span><br><span class="line">    [root@localhost]# source /etc/profile.djdk.sh</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 关于JSP程序的执行过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">JSP需要首先转化为.java文件，然后编译为字节码.class文件，最后将.class文件放到JVM上运行。</span><br><span class="line">（1）首先，关于JSP文件的由来，起初基于servlet的.java代码前端后端混在一起不宜与快速的版本迭代，所以就在servlet</span><br><span class="line">的基础之上建立了.jsp文件，实现前后端的分离开发。</span><br><span class="line">（2）故而出现了以下的流程：.jsp---&gt; .java ---&gt; .class 三种格式的文件出现在服务器端。</span><br><span class="line">（3）.jsp到.java的转换是由Tomcat中的jasper工具自动转换，.java到.class有JDK中的编译组件完成。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>3) 安装Tomcat:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tar -xvf apache-tomcat-8.5.42.tar.gz -C /usr/local/</span><br><span class="line">ln -sv /usr/local/apache-tomcat-8.5.42/ /usr/local/tomcat</span><br><span class="line">vim /etc/profile.d/tomcat.sh</span><br><span class="line">    export PATH=/usr/local/tomcat/bin:$PATH</span><br><span class="line">. /etc/profile.d/tomcat.sh  </span><br><span class="line">useradd  -r java</span><br><span class="line">chown -R java:java apache-tomcat-8.5.42</span><br><span class="line">su - java -c &apos;/usr/local/apache-tomcat-8.5.42/bin/catalina.sh start&apos;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 关于Tomcat的各个组件：</p>
+</blockquote>
+<img src="/2019/11/23/Jdk和Tomcat的安装及配置/tomcat.png">
+<p><strong><em>上图中的组件配置在Tomcat的主配置文件server.xml中。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">（1）其中的service组件主要封装connector 和 engine。</span><br><span class="line">（2）在一个Engine中可以定义多个虚拟主机（host）。</span><br><span class="line">    例如：</span><br><span class="line">        &lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;&lt;/Host&gt;</span><br><span class="line">    我们需要在appBase定义的目录中定义 ROOT 目录作为主站目录。</span><br><span class="line">（3）一个webapp目录下的文件结构：</span><br><span class="line">    lib/ 当前应用说依赖的jar包。</span><br><span class="line">    class/ 类文件，当前应用说需要的类。</span><br><span class="line">    WEB-INF/ 当前应用的私有配置，通常会覆盖Tomcat默认的全局配置,包含web.xml，contest.xml。</span><br><span class="line">    MATE-INF/ 类似于WEB-INF。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>5) Tomcat 8005端口的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Server port=&quot;8005&quot; shutdown=&quot;SHUTDOWN&quot;&gt;</span><br><span class="line">该端口默认是监听在127.0.0.1，在 telnet 连接之后，接收到‘SHUTDOWN’字符串之后会会关闭Tomcat服务。</span><br><span class="line">    可以将‘SHUTDOWN’改为一串随机字符串。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) Tomcat管理页面的认证配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">（1）修改配置文件 conf/tomcat-users.xml：</span><br><span class="line">    &lt;role rolename=&quot;manager-gui&quot;/&gt;</span><br><span class="line">    &lt;role rolename=&quot;admin-gui&quot;/&gt;</span><br><span class="line">    &lt;user username=&quot;gmf&quot; password=&quot;testroot&quot; roles=&quot;manager-gui,admin-gui&quot;/&gt;</span><br><span class="line">（2）修改host-manager和manager的配置文件context.xml：</span><br><span class="line">      &lt;Valve className=&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span><br><span class="line">         allow=&quot;192\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1&quot; /&gt;</span><br><span class="line">重启Tomcat服务。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>7) Tomcat 虚拟主机的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;&lt;/Host&gt;</span><br><span class="line">    unpackWARs:是否自动解压WAR格式的应用包。</span><br><span class="line">    autoDeploy:是否自动部署。</span><br><span class="line">mkdir -pv /data/webapp/ROOT</span><br><span class="line">重启Tomcat。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>8) context配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    &lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br><span class="line">            &lt;Context path=&quot;/app&quot; docBase=&quot;/data/app&quot; reloadable=&quot;false&quot;/&gt;</span><br><span class="line">    &lt;/Host&gt;</span><br><span class="line">[root@localhost data]# pwd</span><br><span class="line">/data</span><br><span class="line">[root@localhost data]# ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root  5 Nov 20 21:18 app -&gt; appv2</span><br><span class="line">drwxr-xr-x 2 root root 24 Nov 20 21:11 appv1</span><br><span class="line">drwxr-xr-x 2 root root 24 Nov 20 21:13 appv2</span><br><span class="line">drwxr-x--- 5 root root 44 Nov 20 21:04 webapp</span><br><span class="line">以上配置便于版本的回滚及发布。(需要重启Tomcat)</span><br><span class="line">以上配置生产中reloadable=&quot;false&quot;，否则会在MATE-INF/ 类似于WEB-INF中的配置文件变化后自动加载，影响效率。</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Jdk和Tomcat的安装及配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Jdk和Tomcat的安装及配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-web高可用入门架构" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -919,90 +1019,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/08/Keepalived的VRRP-script使用/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Keepalived的VRRP script使用">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Keepalived的高级配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/08/Keepalived的高级配置/" class="article-date">
-  	<time datetime="2019-11-08T12:45:28.000Z" itemprop="datePublished">2019-11-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/08/Keepalived的高级配置/">
-        Keepalived的高级配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 多个VIP互为主备：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line">1.  在第一节点：</span><br><span class="line">[root@localhost keepalived]#ls</span><br><span class="line">conf.d  keepalived.conf</span><br><span class="line">[root@localhost keepalived]#cat keepalived.conf </span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     acassen@firewall.loc</span><br><span class="line">     failover@firewall.loc</span><br><span class="line">     sysadmin@firewall.loc</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from Alexandre.Cassen@firewall.loc</span><br><span class="line">   smtp_server 192.168.200.1</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">   vrrp_skip_check_adv_addr</span><br><span class="line">   #vrrp_strict</span><br><span class="line">   vrrp_garp_interval 0</span><br><span class="line">   vrrp_gna_interval 0</span><br><span class="line">   vrrp_iptables</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    #nopreempt</span><br><span class="line">    preempt_delay 60s</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51    #全局唯一的虚拟路由id</span><br><span class="line">    priority 50</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.67</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        192.168.38.57</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.66 dev eth0 label eth0:0</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">include /etc/keepalived/conf.d/*.conf</span><br><span class="line">[root@localhost keepalived]#cat conf.d/VI_2.conf </span><br><span class="line">vrrp_instance VI_2 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    #nopreempt</span><br><span class="line">    #preempt_delay 60s</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 50</span><br><span class="line">    priority 150</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.67</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        192.168.38.57</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.88 dev eth0 label eth0:1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">2.  在第二节点：</span><br><span class="line">[root@localhost keepalived]#ls</span><br><span class="line">conf.d  keepalived.conf</span><br><span class="line">[root@localhost keepalived]#cat keepalived.conf </span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     acassen@firewall.loc</span><br><span class="line">     failover@firewall.loc</span><br><span class="line">     sysadmin@firewall.loc</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from Alexandre.Cassen@firewall.loc</span><br><span class="line">   smtp_server 192.168.200.1</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">   vrrp_skip_check_adv_addr</span><br><span class="line">   #vrrp_strict</span><br><span class="line">   vrrp_garp_interval 0</span><br><span class="line">   vrrp_gna_interval 0</span><br><span class="line">   vrrp_iptables</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    #nopreempt</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 150</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.57</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">         192.168.38.67</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.66 dev eth0 label eth0:0</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">include /etc/keepalived/conf.d/*.conf</span><br><span class="line">[root@localhost keepalived]#cat conf.d/VI_2.conf </span><br><span class="line">vrrp_instance VI_2 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    #nopreempt</span><br><span class="line">    #preempt_delay 60s</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 50</span><br><span class="line">    priority 50</span><br><span class="line">    advert_int 1</span><br><span class="line">    unicast_src_ip 192.168.38.57</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        192.168.38.67</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.38.88 dev eth0 label eth0:1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) Keepalived通知配置:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mailx</span><br><span class="line">vim /etc/mail.rc</span><br><span class="line">    set from=xxxx@qq.com</span><br><span class="line">    set smtp=smtp.qq.com</span><br><span class="line">    set smtp-auth-user=xxxxxx@qq.com</span><br><span class="line">    set smtp-auth-password=ndycpollcffobfci</span><br><span class="line">    set smtp-auth=login</span><br><span class="line">    set ssl-verify=ignore</span><br><span class="line">vim notify.sh</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    contact=&apos;xxxxx@qq.com&apos;</span><br><span class="line">    notify() &#123;</span><br><span class="line">    mailsubject=&quot;$(hostname) to be $1, vip 转移&quot;</span><br><span class="line">    mailbody=&quot;$(date +&apos;%F %T&apos;): vrrp transition, $(hostname) changed to be $1&quot;</span><br><span class="line">    echo &quot;$mailbody&quot; | mail -s &quot;$mailsubject&quot; $contact</span><br><span class="line">    &#125;</span><br><span class="line">    case $1 in</span><br><span class="line">    master)</span><br><span class="line">    notify master</span><br><span class="line">    ;;</span><br><span class="line">    backup)</span><br><span class="line">    notify backup</span><br><span class="line">    ;;</span><br><span class="line">    fault)</span><br><span class="line">    notify fault</span><br><span class="line">    ;;</span><br><span class="line">    *)</span><br><span class="line">    echo &quot;Usage: $(basename $0) &#123;master|backup|fault&#125;&quot;</span><br><span class="line">    exit 1</span><br><span class="line">    ;;</span><br><span class="line">    esac</span><br><span class="line">chmod a+x notify.sh</span><br><span class="line">vim keepalived.conf</span><br><span class="line">在vrrp_instance VI_1 &#123;&#125;字段添加以下内容：</span><br><span class="line">    notify_master &quot;/etc/keepalived/notify.sh master&quot;</span><br><span class="line">    notify_backup &quot;/etc/keepalived/notify.sh backup&quot;</span><br><span class="line">    notify_fault &quot;/etc/keepalived/notify.sh fault&quot;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 利用keepalived配置LVS：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">1.在keepalive的配置文件最后加入以下内容：</span><br><span class="line">vim /etc/keepalived/keepalived.conf</span><br><span class="line"></span><br><span class="line">virtual_server 192.168.38.66 80 &#123;</span><br><span class="line">    delay_loop 6    #检查后端服务器的时间间隔。</span><br><span class="line">    lb_algo rr</span><br><span class="line">    lb_kind DR</span><br><span class="line">    #persistence_timeout 120 #会话保持时间。</span><br><span class="line">    protocol TCP</span><br><span class="line">    #sorry_server 192.168.38.26 80</span><br><span class="line">    real_server 192.168.38.36 80 &#123;</span><br><span class="line">        weight 1</span><br><span class="line">        TCP_CHECK &#123;         #定义当前RS主机的健康状态检测方法。</span><br><span class="line">            connect_timeout 5</span><br><span class="line">            nb_get_retry 3</span><br><span class="line">            delay_before_retry 3    #重试之前的延迟时长。</span><br><span class="line">            connect_port 80</span><br><span class="line">            &#125; </span><br><span class="line">    &#125;</span><br><span class="line">    real_server 192.168.38.26 80 &#123;</span><br><span class="line">    weight 1</span><br><span class="line">    TCP_CHECK &#123;</span><br><span class="line">        connect_timeout 5</span><br><span class="line">        nb_get_retry 3  #重试次数。</span><br><span class="line">        delay_before_retry 3</span><br><span class="line">        connect_port 80</span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.后端server运行以下脚本：</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    vip=192.168.38.66</span><br><span class="line">    mask=&apos;255.255.255.255&apos;</span><br><span class="line">    dev=lo:1</span><br><span class="line">    #rpm -q httpd &amp;&gt; /dev/null || yum -y install httpd &amp;&gt;/dev/null</span><br><span class="line">    #service httpd start &amp;&gt; /dev/null &amp;&amp; echo &quot;The httpd Server is Ready!&quot;</span><br><span class="line">    #echo &quot;&lt;h1&gt;`hostname`&lt;/h1&gt;&quot; &gt; /var/www/html/index.html</span><br><span class="line"></span><br><span class="line">    case $1 in</span><br><span class="line">    start)</span><br><span class="line">        echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">        echo 1 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">        echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">        echo 2 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">        ifconfig $dev $vip netmask $mask #broadcast $vip up</span><br><span class="line">        #route add -host $vip dev $dev</span><br><span class="line">        echo &quot;The RS Server is Ready!&quot;</span><br><span class="line">        ;;</span><br><span class="line">    stop)</span><br><span class="line">        ifconfig $dev down</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">        echo 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">        echo &quot;The RS Server is Canceled!&quot;</span><br><span class="line">        ;;</span><br><span class="line">    *) </span><br><span class="line">        echo &quot;Usage: $(basename $0) start|stop&quot;</span><br><span class="line">        exit 1</span><br><span class="line">        ;;</span><br><span class="line">    esac</span><br><span class="line">3. 安装ipvsadm工具查看规制(这些规制是由keepalive中的组件生成)：</span><br><span class="line">    yum install -y ipvsadm</span><br><span class="line">    [root@localhost keepalived]#ipvsadm -Ln</span><br><span class="line">    IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">    Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">    -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">    TCP  192.168.38.66:80 rr</span><br><span class="line">    -&gt; 192.168.38.26:80             Route   1      0          0         </span><br><span class="line">    -&gt; 192.168.38.36:80             Route   1      0          0</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 以上配置是基于TCP监测，下面是关于(HTTP_GET|SSL_GET)应用层的探测：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HTTP_GET &#123;</span><br><span class="line">    url &#123;</span><br><span class="line">    path /index.html</span><br><span class="line">    status_code 200</span><br><span class="line">    &#125;</span><br><span class="line">    connect_timeout 5</span><br><span class="line">    nb_get_retry 3</span><br><span class="line">    delay_before_retry 3</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/08/Keepalived的高级配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Keepalived的高级配置">
          &nbsp;
         view
     </span>

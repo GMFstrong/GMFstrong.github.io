@@ -202,6 +202,95 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Dockerfile的编写" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/03/Dockerfile的编写/" class="article-date">
+  	<time datetime="2019-12-03T12:00:10.000Z" itemprop="datePublished">2019-12-03</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/03/Dockerfile的编写/">
+        Dockerfile的编写
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Nginx镜像的分层构建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">1.拉取系统基础镜像：</span><br><span class="line">    docker pull  centos:7.7.1908</span><br><span class="line">2.构建镜像分层的目录树;</span><br><span class="line">    mkdir -pv /data/dockerfile/&#123;web/&#123;nginx,tomcat,jdk&#125;,os/&#123;centos,ubuntu,alpine&#125;&#125;</span><br><span class="line">3.安装基础命令：</span><br><span class="line">root@gmf:/data/dockerfile/web/nginx# vim Dockerfile</span><br><span class="line">    FROM centos:7.7.1908</span><br><span class="line">    RUN yum install -y epel-release &amp;&amp; yum install -y vim wget tree lrzsz gcc gcc-c++ automake pcre pcre-devel zlib zlib-devel openssl openssl-devel iproute ne</span><br><span class="line">    t-tools iotop</span><br><span class="line">root@gmf:/data/dockerfile/web/nginx# vim build.sh    </span><br><span class="line">    #!/bin/bash</span><br><span class="line">    docker build -t centos:base1 .</span><br><span class="line">4.下载nginx的源码包：</span><br><span class="line">    root@gmf:/data/dockerfile/web/nginx/1.16# wget http://nginx.org/download/nginx-1.16.1.tar.gz</span><br><span class="line">5.准备Nginx的配置文件：</span><br><span class="line">    可以从其他服务器copy。</span><br><span class="line">    关闭Nginx的后台运行：</span><br><span class="line">        vim nginx.conf</span><br><span class="line">            user nginx;</span><br><span class="line">            worker_processes auto;</span><br><span class="line">            daemon off;</span><br><span class="line">5.编写Dockerfile:</span><br><span class="line">    root@gmf:/data/dockerfile/web/nginx/1.16# vim Dockerfile</span><br><span class="line">        FROM centos:base1</span><br><span class="line">        ADD nginx-1.16.1.tar.gz /usr/local/src/</span><br><span class="line">        RUN cd /usr/local/src/nginx-1.16.1 \</span><br><span class="line">            &amp;&amp; ./configure --prefix=/apps/nginx --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module \</span><br><span class="line">            --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-stream \</span><br><span class="line">            --with-stream_ssl_module --with-stream_realip_module --with-file-aio \</span><br><span class="line">            &amp;&amp; make &amp;&amp; make install \</span><br><span class="line">            &amp;&amp; useradd nginx -u 2019 -s /sbin/nologin \</span><br><span class="line">            &amp;&amp; ln -sv /apps/nginx/sbin/nginx /usr/sbin/nginx \</span><br><span class="line">            &amp;&amp; echo &quot;&lt;h1&gt;Test page!!!&lt;/h1&gt;&quot; &gt; /apps/nginx/html/index.html</span><br><span class="line">        ADD nginx.conf /apps/nginx/conf/nginx.conf</span><br><span class="line">        CMD [&quot;/apps/nginx/sbin/nginx&quot;,&quot;-g&quot;,&quot;daemon off;&quot;]</span><br></pre></td></tr></table></figure>
+<p><strong><em>镜像构建时注意事项：</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在Dockerfile文件中经常变动的文件，尽量放到后面在打入镜像，例如：配置文件，应用代码等。</span><br><span class="line">ADD 会将tar包达到镜像之后自动解压。</span><br><span class="line">CP 不会自动解压tar包。</span><br><span class="line">对于ZIP的压缩包ADD,CP都不会自动解压。</span><br><span class="line">CMD 每个 Dockerfile 只能有一条，如果有多条则只有最后一条被执行。</span><br><span class="line">CMD指定的命令优先级比容器启动时指定的命令优先级低。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) JDK镜像构建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1. jdk镜像的构建：</span><br><span class="line">    root@gmf:/data/dockerfile/web/jdk# vim Dockerfile </span><br><span class="line">        FROM centos:base1</span><br><span class="line">        ADD profile /etc/profile</span><br><span class="line">        ADD jdk-8u212-linux-x64.tar.gz /apps/jdk/</span><br><span class="line">        ENV JAVA_HOME /apps/jdk/jdk1.8.0_212</span><br><span class="line">        ENV JRE_HOME $JAVA_HOME/jre</span><br><span class="line">        ENV CLASSPATH $JAVA_HOME/lib/:$JRE_HOME/lib/</span><br><span class="line">        ENV PATH $PATH:$JAVA_HOME/bin</span><br><span class="line">        RUN rm -rf /etc/localtime \</span><br><span class="line">                &amp;&amp; ln -sv /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \</span><br><span class="line">                &amp;&amp; echo &quot;Asia/Shanghai&quot; &gt; /etc/timezone</span><br><span class="line">2.准备profile（在最后加入以下几行）：</span><br><span class="line">        export JAVA_HOME=/apps/jdk/jdk1.8.0_212</span><br><span class="line">        export JRE_HOME=$JAVA_HOME/jre</span><br><span class="line">        export CLASSPATH=$JAVA_HOME/lib/:$JRE_HOME/lib/</span><br><span class="line">        export PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">3.利用shell脚本创建镜像（方便记忆镜像名）：</span><br><span class="line">        #!/bin/bash</span><br><span class="line">        docker build -t jdk:v1 .</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) Tomcat镜像构建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">1.构建基础的Tomcat镜像：</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat# cat Dockerfile </span><br><span class="line">    FROM jdk:v1</span><br><span class="line">    ENV TZ &quot;Asia/Shanghai&quot;</span><br><span class="line">    ENV LANG en_US.UTF-8</span><br><span class="line">    ENV TERM xterm</span><br><span class="line">    ENV TOMCAT_MAJOR_VERSION 8</span><br><span class="line">    ENV TOMCAT_MINOR_VERSION 8.5.45</span><br><span class="line">    ENV CATALINA_HOME /apps/tomcat</span><br><span class="line">    ENV APP_DIR $&#123;CATALINA_HOME&#125;/webapps</span><br><span class="line">    ADD apache-tomcat-8.5.49.tar.gz /apps/</span><br><span class="line">    RUN ln -sv /apps/apache-tomcat-8.5.49 /apps/tomcat</span><br><span class="line">2.基于以上镜像构建tomcat的发布应用镜像：</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat/app1# vim Dockerfile</span><br><span class="line">        FROM tomcat8.5.49:v1</span><br><span class="line">        ADD tomcat_start.sh /apps/tomcat/bin/tomcat_start.sh</span><br><span class="line">        ADD app1.tar.gz /data/app1/</span><br><span class="line">        ADD server.xml /apps/tomcat/conf/server.xml</span><br><span class="line">        RUN useradd  -u 2019  www \</span><br><span class="line">                &amp;&amp; chown www:www /apps/apache-tomcat-8.5.49 /data/app1 -R</span><br><span class="line">        CMD [&quot;/apps/tomcat/bin/tomcat_start.sh&quot;]</span><br><span class="line">3.启动tomcat的shell脚本：</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat/app1# vim tomcat_start.sh </span><br><span class="line">        #!/bin/bash</span><br><span class="line">        su - www -c &quot;/apps/tomcat/bin/catalina.sh start&quot;</span><br><span class="line">        su - www -c &quot;tail -f /etc/hosts&quot;</span><br><span class="line">    root@gmf:/data/dockerfile/web/tomcat/app1# chmod +x tomcat_start.sh</span><br><span class="line">4.修改server.xml的应用代码放置路径为/data/app1。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 基于alpine制作Nginx的镜像：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1.准备alpine基本系统环境：</span><br><span class="line">    root@gmf:/data/dockerfile/os/alpine# vim Dockerfile</span><br><span class="line">        FROM alpine:3.10.3  </span><br><span class="line">        RUN apk update \</span><br><span class="line">                &amp;&amp; sed -i &quot;s@dl-cdn.alpinelinux.org@mirrors.aliyun.com@g&quot; /etc/apk/repositories \</span><br><span class="line">                &amp;&amp; apk add iotop gcc libgcc libc-dev libcurl libc-utils pcre-dev openssl \</span><br><span class="line">                zlib-dev libnfs make pcre pcre2 zip unzip net-tools pstree wget libevent libevent-dev iproute2</span><br><span class="line">2.基于以上镜像，制作Nginx镜像：</span><br><span class="line">    root@gmf:/data/dockerfile/os/alpine/nginx_1.16# vim Dockerfile</span><br><span class="line">        FROM alpine:base1</span><br><span class="line">        ADD nginx-1.16.1.tar.gz /usr/local/src/</span><br><span class="line">        RUN cd /usr/local/src/nginx-1.16.1 \</span><br><span class="line">                &amp;&amp; ./configure --prefix=/apps/nginx --user=nginx --group=nginx \</span><br><span class="line">                &amp;&amp; make &amp;&amp; make install \</span><br><span class="line">                &amp;&amp; ln -sv /apps/nginx/sbin/nginx /usr/bin/ \</span><br><span class="line">                &amp;&amp; addgroup -g 2019 -S nginx \</span><br><span class="line">                &amp;&amp; adduser -s /sbin/nologin -S -D -u 2019 -G nginx nginx</span><br><span class="line">        COPY nginx.conf /apps/nginx/conf/nginx.conf</span><br><span class="line">        ADD app1.tar.gz /data/nginx/html</span><br><span class="line">        RUN chown nginx.nginx /data/nginx/ /apps/nginx/ -R</span><br><span class="line">        CMD [&quot;nginx&quot;]</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 制作haproxy镜像：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">1.编写Dockerfile:</span><br><span class="line">	FROM centos:7.7.1908</span><br><span class="line">	MAINTAINER ConqUeroR &quot;996941250@qq.com&quot;</span><br><span class="line">	RUN yum install -y yum install gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl \</span><br><span class="line">	        openssl-devel systemd-devel net-tools vim iotop bc zip unzip zlib-devel lrzsz tree \</span><br><span class="line">	        screen lsof tcpdump wget ntpdate</span><br><span class="line">	ADD haproxy-2.0.5.tar.gz /usr/local/src/ </span><br><span class="line">	RUN cd /usr/local/src/haproxy-2.0.5 \</span><br><span class="line">	        &amp;&amp; make ARCH=x86_64 TARGET=linux-glibc USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 USE_SYSTEMD=1 \</span><br><span class="line">	        USE_CPU_AFFINITY=1 PREFIX=/apps/haproxy \</span><br><span class="line">	        &amp;&amp; make install PREFIX=/apps/haproxy \</span><br><span class="line">	        &amp;&amp; mkdir /var/lib/haproxy/ \</span><br><span class="line">	        &amp;&amp; useradd -u 2019 -s /sbin/nologin haproxy \</span><br><span class="line">	        &amp;&amp; chown haproxy:haproxy /var/lib/haproxy/ -R \</span><br><span class="line">	        &amp;&amp; chown haproxy:haproxy /apps/haproxy/ -R </span><br><span class="line">	ADD run_haproxy.sh /usr/bin</span><br><span class="line">	CMD [&quot;/usr/bin/run_haproxy.sh&quot;]</span><br><span class="line">2.编写haproxy的启动脚本：</span><br><span class="line">	root@gmf:/data/dockerfile/web/haproxy# cat run_haproxy.sh</span><br><span class="line">		#!/bin/bash</span><br><span class="line">		/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg</span><br><span class="line">		tail -f /etc/hosts</span><br><span class="line">3.给启动脚本添加执行权限;</span><br><span class="line">	chmod +x run_haproxy.sh</span><br><span class="line">4.制作镜像，上传harbor仓库;</span><br><span class="line">	root@gmf:/data/dockerfile/web/haproxy# cat build.sh</span><br><span class="line">		#!/bin/bash</span><br><span class="line">		docker build -t 192.168.38.202/gmf-test/haproxy:v1 .</span><br><span class="line">		docker push 192.168.38.202/gmf-test/haproxy:v1</span><br><span class="line">		docker rmi 192.168.38.202/gmf-test/haproxy:v1</span><br><span class="line">5.准备haproxy的配置文件;</span><br><span class="line">	root@gmf:~# cat haproxy.cfg </span><br><span class="line">        global</span><br><span class="line">                maxconn 100000</span><br><span class="line">                chroot /apps/haproxy</span><br><span class="line">                stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">                uid 2019</span><br><span class="line">                gid 2019</span><br><span class="line">                daemon</span><br><span class="line">                pidfile /var/lib/haproxy/haproxy.pid</span><br><span class="line">                log 127.0.0.1 local3 info</span><br><span class="line">        defaults</span><br><span class="line">                option http-keep-alive</span><br><span class="line">                option forwardfor</span><br><span class="line">                maxconn 100000</span><br><span class="line">                mode http</span><br><span class="line">                timeout connect 300000ms</span><br><span class="line">                timeout client 300000ms</span><br><span class="line">                timeout server 300000ms</span><br><span class="line">        listen stats</span><br><span class="line">                mode http</span><br><span class="line">                bind 0.0.0.0:9999</span><br><span class="line">                stats enable</span><br><span class="line">                log global</span><br><span class="line">                stats uri     /haproxy-status</span><br><span class="line">                stats auth   admin:testroot</span><br><span class="line">        listen wps</span><br><span class="line">                bind 0.0.0.0:80</span><br><span class="line">                mode http</span><br><span class="line">                log global</span><br><span class="line">                server harbor2 192.168.38.204:80 check inter 2000 fall 2 rise 5</span><br><span class="line">                server harbor1 192.168.38.202:80 check inter 2000 fall 2 rise 5 backup</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/03/Dockerfile的编写/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Dockerfile的编写">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Docker的常用命令" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1013,106 +1102,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/23/Tomcat的反向代理/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Tomcat的反向代理">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Jdk和Tomcat的安装及配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/23/Jdk和Tomcat的安装及配置/" class="article-date">
-  	<time datetime="2019-11-22T17:25:22.000Z" itemprop="datePublished">2019-11-23</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/23/Jdk和Tomcat的安装及配置/">
-        Jdk和Tomcat的安装及配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 安装配置JDK：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.使用rpm包安装：</span><br><span class="line">    yum install -y jdk-8u191-linux-x64.rpm </span><br><span class="line">2.配置全局的环境变量（默认安装在/usr/java）：</span><br><span class="line">    [root@localhost]# vim /etc/profile.djdk.sh</span><br><span class="line">        export JAVA_HOME=/usr/java/default</span><br><span class="line">        export PATH=$JAVA_HOME/bin:$PATH</span><br><span class="line">    [root@localhost]# source /etc/profile.djdk.sh</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 关于JSP程序的执行过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">JSP需要首先转化为.java文件，然后编译为字节码.class文件，最后将.class文件放到JVM上运行。</span><br><span class="line">（1）首先，关于JSP文件的由来，起初基于servlet的.java代码前端后端混在一起不宜与快速的版本迭代，所以就在servlet</span><br><span class="line">的基础之上建立了.jsp文件，实现前后端的分离开发。</span><br><span class="line">（2）故而出现了以下的流程：.jsp---&gt; .java ---&gt; .class 三种格式的文件出现在服务器端。</span><br><span class="line">（3）.jsp到.java的转换是由Tomcat中的jasper工具自动转换，.java到.class有JDK中的编译组件完成。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 安装Tomcat:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tar -xvf apache-tomcat-8.5.42.tar.gz -C /usr/local/</span><br><span class="line">ln -sv /usr/local/apache-tomcat-8.5.42/ /usr/local/tomcat</span><br><span class="line">vim /etc/profile.d/tomcat.sh</span><br><span class="line">    export PATH=/usr/local/tomcat/bin:$PATH</span><br><span class="line">. /etc/profile.d/tomcat.sh  </span><br><span class="line">useradd  -r java</span><br><span class="line">chown -R java:java apache-tomcat-8.5.42</span><br><span class="line">su - java -c &apos;/usr/local/apache-tomcat-8.5.42/bin/catalina.sh start&apos;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 关于Tomcat的各个组件：</p>
-</blockquote>
-<img src="/2019/11/23/Jdk和Tomcat的安装及配置/tomcat.png">
-<p><strong><em>上图中的组件配置在Tomcat的主配置文件server.xml中。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">（1）其中的service组件主要封装connector 和 engine。</span><br><span class="line">（2）在一个Engine中可以定义多个虚拟主机（host）。</span><br><span class="line">    例如：</span><br><span class="line">        &lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;&lt;/Host&gt;</span><br><span class="line">    我们需要在appBase定义的目录中定义 ROOT 目录作为主站目录。</span><br><span class="line">（3）一个webapp目录下的文件结构：</span><br><span class="line">    lib/ 当前应用说依赖的jar包。</span><br><span class="line">    class/ 类文件，当前应用说需要的类。</span><br><span class="line">    WEB-INF/ 当前应用的私有配置，通常会覆盖Tomcat默认的全局配置,包含web.xml，contest.xml。</span><br><span class="line">    MATE-INF/ 类似于WEB-INF。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>5) Tomcat 8005端口的配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Server port=&quot;8005&quot; shutdown=&quot;SHUTDOWN&quot;&gt;</span><br><span class="line">该端口默认是监听在127.0.0.1，在 telnet 连接之后，接收到‘SHUTDOWN’字符串之后会会关闭Tomcat服务。</span><br><span class="line">    可以将‘SHUTDOWN’改为一串随机字符串。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) Tomcat管理页面的认证配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">（1）修改配置文件 conf/tomcat-users.xml：</span><br><span class="line">    &lt;role rolename=&quot;manager-gui&quot;/&gt;</span><br><span class="line">    &lt;role rolename=&quot;admin-gui&quot;/&gt;</span><br><span class="line">    &lt;user username=&quot;gmf&quot; password=&quot;testroot&quot; roles=&quot;manager-gui,admin-gui&quot;/&gt;</span><br><span class="line">（2）修改host-manager和manager的配置文件context.xml：</span><br><span class="line">      &lt;Valve className=&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span><br><span class="line">         allow=&quot;192\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1&quot; /&gt;</span><br><span class="line">重启Tomcat服务。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>7) Tomcat 虚拟主机的配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;&lt;/Host&gt;</span><br><span class="line">    unpackWARs:是否自动解压WAR格式的应用包。</span><br><span class="line">    autoDeploy:是否自动部署。</span><br><span class="line">mkdir -pv /data/webapp/ROOT</span><br><span class="line">重启Tomcat。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>8) context配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    &lt;Host name=&quot;www.gmf.com&quot;  appBase=&quot;/data/webapp&quot; unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br><span class="line">            &lt;Context path=&quot;/app&quot; docBase=&quot;/data/app&quot; reloadable=&quot;false&quot;/&gt;</span><br><span class="line">    &lt;/Host&gt;</span><br><span class="line">[root@localhost data]# pwd</span><br><span class="line">/data</span><br><span class="line">[root@localhost data]# ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root  5 Nov 20 21:18 app -&gt; appv2</span><br><span class="line">drwxr-xr-x 2 root root 24 Nov 20 21:11 appv1</span><br><span class="line">drwxr-xr-x 2 root root 24 Nov 20 21:13 appv2</span><br><span class="line">drwxr-x--- 5 root root 44 Nov 20 21:04 webapp</span><br><span class="line">以上配置便于版本的回滚及发布。(需要重启Tomcat)</span><br><span class="line">以上配置生产中reloadable=&quot;false&quot;，否则会在MATE-INF/ 类似于WEB-INF中的配置文件变化后自动加载，影响效率。</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/23/Jdk和Tomcat的安装及配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Jdk和Tomcat的安装及配置">
          &nbsp;
         view
     </span>

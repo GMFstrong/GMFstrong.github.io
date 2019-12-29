@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ZooKeeper的安装配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) 安装单机的ZooKeeper：  12345678910111213141516171819202122232425262728293031321.安装JDK环境：    apt install -y openjdk-8-jdk2.安装ZooKeeper:    mkdir /apps/zookeeper -pv    cd /apps/zookeeper    wget https://">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZooKeeper的安装配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/12/29/ZooKeeper的安装配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) 安装单机的ZooKeeper：  12345678910111213141516171819202122232425262728293031321.安装JDK环境：    apt install -y openjdk-8-jdk2.安装ZooKeeper:    mkdir /apps/zookeeper -pv    cd /apps/zookeeper    wget https://">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-29T13:30:15.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ZooKeeper的安装配置">
+<meta name="twitter:description" content="1) 安装单机的ZooKeeper：  12345678910111213141516171819202122232425262728293031321.安装JDK环境：    apt install -y openjdk-8-jdk2.安装ZooKeeper:    mkdir /apps/zookeeper -pv    cd /apps/zookeeper    wget https://">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-ZooKeeper的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/29/ZooKeeper的安装配置/" class="article-date">
+  	<time datetime="2019-12-29T12:00:09.000Z" itemprop="datePublished">2019-12-29</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ZooKeeper的安装配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2019/12/29/ZooKeeper的安装配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="ZooKeeper的安装配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装单机的ZooKeeper：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">1.安装JDK环境：</span><br><span class="line">    apt install -y openjdk-8-jdk</span><br><span class="line">2.安装ZooKeeper:</span><br><span class="line">    mkdir /apps/zookeeper -pv</span><br><span class="line">    cd /apps/zookeeper</span><br><span class="line">    wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz</span><br><span class="line">    tar -xvf zookeeper-3.4.14.tar.gz</span><br><span class="line">    cp zoo_sample.cfg zoo.cfg</span><br><span class="line">3.配置文件介绍：</span><br><span class="line">    tickTime=2000 #服务器与服务器之间的单次心跳检测时间间隔，单位为毫秒</span><br><span class="line"></span><br><span class="line">    initLimit=10 #集群中 leader 服务器与 follower 服务器初始连接心跳次数，即多少个 2000 毫秒，在网络不好时调大。</span><br><span class="line"></span><br><span class="line">    syncLimit=5 # leader 与 follower 之间连接完成之后，后期检测发送和应答的心跳次数，如果该 follower </span><br><span class="line">    在设置的时间内(5*2000)不能与 leader 进行通信，那么此 follower 将被视为不可用。</span><br><span class="line"></span><br><span class="line">    dataDir=/usr/local/zookeeper/data #自定义的 zookeeper 保存数据的目录。</span><br><span class="line"></span><br><span class="line">    clientPort=2181 #客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。</span><br><span class="line"></span><br><span class="line">    maxClientCnxns=4096 #设置最大连接客户端数量。</span><br><span class="line"></span><br><span class="line">    autopurge.snapRetainCount=128 #设置 zookeeper 保存多少次客户端连接的数据。</span><br><span class="line"></span><br><span class="line">    autopurge.purgeInterval=1 #服务器编号=服务器 IP:LF 数据同步端口:LF 选举端口。</span><br><span class="line"></span><br><span class="line">    server.1=172.18.0.101:2888:3888 # server.服务器编号=服务器 IP:LF 数据同步端口(仅仅出现在leader):LF 选举端口。</span><br><span class="line">    server.2=172.18.0.102:2888:3888</span><br><span class="line">    server.3=172.18.0.103:2888:3888</span><br><span class="line">4.启动ZooKeeper:</span><br><span class="line">    /apps/zookeeper/zookeeper-3.4.14/bin/zkServer.sh start</span><br><span class="line">    /apps/zookeeper/zookeeper-3.4.14/bin/zkServer.sh status</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) ZooKeeper的集群配置：</p>
+</blockquote>
+<p><strong><em>这里用3台机器构建一个Zookeeper集群，分别安装JDK环境。</em></strong><br><strong><em>zookeeper 集群特性：整个集群种只要有超过集群数量一半的 zookeeper 工作是正常的，那么整个集群对外就是可用的。</em></strong><br><strong><em>在整个ZooKeeper集群中为了保证数据的一致性，仅有Leader具有写权限。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">1.在各个节点安装ZooKeeper:</span><br><span class="line">    apt install -y openjdk-8-jdk</span><br><span class="line">    mkdir /apps/zookeeper -pv</span><br><span class="line">    cd /apps/zookeeper</span><br><span class="line">    tar -xvf zookeeper-3.4.14.tar.gz</span><br><span class="line">    cd /apps/zookeeper/zookeeper-3.4.14/conf/</span><br><span class="line">    cp zoo_sample.cfg zoo.cfg</span><br><span class="line">    vim zoo.cfg</span><br><span class="line">        tickTime=2000</span><br><span class="line">        initLimit=10</span><br><span class="line">        syncLimit=5</span><br><span class="line">        dataDir=/tmp/zookeeper</span><br><span class="line">        clientPort=2181</span><br><span class="line">        maxClientCnxns=4096</span><br><span class="line">        server.1=192.168.38.208:2888:3888</span><br><span class="line">        server.2=192.168.38.207:2888:3888</span><br><span class="line">        server.3=192.168.38.210:2888:3888</span><br><span class="line">2.创建节点各自在集群中的ID号：</span><br><span class="line">    echo 1 &gt; /tmp/zookeeper/myid</span><br><span class="line">    ‘/tmp/zookeeper/’ 该目录为ZooKeeper的数据目录，‘myid’文件中的ID号必须与配置文件server.1中的一致。</span><br><span class="line">3.启动集群（必须在配置文件中指定的时间内启动所有节点）：</span><br><span class="line">    /apps/zookeeper/zookeeper-3.4.14/bin/zkServer.sh start</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 安装zookeeper 客户端 ZooInspector </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apt install -y maven </span><br><span class="line">git clone https://github.com/zzhang5/zooinspector.git</span><br><span class="line">cd zooinspector/</span><br><span class="line">mvn clean package（注意翻墙，否者很慢）</span><br><span class="line">chmod +x target/zooinspector-pkg/bin/zooinspector.sh</span><br><span class="line">target/zooinspector-pkg/bin/zooinspector.sh （注意开启X11）</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 命令行测试写入数据：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/apps/zookeeper/zookeeper-3.4.14/bin/zkCli.sh -server 192.168.38.207:2181</span><br><span class="line">? 查看支持的命令</span><br><span class="line">create /test &quot;hello&quot; 创建数据</span><br><span class="line">get /test    验证数据</span><br><span class="line">connect 192.168.38.208:2181  到其它节点验证数据是否写入</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/12/16/Gitlab的基本使用/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Gitlab的基本使用</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="ZooKeeper的安装配置" data-title="ZooKeeper的安装配置" data-url="http://gmfdevops.com.com/2019/12/29/ZooKeeper的安装配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="ZooKeeper的安装配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2019 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
