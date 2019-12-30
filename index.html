@@ -202,6 +202,87 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-RabbitMQ消息队列" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/12/30/RabbitMQ消息队列/" class="article-date">
+  	<time datetime="2019-12-30T09:00:09.000Z" itemprop="datePublished">2019-12-30</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/30/RabbitMQ消息队列/">
+        RabbitMQ消息队列
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装单机RabbitMQ：（生产 4C 8G）</p>
+</blockquote>
+<p><strong><em>在使用负载均衡代理时用TCP模式，因为RabbitMQ使用的是专有的七层协议。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">1.更改主机名，并配置主机名解析（RabbitMQ对主机名的要求比较高）</span><br><span class="line">    hostnamectl set-hostname mq1.gmf.com</span><br><span class="line">    vim /etc/hosts</span><br><span class="line">        192.168.38.207 mq1.gmf.com mq1</span><br><span class="line">2.安装RabbitMQ:</span><br><span class="line">    curl -fsSL https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc | sudo apt-key add -</span><br><span class="line">    apt-key adv --keyserver &quot;hkps.pool.sks-keyservers.net&quot; --recv-keys &quot;0x6B73A36E6026DFCA&quot;</span><br><span class="line">    apt-get install apt-transport-https  #安装 apt HTTPS 传输</span><br><span class="line">    vim /etc/apt/sources.list</span><br><span class="line">        deb https://dl.bintray.com/rabbitmq-erlang/debian bionic erlang</span><br><span class="line">        deb https://dl.bintray.com/rabbitmq/debian bionic main</span><br><span class="line">    apt update </span><br><span class="line">    apt-cache madison rabbitmq-server</span><br><span class="line">    apt install -y rabbitmq-server=3.7.23-1</span><br><span class="line">3.开启web界面管理插件：</span><br><span class="line">    rabbitmq-plugins enable rabbitmq_management</span><br><span class="line"></span><br><span class="line">5672：消费者访问的 端口</span><br><span class="line">15672：web 管理端口</span><br><span class="line">25672：集群状态通信端口</span><br><span class="line"></span><br><span class="line">4.启用guest用户的外部访问：</span><br><span class="line">    vim /usr/lib/rabbitmq/lib/rabbitmq_server-3.7.23/ebin/rabbit.app</span><br><span class="line">        &#123;loopback_users, []&#125;  #39行</span><br><span class="line">    systemctl restart rabbitmq-server.service</span><br><span class="line">5.添加用户：</span><br><span class="line">     rabbitmqctl add_user gmf testroot</span><br><span class="line">     rabbitmqctl set_permissions gmf &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>2) RabbitMQ的集群搭建：</p>
+</blockquote>
+<p><strong><em>普通集群模式（默认模式）：该模式下，消息实体仅仅存在于其中一个节点，其它节点只有元数据（队列结构），但是消费者在任意节点都可以取到消息实体，因为消息实体可以从存放消息实体的节点传递到消费者访问的节点上。故而消息实体仅仅有一份，存在因单点故障丢数据的风险</em></strong></p>
+<p><strong><em>镜像集群模式：该模式解决了单点故障数据丢失的问题，因为消息实体会主动在各个节点间做数据同步。该模式的缺点也不言而喻，随着节点和消息队列数量的增加，必然会引起因数据同步造成集群内部网络带宽的消耗和机器性能的下降。该模式在数据可靠性要求较高时适用。</em></strong></p>
+<p><strong><em>在RabbitMQ中存在两种模式的节点：（1）磁盘节点，用于永久保存数据，防止集群因外部因素（机房断电）造成的数据丢失。（2）内存节点，因为磁盘IO较慢，故而采用内存提升速度。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1.更改hosts解析：</span><br><span class="line">    vim /etc/hosts</span><br><span class="line">        192.168.38.207 mq1.gmf.com mq1</span><br><span class="line">        192.168.38.208 mq2.gmf.com mq2</span><br><span class="line">        192.168.38.210 mq3.gmf.com mq3</span><br><span class="line">2.更改主机名：</span><br><span class="line">    hostnamectl set-hostname mq1.gmf.com</span><br><span class="line">    hostnamectl set-hostname mq2.gmf.com</span><br><span class="line">    hostnamectl set-hostname mq3.gmf.com</span><br><span class="line">3.在各个节点安装RabbitMQ</span><br><span class="line">    参考单机模式。</span><br><span class="line">4.创建Erlang集群（RabbitMQ集群依赖）：</span><br><span class="line">    systemctl stop rabbitmq-server.service  #关闭各个节点服务</span><br><span class="line">    scp /var/lib/rabbitmq/.erlang.cookie 192.168.38.208:/var/lib/rabbitmq/.erlang.cookie</span><br><span class="line">    scp /var/lib/rabbitmq/.erlang.cookie 192.168.38.210:/var/lib/rabbitmq/.erlang.cookie</span><br><span class="line">    必须保证各节点 cookie 保持一致，文件是 400 的权限，否则节点之间就无法通信。</span><br><span class="line">    systemctl start rabbitmq-server.service</span><br><span class="line">5.将node2和nide3加入node1：</span><br><span class="line">    1.关闭应用服务：</span><br><span class="line">        rabbitmqctl stop_app </span><br><span class="line">    2.清空节点元数据：</span><br><span class="line">        rabbitmqctl reset</span><br><span class="line">    3.将node2和node3以内存节点加入node1(mq1)：</span><br><span class="line">         rabbitmqctl join_cluster rabbit@mq1 --ram #默认为磁盘节点</span><br><span class="line">    4.启动app服务：</span><br><span class="line">        rabbitmqctl start_app</span><br><span class="line">    5.开启各个节点的web管理：</span><br><span class="line">        rabbitmq-plugins enable rabbitmq_management</span><br><span class="line">    6.验证当前集群状态：</span><br><span class="line">        rabbitmqctl cluster_status </span><br><span class="line">            Cluster status of node rabbit@mq1 ...</span><br><span class="line">            [&#123;nodes,[&#123;disc,[rabbit@mq1]&#125;,&#123;ram,[rabbit@mq3,rabbit@mq2]&#125;]&#125;,</span><br><span class="line">            &#123;running_nodes,[rabbit@mq3,rabbit@mq2,rabbit@mq1]&#125;,</span><br><span class="line">            &#123;cluster_name,&lt;&lt;&quot;rabbit@mq1.gmf.com&quot;&gt;&gt;&#125;,</span><br><span class="line">            &#123;partitions,[]&#125;,</span><br><span class="line">            &#123;alarms,[&#123;rabbit@mq3,[]&#125;,&#123;rabbit@mq2,[]&#125;,&#123;rabbit@mq1,[]&#125;]&#125;]</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 将集群配置为镜像模式：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在任意节点执行：</span><br><span class="line">    rabbitmqctl set_policy ha-all &quot;#&quot; &apos;&#123;&quot;ha-mode&quot;:&quot;all&quot;&#125;&apos;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/12/30/RabbitMQ消息队列/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="RabbitMQ消息队列">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-ZooKeeper的安装配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -969,94 +1050,6 @@
 <div class="counter-tag counter">
     <span id="/2019/12/06/Docker网络的使用/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Docker网络的使用">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Docker数据卷的使用" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/12/06/Docker数据卷的使用/" class="article-date">
-  	<time datetime="2019-12-06T12:00:09.000Z" itemprop="datePublished">2019-12-06</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/06/Docker数据卷的使用/">
-        Docker数据卷的使用
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。</em></strong></p>
-<blockquote>
-<p>1) 使用数据卷的有点：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。</span><br><span class="line">2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。</span><br><span class="line">3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。</span><br><span class="line">4. 在容器里面的写入数据不会影响到镜像本身。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 将宿主机目录映射到容器内部：（将目录或者文件映射进容器时注意权限问题）</p>
-</blockquote>
-<p><strong><em>使用-v 参数，将宿主机目录映射到容器内部，web2 的 的 ro 标示在容器内对该目录只读，默认是可读写的</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在容器中/apps/nginx/html该目录仅仅能读不能修改（宿主机仍然可以修改，在宿主机可以使用chattr +i xxx 进行控制）。</span><br><span class="line">    root@gmf:~# docker run -itd -p 83:80 -v /data/html/web2/:/apps/nginx/html:ro 4f183a656f6b</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>3) 同时在容器中挂载多个文件或目录：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# docker run -it --rm -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh -v /data/html/:/data/app1 -p 80:8080 edbe434432c9</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) JVM的优化参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=&quot;-server -Xms4g -Xmx4g -Xss512k -Xmn1g -XX:CMSInitiatingOccupancyFraction=65 -XX:+UseFastAccessorMethods -XX:+AggressiveOpts -XX:+UseBiasedLocking -XX:+DisableExplicitGC -XX:MaxTenuringThreshold=10 -XX:NewSize=2048M -XX:MaxNewSize=2048M -XX:NewRatio=2 -XX:PermSize=128m -XX:MaxPermSize=512m -XX:CMSFullGCsBeforeCompaction=5 -XX:+ExplicitGCInvokesConcurrent -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods&quot;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>5) 数据卷容器的使用：</p>
-</blockquote>
-<p><strong><em>停止 volume server 可以创建新容器，将 volume server 删除，不能创建容器，已经运行的容器不受任何影响。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.创建存储卷server：</span><br><span class="line">    docker run -d -v /data/html:/data/app1/ -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh:ro --name vserver edbe434432c9</span><br><span class="line">2.基于存储卷server创建容器：</span><br><span class="line">    docker run -d -p 80:8080 --volumes-from vserver --name=web1 edbe434432c9</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/12/06/Docker数据卷的使用/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Docker数据卷的使用">
          &nbsp;
         view
     </span>

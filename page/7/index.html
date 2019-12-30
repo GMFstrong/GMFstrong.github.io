@@ -202,6 +202,78 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-一键发放公钥" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/一键发放公钥/" class="article-date">
+  	<time datetime="2019-09-15T12:04:15.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/一键发放公钥/">
+        一键发放公钥
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在使用该脚本前，确保自己拥有ip_pass.txt文件。</p>
+</blockquote>
+<p>形如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br><span class="line">xxx.xxx.xxx.xxx pppppp</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">rpm -ql expect &amp;&gt;/dev/null || yum install -y -q expect</span><br><span class="line">ssh-keygen -P &quot;&quot; -f &quot;/root/.ssh/id_rsa&quot;</span><br><span class="line">while read line;do</span><br><span class="line">        IPADD=`echo $line | cut -d &quot; &quot; -f1`</span><br><span class="line">        PASS=`echo &quot;$line&quot; |cut -d &quot; &quot; -f2`</span><br><span class="line">expect &lt;&lt;EOF</span><br><span class="line">        set timeout 10</span><br><span class="line">        spawn ssh-copy-id $IPADD</span><br><span class="line">        expect &#123;</span><br><span class="line">        &quot;yes/no&quot; &#123;send &quot;yes\n&quot;;exp_continue&#125;</span><br><span class="line">        &quot;password&quot; &#123;send &quot;$PASS\n&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        expect eof</span><br><span class="line">EOF</span><br><span class="line">done &lt; IP_PASS.txt</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/shell/">shell</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/一键发放公钥/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="一键发放公钥">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-rsync配合计划任务实现数据备份" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1040,100 +1112,6 @@
 <div class="counter-tag counter">
     <span id="/2019/08/20/Linux主机名管理/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Linux主机名管理">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Bonding的网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/20/Bonding的网卡配置/" class="article-date">
-  	<time datetime="2019-08-20T02:32:20.000Z" itemprop="datePublished">2019-08-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/20/Bonding的网卡配置/">
-        Bonding的网卡配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>Bonding就是一种将多块网卡绑定同一IP地址对外提供服务可以实现高可用和负载均衡的技术。</em></strong></p>
-<p>直接给两块网卡配置同一IP地址是不可以的。通过bonding虚拟一块网卡对外提供链接，并且所有的物理网卡被修改为相同的MAC地址。</p>
-<blockquote>
-<p>bonding 的7种工作模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  （1）Mode 0 (balance-rr)： 轮询（Round-robin）策略，从头到尾顺序的在每</span><br><span class="line">一个slave接口上面发送数据包。本模式提供负载均衡和容错的能力。</span><br><span class="line">  （2）Mode 1 (active-backup)：活动-备份（主备）策略，只有一个slave被激活，当且仅当活动的slave接口失败时才会激活其他slave.为了避免交换机发生混</span><br><span class="line">乱此时绑定的MAC地址只有一个外部端口上可见。</span><br><span class="line">  （3）Mode 3 (broadcast)：广播策略，在所有的slave接口上传送所有的报文,提</span><br><span class="line">供容错能力。</span><br><span class="line">  （4）active-backup、balance-tlb 和 balance-alb 模式不需要交换机的任何特</span><br><span class="line">殊配置。其他绑定模式需要配置交换机以便整合链接。如：Cisco 交换机需</span><br><span class="line">要在模式 0、2 和 3 中使用 EtherChannel，但在模式4中需要 LACP和</span><br><span class="line">EtherChannel。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>在Centos6上用两块网卡实现bonding的配置：</p>
-</blockquote>
-<p>  （1）在/etc/sysconfig/network-scripts/目录下创建ifcfg-bond0文件，文件内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-bond0 </span><br><span class="line">DEVICE=bond0</span><br><span class="line">BONDING_OPTS=&apos;miimon=100 mode=1&apos;   #miimon 是用来进行链路监测的。如果miimon=100，那么系统每100ms 监测一次链路连接状态，如果有一条线路不通就转入另一条线路，mode为bonding的工作模式。</span><br><span class="line">IPADDR=192.168.38.100</span><br><span class="line">NETMASK=255.255.255.0</span><br><span class="line">GATEWAY=192.168.38.2</span><br><span class="line">DNS1=192.168.38.2</span><br><span class="line">DNS2=180.76.76.76</span><br><span class="line">BOOTPROTO=static</span><br></pre></td></tr></table></figure></p>
-<p>  （2）修改网卡配置文件（/etc/sysconfig/network-scripts/ifcfg-eth[0|1]）为以下内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth0</span><br><span class="line">DEVICE=eth0             #仅需要修改这里的设备名就行</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">MASTER=bond0            #加入的bonding的设备名</span><br><span class="line">SLAVE=yes               </span><br><span class="line">[root@centos6 network-scripts]#cat ifcfg-eth1</span><br><span class="line">DEVICE=eth1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">ONBOOT=yes</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">MASTER=bond0</span><br><span class="line">SLAVE=yes</span><br></pre></td></tr></table></figure></p>
-<p>  （3）在以上文件修改完成以后，重启网络服务：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#!ser</span><br><span class="line">service network restart</span><br><span class="line">Shutting down interface bond0:                             [  OK  ]</span><br><span class="line">Shutting down loopback interface:                          [  OK  ]</span><br><span class="line">Bringing up loopback interface:                            [  OK  ]</span><br><span class="line">Bringing up interface bond0:  Determining if ip address 192.168.38.100 is already in use for device bond0...</span><br><span class="line">                                                           [  OK  ]</span><br></pre></td></tr></table></figure></p>
-<p>  （4）查看bonding的信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat /proc/net/bonding/bond0 </span><br><span class="line">Ethernet Channel Bonding Driver: v3.7.1 (April 27, 2011)</span><br><span class="line"></span><br><span class="line">Bonding Mode: fault-tolerance (active-backup)</span><br><span class="line">Primary Slave: None</span><br><span class="line">Currently Active Slave: eth0</span><br><span class="line">MII Status: up</span><br><span class="line">MII Polling Interval (ms): 100</span><br><span class="line">Up Delay (ms): 0</span><br><span class="line">Down Delay (ms): 0</span><br><span class="line"></span><br><span class="line">Slave Interface: eth0</span><br><span class="line">MII Status: up</span><br><span class="line">Speed: 1000 Mbps</span><br><span class="line">Duplex: full</span><br><span class="line">Link Failure Count: 1</span><br><span class="line">Permanent HW addr: 00:0c:29:0a:74:24</span><br><span class="line">Slave queue ID: 0</span><br><span class="line"></span><br><span class="line">Slave Interface: eth1</span><br><span class="line">MII Status: up</span><br><span class="line">Speed: 1000 Mbps</span><br><span class="line">Duplex: full</span><br><span class="line">Link Failure Count: 2</span><br><span class="line">Permanent HW addr: 00:0c:29:0a:74:2e</span><br><span class="line">Slave queue ID: 0</span><br></pre></td></tr></table></figure></p>
-<p>  （5）查看bonding的工作模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#cat /sys/class/net/bond0/bonding/mode</span><br><span class="line">active-backup 1</span><br></pre></td></tr></table></figure></p>
-<p>  （6）通过ip a命令可以查看到两块网卡对外的MAC地址是相同的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 network-scripts]#ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN </span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">    inet6 ::1/128 scope host </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,SLAVE,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast master bond0 state UP qlen 1000</span><br><span class="line">    link/ether 00:0c:29:0a:74:24 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">3: eth1: &lt;BROADCAST,MULTICAST,SLAVE,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast master bond0 state UP qlen 1000</span><br><span class="line">    link/ether 00:0c:29:0a:74:24 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">4: bond0: &lt;BROADCAST,MULTICAST,MASTER,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP </span><br><span class="line">    link/ether 00:0c:29:0a:74:24 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.38.100/24 brd 192.168.38.255 scope global bond0</span><br><span class="line">    inet6 fe80::20c:29ff:fe0a:7424/64 scope link </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>下面是关于bonding的卸载：</p>
-</blockquote>
-<p>  （1）先把bonding网卡down了。</p>
-<pre><code>ifconfig bond0 down
-</code></pre><p>  （2）卸载bonding驱动。</p>
-<pre><code>rmmod bonding
-</code></pre><p> <strong><em>注意：如若没有删除ifcfg-bond0网卡的配置文件，再次启动网络服务bonding会重新安装。</em></strong></p>
-<h2 id="在一些场景中，可以用Network-Teaming实现与Bonding类似的功能。"><a href="#在一些场景中，可以用Network-Teaming实现与Bonding类似的功能。" class="headerlink" title="在一些场景中，可以用Network Teaming实现与Bonding类似的功能。"></a>在一些场景中，可以用Network Teaming实现与Bonding类似的功能。</h2><blockquote>
-<p>网络组：是将多个网卡聚合在一起方法，从而实现冗错和提高吞吐量。</p>
-</blockquote>
-<pre><code>特点：网络组不同于旧版中bonding技术，提供更好的性能和扩展性，网络组由内核驱动和teamd守护进程实现。
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/20/Bonding的网卡配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Bonding的网卡配置">
          &nbsp;
         view
     </span>
