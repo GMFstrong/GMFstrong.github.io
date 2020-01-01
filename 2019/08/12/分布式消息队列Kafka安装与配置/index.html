@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Docker数据卷的使用 | ConqUeroR</title>
+  <title>分布式消息队列Kafka安装与配置 | ConqUeroR</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。  1) 使用数据卷的有点：  12341. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。4. 在容">
+  <meta name="description" content="1) 安装Kafaka：  kafka依赖于ZooKeeper集群，先安装ZooKeeper集群。123456789101112131415wget http://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.3.1/kafka_2.12-2.3.1.tgzmkdir /apps/kafkatar -xvf /usr/local/src/kafka_2.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Docker数据卷的使用">
-<meta property="og:url" content="http://gmfdevops.com.com/2019/12/06/Docker数据卷的使用/index.html">
+<meta property="og:title" content="分布式消息队列Kafka安装与配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2019/08/12/分布式消息队列Kafka安装与配置/index.html">
 <meta property="og:site_name" content="ConqUeroR">
-<meta property="og:description" content="一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。  1) 使用数据卷的有点：  12341. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。4. 在容">
+<meta property="og:description" content="1) 安装Kafaka：  kafka依赖于ZooKeeper集群，先安装ZooKeeper集群。123456789101112131415wget http://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.3.1/kafka_2.12-2.3.1.tgzmkdir /apps/kafkatar -xvf /usr/local/src/kafka_2.">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-12-07T10:39:47.000Z">
+<meta property="og:updated_time" content="2020-01-01T13:55:24.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Docker数据卷的使用">
-<meta name="twitter:description" content="一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。  1) 使用数据卷的有点：  12341. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。4. 在容">
+<meta name="twitter:title" content="分布式消息队列Kafka安装与配置">
+<meta name="twitter:description" content="1) 安装Kafaka：  kafka依赖于ZooKeeper集群，先安装ZooKeeper集群。123456789101112131415wget http://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.3.1/kafka_2.12-2.3.1.tgzmkdir /apps/kafkatar -xvf /usr/local/src/kafka_2.">
   
     <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
   
@@ -201,11 +201,11 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-Docker数据卷的使用" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-分布式消息队列Kafka安装与配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/12/06/Docker数据卷的使用/" class="article-date">
-  	<time datetime="2019-12-06T12:00:09.000Z" itemprop="datePublished">2019-12-06</time>
+      <a href="/2019/08/12/分布式消息队列Kafka安装与配置/" class="article-date">
+  	<time datetime="2019-08-12T12:00:10.000Z" itemprop="datePublished">2019-08-12</time>
 </a>
     </div>
   
@@ -218,7 +218,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Docker数据卷的使用
+      分布式消息队列Kafka安装与配置
       
     </h1>
   
@@ -229,15 +229,15 @@
         
         
 	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
+	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
 	</div>
 
 
         
           
 <div class="counter-tag counter">
-    <span id="/2019/12/06/Docker数据卷的使用/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Docker数据卷的使用">
+    <span id="/2019/08/12/分布式消息队列Kafka安装与配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="分布式消息队列Kafka安装与配置">
          &nbsp;
         view
     </span>
@@ -250,27 +250,30 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><strong><em>一般发放入数据卷中数据为需要持久存储的如mysql的/data/目录，redis的数据目录，用户上传的图片等。因为容器中的数据会随着容器的销毁而丢失。</em></strong></p>
-<blockquote>
-<p>1) 使用数据卷的有点：</p>
+        <blockquote>
+<p>1) 安装Kafaka：</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. 数据卷是宿主机的目录或者文件，并且可以在多个容器之间共同使用。</span><br><span class="line">2. 在宿主机对数据卷更改数据后会在所有容器里面会立即更新。</span><br><span class="line">3. 数据卷的数据可以持久保存，即使删除使用使用该容器卷的容器也不影响。</span><br><span class="line">4. 在容器里面的写入数据不会影响到镜像本身。</span><br></pre></td></tr></table></figure>
+<p><strong><em>kafka依赖于ZooKeeper集群，先安装ZooKeeper集群。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">wget http://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.3.1/kafka_2.12-2.3.1.tgz</span><br><span class="line">mkdir /apps/kafka</span><br><span class="line">tar -xvf /usr/local/src/kafka_2.12-2.3.1.tgz -C /apps/kafka/</span><br><span class="line">ln -sv /apps/kafka/kafka_2.12-2.3.1/ /usr/local/kafka</span><br><span class="line">mkdir /data/kafka/kafka-logs -pv</span><br><span class="line">vim /usr/local/kafka/config/server.properties</span><br><span class="line">    broker.id=207                               #kafka集群中独一无二</span><br><span class="line">    listeners=PLAINTEXT://192.168.38.207:9092   #监听的地址端口</span><br><span class="line">    log.dirs=/data/kafka/kafka-logs             #消息存放的位置</span><br><span class="line">    zookeeper.connect=192.168.38.207:2181,192.168.38.210:2181,192.168.38.208:2181  #连接的zk的地址,zk中存储了broker的元数据信息</span><br><span class="line">    zookeeper.connection.timeout.ms=10000       #必要时调大超时时间</span><br><span class="line">/usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties    #前台启动</span><br><span class="line">        [2020-01-01 14:40:10,758] INFO [KafkaServer id=207] started (kafka.server.KafkaServer)  #启动正常</span><br><span class="line">/usr/local/kafka/bin/kafka-server-start.sh -daemon  #后台启动</span><br><span class="line">tail -f /usr/local/kafka/logs/*                 #查看是否启动成功</span><br></pre></td></tr></table></figure></p>
 <blockquote>
-<p>2) 将宿主机目录映射到容器内部：（将目录或者文件映射进容器时注意权限问题）</p>
+<p>2) 创建一个topic:</p>
 </blockquote>
-<p><strong><em>使用-v 参数，将宿主机目录映射到容器内部，web2 的 的 ro 标示在容器内对该目录只读，默认是可读写的</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在容器中/apps/nginx/html该目录仅仅能读不能修改（宿主机仍然可以修改，在宿主机可以使用chattr +i xxx 进行控制）。</span><br><span class="line">    root@gmf:~# docker run -itd -p 83:80 -v /data/html/web2/:/apps/nginx/html:ro 4f183a656f6b</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper 192.168.38.207 --partitions 3 --replication-factor 3 --topic gmf</span><br><span class="line">    Created topic gmf.</span><br><span class="line">/usr/local/kafka/bin/kafka-topics.sh --describe --zookeeper 192.168.38.207 --topic gmf </span><br><span class="line">    Topic:gmf       PartitionCount:3        ReplicationFactor:3     Configs:</span><br><span class="line">        Topic: gmf      Partition: 0    Leader: 207     Replicas: 207,208,210   Isr: 207,208,210</span><br><span class="line">        Topic: gmf      Partition: 1    Leader: 208     Replicas: 208,210,207   Isr: 208,210,207</span><br><span class="line">        Topic: gmf      Partition: 2    Leader: 210     Replicas: 210,207,208   Isr: 210,207,208</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>3) 同时在容器中挂载多个文件或目录：</p>
+<p>3) 获取所有的Topic：</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@gmf:~# docker run -it --rm -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh -v /data/html/:/data/app1 -p 80:8080 edbe434432c9</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-topics.sh --list --zookeeper 192.168.38.207</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>4) JVM的优化参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=&quot;-server -Xms4g -Xmx4g -Xss512k -Xmn1g -XX:CMSInitiatingOccupancyFraction=65 -XX:+UseFastAccessorMethods -XX:+AggressiveOpts -XX:+UseBiasedLocking -XX:+DisableExplicitGC -XX:MaxTenuringThreshold=10 -XX:NewSize=2048M -XX:MaxNewSize=2048M -XX:NewRatio=2 -XX:PermSize=128m -XX:MaxPermSize=512m -XX:CMSFullGCsBeforeCompaction=5 -XX:+ExplicitGCInvokesConcurrent -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods&quot;</span><br></pre></td></tr></table></figure></p>
+<p>4) 向一个队列里边发送消息：</p>
 </blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-console-producer.sh --broker-list 192.168.38.207:9092 --topic gmf</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>5) 数据卷容器的使用：</p>
+<p>5) 获取消息：</p>
 </blockquote>
-<p><strong><em>停止 volume server 可以创建新容器，将 volume server 删除，不能创建容器，已经运行的容器不受任何影响。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.创建存储卷server：</span><br><span class="line">    docker run -d -v /data/html:/data/app1/ -v /data/conf/tomcat/catalina.sh:/apps/tomcat/bin/catalina.sh:ro --name vserver edbe434432c9</span><br><span class="line">2.基于存储卷server创建容器：</span><br><span class="line">    docker run -d -p 80:8080 --volumes-from vserver --name=web1 edbe434432c9</span><br></pre></td></tr></table></figure></p>
-
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-console-consumer.sh --topic gmf --bootstrap-server 192.168.38.207:9092 --from-beginning</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) 删除一个topic:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-topics.sh --delete --zookeeper 192.168.38.207 --topic gmf</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -279,18 +282,18 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/12/06/Docker网络的使用/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/08/20/Bonding的网卡配置/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">&lt;</strong>
       <div class="article-nav-title">
         
-          Docker网络的使用
+          Bonding的网卡配置
         
       </div>
     </a>
   
   
-    <a href="/2019/12/03/Dockerfile的编写/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Dockerfile的编写</div>
+    <a href="/2019/08/12/LVM的常用配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">LVM的常用配置</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -300,7 +303,7 @@
 </article>
 
 
-<div class="ds-share share" data-thread-key="Docker数据卷的使用" data-title="Docker数据卷的使用" data-url="http://gmfdevops.com.com/2019/12/06/Docker数据卷的使用/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="Docker数据卷的使用">
+<div class="ds-share share" data-thread-key="分布式消息队列Kafka安装与配置" data-title="分布式消息队列Kafka安装与配置" data-url="http://gmfdevops.com.com/2019/08/12/分布式消息队列Kafka安装与配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="分布式消息队列Kafka安装与配置">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
