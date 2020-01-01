@@ -202,6 +202,88 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Linux主机名管理" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/20/Linux主机名管理/" class="article-date">
+  	<time datetime="2019-08-20T02:41:09.000Z" itemprop="datePublished">2019-08-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/20/Linux主机名管理/">
+        Linux主机名管理
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>关于Linux主机名的修改：<br>hostname 主机名         再执行exec bash可以临时生效。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]#hostname node1</span><br><span class="line">[root@centos6 ~]#exec bash</span><br><span class="line">[root@node1 ~]#</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/etc/hostname，更改配置文件不会立即生效。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]#vim /etc/sysconfig/network</span><br><span class="line">  </span><br><span class="line">  1 NETWORKING=yes</span><br><span class="line">  2 HOSTNAME=conqueror</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>如若修改了/etc/sysconfig/network文件，建议在/etc/hosts文件里127.0.0.1后加入自己更改的主机名，便于自己在访问主机名时可以解析。</em></strong></p>
+<blockquote>
+<p>没有添加以前：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">ping: unknown host conqueror</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>添加以后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#vim /etc/hosts</span><br><span class="line">  </span><br><span class="line">  1 127.0.0.1   localhost localhost.localdomain localhost4 localhos</span><br><span class="line">    t4.localdomain4 conqueror                                      </span><br><span class="line">  2 ::1         localhost localhost.localdomain localhost6 localhos</span><br><span class="line">    t6.localdomain6</span><br><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">PING localhost (127.0.0.1) 56(84) bytes of data.</span><br><span class="line">64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.014 ms</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong><em>在Centos7中可以使用如下命令管理主机名：</em></strong><br>hostnamectl set-hostname 主机名</p>
+<pre><code>以上命令用于修改主机名。
+</code></pre><p>默认删除文件/etc/hostname，主机名会恢复至localhost.localdomain。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux/">linux</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/08/20/Linux主机名管理/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Linux主机名管理">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Bonding的网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -275,97 +357,6 @@
 <div class="counter-tag counter">
     <span id="/2019/08/20/Bonding的网卡配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Bonding的网卡配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-分布式消息队列Kafka安装与配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/12/分布式消息队列Kafka安装与配置/" class="article-date">
-  	<time datetime="2019-08-12T12:00:10.000Z" itemprop="datePublished">2019-08-12</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/12/分布式消息队列Kafka安装与配置/">
-        分布式消息队列Kafka安装与配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 安装Kafaka：</p>
-</blockquote>
-<p><strong><em>kafka依赖于ZooKeeper集群，先安装ZooKeeper集群。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">wget http://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.3.1/kafka_2.12-2.3.1.tgz</span><br><span class="line">mkdir /apps/kafka</span><br><span class="line">tar -xvf /usr/local/src/kafka_2.12-2.3.1.tgz -C /apps/kafka/</span><br><span class="line">ln -sv /apps/kafka/kafka_2.12-2.3.1/ /usr/local/kafka</span><br><span class="line">mkdir /data/kafka/kafka-logs -pv</span><br><span class="line">vim /usr/local/kafka/config/server.properties</span><br><span class="line">    broker.id=207                               #kafka集群中独一无二</span><br><span class="line">    listeners=PLAINTEXT://192.168.38.207:9092   #监听的地址端口</span><br><span class="line">    log.dirs=/data/kafka/kafka-logs             #消息存放的位置</span><br><span class="line">    zookeeper.connect=192.168.38.207:2181,192.168.38.210:2181,192.168.38.208:2181  #连接的zk的地址,zk中存储了broker的元数据信息</span><br><span class="line">    zookeeper.connection.timeout.ms=10000       #必要时调大超时时间</span><br><span class="line">/usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties    #前台启动</span><br><span class="line">        [2020-01-01 14:40:10,758] INFO [KafkaServer id=207] started (kafka.server.KafkaServer)  #启动正常</span><br><span class="line">/usr/local/kafka/bin/kafka-server-start.sh -daemon  #后台启动</span><br><span class="line">tail -f /usr/local/kafka/logs/*                 #查看是否启动成功</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>2) 创建一个topic:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper 192.168.38.207 --partitions 3 --replication-factor 3 --topic gmf</span><br><span class="line">    Created topic gmf.</span><br><span class="line">/usr/local/kafka/bin/kafka-topics.sh --describe --zookeeper 192.168.38.207 --topic gmf </span><br><span class="line">    Topic:gmf       PartitionCount:3        ReplicationFactor:3     Configs:</span><br><span class="line">        Topic: gmf      Partition: 0    Leader: 207     Replicas: 207,208,210   Isr: 207,208,210</span><br><span class="line">        Topic: gmf      Partition: 1    Leader: 208     Replicas: 208,210,207   Isr: 208,210,207</span><br><span class="line">        Topic: gmf      Partition: 2    Leader: 210     Replicas: 210,207,208   Isr: 210,207,208</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 获取所有的Topic：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-topics.sh --list --zookeeper 192.168.38.207</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 向一个队列里边发送消息：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-console-producer.sh --broker-list 192.168.38.207:9092 --topic gmf</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) 获取消息：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-console-consumer.sh --topic gmf --bootstrap-server 192.168.38.207:9092 --from-beginning</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) 删除一个topic:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/kafka/bin/kafka-topics.sh --delete --zookeeper 192.168.38.207 --topic gmf</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/12/分布式消息队列Kafka安装与配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="分布式消息队列Kafka安装与配置">
          &nbsp;
         view
     </span>

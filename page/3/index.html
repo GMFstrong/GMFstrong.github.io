@@ -202,6 +202,91 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Tomcat共享session" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/23/Tomcat共享session/" class="article-date">
+  	<time datetime="2019-11-22T17:25:24.000Z" itemprop="datePublished">2019-11-23</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/23/Tomcat共享session/">
+        Tomcat共享session
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>msm（memcached session manager）提供将Tomcat的session保持到memcached或redis的程序，可以实现高可用。</em></strong></p>
+<blockquote>
+<p>1)使用MSM管理Tomcat的session，需要以下三种类：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Tomcat的Session管理类，Tomcat版本不同，用于替换Tomcat默认session管理器。</span><br><span class="line">2.Session数据的序列化、反序列化类。</span><br><span class="line">3.驱动类，用于连接Reids和memcached的客户端。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 基于memcache的session共享配置(sticky模式)：</p>
+</blockquote>
+<p><strong><em>当请求结束时Tomcat的session会送给memcached备份。即Tomcat session为主session，memcached session为备session，使用memcached相当于备份了一份Session。查询Session时Tomcat会优先使用自己内存的Session，Tomcat通过jvmRoute发现不是自己的Session，便从memcached中找到该Session，更新本机Session，请求完成后更新memcached。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">1.安装memcached：  </span><br><span class="line">    yum install -y memcached</span><br><span class="line">        关于memcache的运行参数：</span><br><span class="line">            -u username memcached运行的用户身份，必须普通用户</span><br><span class="line">            -p 绑定的端口，默认11211</span><br><span class="line">            -m num 最大内存，单位MB，默认64MB</span><br><span class="line">            -c num 最大连接数，缺省1024</span><br><span class="line">            -d 守护进程方式运行</span><br><span class="line">            -f 增长因子Growth Factor，默认1.25</span><br><span class="line">            -v 详细信息，-vv能看到详细信息</span><br><span class="line">            -M 内存耗尽，不许LRU</span><br><span class="line">            -U 设置UDP监听端口，0表示禁用UDP</span><br><span class="line">2.把需要的三种类放到全局的 lib 目录下。</span><br><span class="line">    asm-5.2.jar</span><br><span class="line">    kryo-3.0.3.jar</span><br><span class="line">    kryo-serializers-0.45.jar</span><br><span class="line">    memcached-session-manager-2.3.2.jar</span><br><span class="line">    memcached-session-manager-tc8-2.3.2.jar</span><br><span class="line">    minlog-1.3.1.jar</span><br><span class="line">    msm-kryo-serializer-2.3.2.jar</span><br><span class="line">    objenesis-2.6.jar</span><br><span class="line">    reflectasm-1.11.9.jar</span><br><span class="line">    spymemcached-2.12.3.jar</span><br><span class="line">3.配置Tomcat的全局context.xml文件（放到&lt;Context&gt;内）：</span><br><span class="line">    vim /usr/local/tomcat/conf/context.xml</span><br><span class="line">        &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">                memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">                failoverNodes=&quot;m105&quot;            #配置备用的memcached，在sticky模式下是自己。</span><br><span class="line">                requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">                transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">        /&gt;</span><br><span class="line">    memcached的节点们；n1、n2只是别名，可以重新命名。</span><br><span class="line">    failoverNodes故障转移节点，n1是备用节点，n2是主存储节点。另一台Tomcat将n1改为n2，其主节点是n1，备用节点是n2。</span><br><span class="line">    配置成功会在日志显示如下信息：</span><br><span class="line">        de.javakaffee.web.msm.MemcachedSessionService.startInternal --------</span><br><span class="line">        - finished initialization:</span><br><span class="line">        - sticky: true</span><br><span class="line">        - operation timeout: 1000</span><br><span class="line">        - node ids: [m105]</span><br><span class="line">        - failover node ids: [m104]</span><br><span class="line">        - storage key prefix: null</span><br><span class="line">        - locking mode: null (expiration: 5s)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) 配置non-sticky模式：</p>
+</blockquote>
+<p><strong><em>从msm 1.4.0之后开始支持non-sticky模式。Tomcat session为中转Session，如果n1为主session，n2为备session。产生的新的Session会发送给主、备memcached，并清除本地Session。n1下线，n2转正。n1再次上线，n2依然是主Session存储节点。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">仅仅需要修改全局context.xml文件中的内容，其它需要的类保持不变。</span><br><span class="line"> &lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">        memcachedNodes=&quot;m105:192.168.38.105:11211,m104:192.168.38.104:11211&quot;</span><br><span class="line">        sticky=&quot;false&quot;</span><br><span class="line">        sessionBackupAsync=&quot;false&quot;</span><br><span class="line">        lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">        requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">        transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line"> /&gt;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>4) 配置Redis的Session共享：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;Manager className=&quot;de.javakaffee.web.msm.MemcachedBackupSessionManager&quot;</span><br><span class="line">       memcachedNodes=&quot;redis://192.168.38.105:6379&quot;</span><br><span class="line">       sticky=&quot;false&quot;</span><br><span class="line">       sessionBackupAsync=&quot;false&quot;</span><br><span class="line">       lockingMode=&quot;uriPattern:/path1|/path2&quot;</span><br><span class="line">       requestUriIgnorePattern=&quot;.*\.(ico|png|gif|jpg|css|js)$&quot;</span><br><span class="line">       transcoderFactoryClass=&quot;de.javakaffee.web.msm.serializer.kryo.KryoTranscoderFactory&quot;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/23/Tomcat共享session/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Tomcat共享session">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Tomcat的反向代理" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -960,81 +1045,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/13/Redis的安装及简单配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Redis的安装及简单配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Centos7网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/12/Centos7网卡配置/" class="article-date">
-  	<time datetime="2019-11-12T12:00:09.000Z" itemprop="datePublished">2019-11-12</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/12/Centos7网卡配置/">
-        Centos7网卡配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 配置网卡绑定（bond）:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">1.网卡eth0的配置：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-eth0</span><br><span class="line">        NAME=&quot;eth0&quot;</span><br><span class="line">        DEVICE=&quot;eth0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        MASTER=bond0</span><br><span class="line">        SLAVE=yes</span><br><span class="line">2.网卡eth1的配置：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-eth1</span><br><span class="line">        NAME=&quot;eth1&quot;</span><br><span class="line">        DEVICE=&quot;eth1&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        MASTER=bond0</span><br><span class="line">        SLAVE=yes</span><br><span class="line">3.创建ifcfg-bond0配置文件：</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-bond0 </span><br><span class="line">        NAME=&quot;bond0&quot;</span><br><span class="line">        DEVICE=&quot;bond0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Ethernet</span><br><span class="line">        BONDING_OPTS=&apos;miimon=100 mode=1&apos;</span><br><span class="line">        IPADDR=192.168.38.105</span><br><span class="line">        PREFIX=24</span><br><span class="line">        GATEWAY=192.168.38.2</span><br><span class="line">        DNS1=192.168.38.2</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 基于以上的bond创建Bridge（网桥设备）：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">1.创建ifcfg-br0配置文件：</span><br><span class="line">    [root@localhost network-scripts]# vim ifcfg-br0 </span><br><span class="line">        NAME=&quot;br0&quot;</span><br><span class="line">        DEVICE=&quot;br0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        TYPE=Bridge</span><br><span class="line">        IPADDR=192.168.38.105</span><br><span class="line">        PREFIX=24</span><br><span class="line">        GATEWAY=192.168.38.2</span><br><span class="line">        DNS1=192.168.38.2</span><br><span class="line">2.在创建的bond设备调用br0:</span><br><span class="line">    [root@localhost network-scripts]# cat ifcfg-bond0 </span><br><span class="line">        NAME=&quot;bond0&quot;</span><br><span class="line">        DEVICE=&quot;bond0&quot;</span><br><span class="line">        ONBOOT=yes</span><br><span class="line">        BOOTPROTO=static</span><br><span class="line">        BONDING_OPTS=&apos;miimon=100 mode=1&apos;</span><br><span class="line">        BRIDGE=br0          #调用br0设备。</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/network/">network</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/12/Centos7网卡配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Centos7网卡配置">
          &nbsp;
         view
     </span>

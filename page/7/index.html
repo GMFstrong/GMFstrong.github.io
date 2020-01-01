@@ -202,6 +202,84 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-SSH免密码登录密钥配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/15/SSH免密码登录密钥配置/" class="article-date">
+  	<time datetime="2019-09-15T12:04:31.000Z" itemprop="datePublished">2019-09-15</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/15/SSH免密码登录密钥配置/">
+        SSH免密码登录密钥配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>首先,在本地生成密钥对：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh-keygen -t rsa</span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file in which to save the key (/root/.ssh/id_rsa): </span><br><span class="line">Created directory &apos;/root/.ssh&apos;.</span><br><span class="line">Enter passphrase (empty for no passphrase): </span><br><span class="line">Enter same passphrase again: </span><br><span class="line">Your identification has been saved in /root/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved in /root/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">cf:24:b8:b3:28:80:cc:e8:16:77:07:f2:b9:1d:bb:bf root@localhost.localdomain</span><br><span class="line">The key&apos;s randomart image is:</span><br><span class="line">+--[ RSA 2048]----+</span><br><span class="line">|                 |</span><br><span class="line">|                 |</span><br><span class="line">|                 |</span><br><span class="line">|   . . .         |</span><br><span class="line">|=   o + S .      |</span><br><span class="line">|++ . + + =       |</span><br><span class="line">|..o . * o o      |</span><br><span class="line">| o.  o =         |</span><br><span class="line">|.  .. ..oE.      |</span><br><span class="line">+-----------------+</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>默认生成如下文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# tree .ssh/</span><br><span class="line">.ssh/</span><br><span class="line">├── id_rsa</span><br><span class="line">└── id_rsa.pub</span><br><span class="line"></span><br><span class="line">0 directories, 2 files</span><br></pre></td></tr></table></figure></p>
+<p>将生成的公钥上传到ssh的服务端。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh-copy-id -i .ssh/id_rsa.pub root@192.168.38.27</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span><br><span class="line">root@192.168.38.27&apos;s password: </span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   &quot;ssh &apos;root@192.168.38.27&apos;&quot;</span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br></pre></td></tr></table></figure></p>
+<p>在服务端生成如下文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@test ~]# tree .ssh/</span><br><span class="line">.ssh/</span><br><span class="line">└── authorized_keys</span><br><span class="line"></span><br><span class="line">0 directories, 1 file</span><br></pre></td></tr></table></figure></p>
+<p>直接登录成功：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh root@192.168.38.27                           </span><br><span class="line">Warning: Permanently added &apos;192.168.38.27&apos; (ECDSA) to the list of known hosts.</span><br><span class="line">Last login: Tue Sep  3 05:41:17 2019 from 192.168.38.19</span><br><span class="line">[root@test ~]#</span><br></pre></td></tr></table></figure></p>
+<p>有时候为了安全需要对私钥进行加密：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]# ssh-keygen -p</span><br><span class="line">Enter file in which the key is (/root/.ssh/id_rsa): </span><br><span class="line">Key has comment &apos;/root/.ssh/id_rsa&apos;</span><br><span class="line">Enter new passphrase (empty for no passphrase): </span><br><span class="line">Enter same passphrase again: </span><br><span class="line">Your identification has been saved with the new passphrase.</span><br><span class="line">[root@centos7 ~]# ssh 192.168.38.16</span><br><span class="line">Enter passphrase for key &apos;/root/.ssh/id_rsa&apos;: </span><br><span class="line">Last login: Tue Sep  3 16:02:03 2019 from 192.168.38.17</span><br><span class="line">[root@centos6 ~]#</span><br></pre></td></tr></table></figure></p>
+<p>如上所述，在加密过后需要在登录时验证私钥口令，比较麻烦，因此可以托管到ssh-agent bash 代理中,需要安装psmisc。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]# yum install -y psmisc</span><br><span class="line">...</span><br><span class="line">[root@centos7 ~]# ssh-agent bash</span><br><span class="line">[root@centos7 ~]# pstree | grep ssh</span><br><span class="line">        |-sshd---sshd---bash---bash-+-grep</span><br><span class="line">        |                           `-ssh-agent</span><br><span class="line">[root@centos7 ~]# ssh-add</span><br><span class="line">Enter passphrase for /root/.ssh/id_rsa: </span><br><span class="line">Identity added: /root/.ssh/id_rsa (/root/.ssh/id_rsa)</span><br><span class="line">[root@centos7 ~]# ssh 192.168.38.16</span><br><span class="line">Last login: Tue Sep  3 16:08:49 2019 from 192.168.38.17</span><br></pre></td></tr></table></figure></p>
+<p>如上，将私钥密码托管到ssh-agent代理后，只需输入一次密码。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/09/15/SSH免密码登录密钥配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="SSH免密码登录密钥配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-一键发放公钥" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1030,88 +1108,6 @@
 <div class="counter-tag counter">
     <span id="/2019/08/20/Ubuntu的网卡配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Ubuntu的网卡配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Linux主机名管理" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/08/20/Linux主机名管理/" class="article-date">
-  	<time datetime="2019-08-20T02:41:09.000Z" itemprop="datePublished">2019-08-20</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/20/Linux主机名管理/">
-        Linux主机名管理
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>关于Linux主机名的修改：<br>hostname 主机名         再执行exec bash可以临时生效。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]#hostname node1</span><br><span class="line">[root@centos6 ~]#exec bash</span><br><span class="line">[root@node1 ~]#</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>若要永久更改主机名这需要更改文件/etc/sysconfig/network（在Centos6中），若是在Centos7中，建议更改/etc/hostname，更改配置文件不会立即生效。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]#vim /etc/sysconfig/network</span><br><span class="line">  </span><br><span class="line">  1 NETWORKING=yes</span><br><span class="line">  2 HOSTNAME=conqueror</span><br></pre></td></tr></table></figure></p>
-<p><strong><em>如若修改了/etc/sysconfig/network文件，建议在/etc/hosts文件里127.0.0.1后加入自己更改的主机名，便于自己在访问主机名时可以解析。</em></strong></p>
-<blockquote>
-<p>没有添加以前：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">ping: unknown host conqueror</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>添加以后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@conqueror ~]#vim /etc/hosts</span><br><span class="line">  </span><br><span class="line">  1 127.0.0.1   localhost localhost.localdomain localhost4 localhos</span><br><span class="line">    t4.localdomain4 conqueror                                      </span><br><span class="line">  2 ::1         localhost localhost.localdomain localhost6 localhos</span><br><span class="line">    t6.localdomain6</span><br><span class="line">[root@conqueror ~]#ping conqueror</span><br><span class="line">PING localhost (127.0.0.1) 56(84) bytes of data.</span><br><span class="line">64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.014 ms</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p><strong><em>在Centos7中可以使用如下命令管理主机名：</em></strong><br>hostnamectl set-hostname 主机名</p>
-<pre><code>以上命令用于修改主机名。
-</code></pre><p>默认删除文件/etc/hostname，主机名会恢复至localhost.localdomain。</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/08/20/Linux主机名管理/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Linux主机名管理">
          &nbsp;
         view
     </span>
