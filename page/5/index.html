@@ -202,6 +202,77 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Nginx下配置php" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/01/Nginx下配置php/" class="article-date">
+  	<time datetime="2019-11-01T13:44:41.000Z" itemprop="datePublished">2019-11-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/01/Nginx下配置php/">
+        Nginx下配置php
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Nginx 通过fastCGI 调用php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1) 通过调用本机的php-fpm解析php请求：</span><br><span class="line">    </span><br><span class="line">    location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; #主要通过该配置将请求的URI通过变量传递给后端PHP。</span><br><span class="line">        include fastcgi_params;     #该配置包含大量传递到php-fpm的变量。</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    location ~ ^/(ping|status) &#123;</span><br><span class="line">        include fastcgi_params;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_script_name;    </span><br><span class="line">    &#125;</span><br><span class="line">2) 通过调用其它服务器的PHP解析PHP请求：</span><br><span class="line">    1.安装remi源：</span><br><span class="line">        wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    2.安装epel源后，安装该rpm包：</span><br><span class="line">        yum install -y wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    3.安装php7.2版本的php:</span><br><span class="line">        yum install -y php72-php-fpm  </span><br><span class="line">    4.PHP启动需要至少3个配置文件在/opt/remi/php72/root/usr/etc下：</span><br><span class="line">        php.ini    #该文件不是php72-php-fpm安装，而是由php72-php-common安装的。</span><br><span class="line">        php-fpm.conf    #该文件默认包含了include=/etc/opt/remi/php72/php-fpm.d/*.conf，故而www.conf不用动。</span><br><span class="line">        www.conf #该文件在yum安装后默认在/etc/opt/remi/php72/php-fpm.d/www.conf。</span><br><span class="line">    5.默认php72监听在本机回环地址的9000端口，需要更改：</span><br><span class="line">        listen = 0.0.0.0:9000</span><br><span class="line">        listen.allowed_clients = 192.168.38.67</span><br><span class="line">    6.配置nginx:</span><br><span class="line">        location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 192.168.38.57:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; </span><br><span class="line">        include fastcgi_params;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/01/Nginx下配置php/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Nginx下配置php">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Nginx的rewrite" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1012,83 +1083,6 @@
 <div class="counter-tag counter">
     <span id="/2019/10/17/PHP编译安装/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="PHP编译安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-HTTPD的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/10/09/HTTPD的编译安装/" class="article-date">
-  	<time datetime="2019-10-09T13:54:30.000Z" itemprop="datePublished">2019-10-09</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/09/HTTPD的编译安装/">
-        HTTPD的编译安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 准备安装httpd-2.4依赖的包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">依赖于apr-1.4+，apr-util-1.4+，apache portable runtime，解决跨平台实现。</span><br><span class="line">dnf install -y gcc pcre-devel openssl-devel expat-devel bzip2 make</span><br><span class="line">tar -xvf httpd-2.4.41.tar.gz</span><br><span class="line">tar -xvf apr-1.7.0.tar.bz2</span><br><span class="line">tar -xvf apr-util-1.6.1.tar.bz2</span><br><span class="line">mkdir /apps/httpd -pv</span><br><span class="line">mv apr-1.7.0 httpd-2.4.41/srclib/apr</span><br><span class="line">mv apr-util-1.6.1 httpd-2.4.41/srclib/apr-util</span><br><span class="line">cd httpd-2.4.41</span><br><span class="line">./configure \</span><br><span class="line">--prefix=/apps/httpd \</span><br><span class="line">--enable-so \</span><br><span class="line">--enable-ssl \</span><br><span class="line">--enable-cgi \</span><br><span class="line">--enable-rewrite \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-pcre \</span><br><span class="line">--with-included-apr \</span><br><span class="line">--enable-modules=most \</span><br><span class="line">--enable-mpms-shared=all \</span><br><span class="line">--with-mpm=prefork</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">修改环境变量：</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 默认用户的更改：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">默认apache在编译安装之后的默认用户是daemon。</span><br><span class="line">可以创建一个专有的系统用户供其使用：</span><br><span class="line">useradd -s /sbin/nologin -r apache</span><br><span class="line">打开以下文件，修改如下两行：</span><br><span class="line">vim /apps/httpd/conf/httpd.conf</span><br><span class="line">user apache</span><br><span class="line">group apache</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 设置开机启动的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">方法一：</span><br><span class="line">在以下文件添加如下一行：</span><br><span class="line">vim /etc/rc.d/rc.local</span><br><span class="line">/apps/httpd/bin/apachectl start</span><br><span class="line">为以上文件添加执行权限：</span><br><span class="line">chmod +x /etc/rc.d/rc.local</span><br><span class="line">方法二：</span><br><span class="line">编写systemd的管理脚本：</span><br><span class="line">vim /usr/lib/systemd/system/httpd.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=The Apache HTTP Server</span><br><span class="line">After=network.target remote-fs.target nss-lookup.target</span><br><span class="line">Documentation=man:httpd(8)</span><br><span class="line">Documentation=man:apachectl(8)</span><br><span class="line">[Service]</span><br><span class="line">Type=forking #此行不要为notify，因为在apache编译时没有加载该模块。</span><br><span class="line">#EnvironmentFile=/etc/sysconfig/httpd</span><br><span class="line">ExecStart=/apps/httpd/bin/httpd $OPTIONS -k start</span><br><span class="line">ExecReload=/apps/httpd/bin/httpd $OPTIONS -k graceful</span><br><span class="line">ExecStop=/bin/kill -WINCH $&#123;MAINPID&#125;</span><br><span class="line">KillSignal=SIGCONT</span><br><span class="line">PrivateTmp=true</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">重新加载配置文件：</span><br><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/10/09/HTTPD的编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HTTPD的编译安装">
          &nbsp;
         view
     </span>

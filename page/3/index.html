@@ -202,6 +202,108 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Openvpn的搭建与配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/25/Openvpn的搭建与配置/" class="article-date">
+  	<time datetime="2019-11-25T10:09:24.000Z" itemprop="datePublished">2019-11-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/25/Openvpn的搭建与配置/">
+        Openvpn的搭建与配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装Openvpn及easy-rsa：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.安装：</span><br><span class="line">    yum install -y  easy-rsa openvpn   #easy-rsa简单的证书管理工具。</span><br><span class="line">2.复制相应的配置文件到指定得位置：</span><br><span class="line">    cp /usr/share/doc/openvpn-2.4.8/sample/sample-config-files/server.conf /etc/openvpn/</span><br><span class="line">    cp -ra /usr/share/easy-rsa /etc/openvpn/easyrsa-server</span><br><span class="line">    cp /usr/share/doc/easy-rsa-3.0.6/vars.example /etc/openvpn/easyrsa-server/3/vars</span><br><span class="line">3.初始化PKI:</span><br><span class="line">    cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">    ./easyrsa init-pki      #生成pki目录用于保存证书。</span><br><span class="line">4.创建CA，用于签发服务端与客户端证书：</span><br><span class="line">    ./easyrsa build-ca nopass  </span><br><span class="line">              公钥：/etc/openvpn/easyrsa-server/3/pki/ca.crt。</span><br><span class="line">              私钥：/etc/openvpn/easyrsa-server/3/pki/private/ca.key。</span><br><span class="line">5.创建服务端证书：</span><br><span class="line">    ./easyrsa gen-req server nopass</span><br><span class="line">              私钥：/etc/openvpn/easyrsa-server/3/pki/private/server.key。</span><br><span class="line">       证书申请文件：/etc/openvpn/easyrsa-server/3/pki/reqs/server.req。</span><br><span class="line">    ./easyrsa sign-req server server</span><br><span class="line">        服务端公钥，发送给客户端，用于通信加密使用。</span><br><span class="line">        /etc/openvpn/easyrsa-server/3/pki/issued/server.crt</span><br><span class="line">6.创建dh文件（用于密钥交换）：</span><br><span class="line">    ./easyrsa  gen-dh</span><br><span class="line">        /etc/openvpn/easyrsa-server/3/pki/dh.pem</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 创建客户端证书：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1.复制创建客户端证书的配置文件：</span><br><span class="line">    cp -ar /usr/share/easy-rsa/ /etc/openvpn/easyrsa-client/</span><br><span class="line">    cp /usr/share/doc/easy-rsa-3.0.6/vars.example /etc/openvpn/easyrsa-client/3/vars</span><br><span class="line">    cd /etc/openvpn/easyrsa-client/3/</span><br><span class="line">2.生成PKI目录：</span><br><span class="line">    ./easyrsa init-pki</span><br><span class="line">3.生成客户端私钥及证书申请文件：</span><br><span class="line">    ./easyrsa gen-req gmf nopass</span><br><span class="line">    证书申请文件：/etc/openvpn/easyrsa-client/3/pki/reqs/gmf.req</span><br><span class="line">            私钥：/etc/openvpn/easyrsa-client/3/pki/private/gmf.key</span><br><span class="line">4.签发客户端证书：</span><br><span class="line">    cd /etc/openvpn/easyrsa-server/3</span><br><span class="line">    ./easyrsa  import-req /etc/openvpn/easyrsa-client/3/pki/reqs/gmf.req  gmf  #导入证书</span><br><span class="line">    ./easyrsa sign-req client gmf</span><br><span class="line">        生成证书：/etc/openvpn/easyrsa-server/3/pki/issued/gmf.crt</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 整理签发的服务端证书：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/openvpn/certs</span><br><span class="line">cd /etc/openvpn/certs</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/dh.pem .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/ca.crt .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/issued/server.crt .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/private/server.key .</span><br><span class="line">   cp /etc/openvpn/easyrsa-server/3/pki/private/ca.key .</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 整理签发的客户端证书：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/openvpn/client/gmf</span><br><span class="line">cd /etc/openvpn/client/gmf</span><br><span class="line">    cp /etc/openvpn/easyrsa-server/3/pki/ca.crt .</span><br><span class="line">    cp /etc/openvpn/easyrsa-server/3/pki/issued/gmf.crt .</span><br><span class="line">    cp /etc/openvpn/easyrsa-client/3/pki/private/gmf.key .</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 准备服务端配置文件：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/openvpn/server.conf</span><br><span class="line">    local 192.168.38.101</span><br><span class="line">    port 1194</span><br><span class="line">    proto tcp</span><br><span class="line">    dev tun</span><br><span class="line">    ca /etc/openvpn/certs/ca.crt</span><br><span class="line">    cert /etc/openvpn/certs/server.crt</span><br><span class="line">    key /etc/openvpn/certs/server.key</span><br><span class="line">    dh /etc/openvpn/certs/dh.pem</span><br><span class="line">    server 10.30.0.0 255.255.0.0</span><br><span class="line">    push &quot;route 10.20.0.0 255.255.0.0&quot;</span><br><span class="line">    client-to-client</span><br><span class="line">    keepalive 10 120</span><br><span class="line">    cipher AES-256-CBC</span><br><span class="line">    max-clients 100</span><br><span class="line">    user openvpn</span><br><span class="line">    group openvpn</span><br><span class="line">    persist-key</span><br><span class="line">    persist-tun</span><br><span class="line">    status openvpn-status.log</span><br><span class="line">    log-append /var/log/openvpn/openvpn.log</span><br><span class="line">    verb 9</span><br><span class="line">    mute 20</span><br><span class="line">配置防火墙规制：</span><br><span class="line">    yum install iptables-services iptables -y</span><br><span class="line">    systemctl enable --now iptables.service</span><br><span class="line">    iptables -F</span><br><span class="line">    iptables -X</span><br><span class="line">    iptables -F</span><br><span class="line">    iptables -t nat -A POSTROUTING -s 10.30.0.0/16 -j MASQUERADE</span><br><span class="line">    ########iptables -t nat -A POSTROUTING -s 10.30.0.0/16 -o eth0 -j MASQUERADE</span><br><span class="line">    iptables -A INPUT -p TCP --dport 1194 -j ACCEPT</span><br><span class="line">    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line">    service iptables save</span><br><span class="line">修改内核参数：</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        net.ipv4.ip_forward = 1</span><br><span class="line">    sysctl -p</span><br><span class="line">创建日志目录并授权：</span><br><span class="line">    mkdir /var/log/openvpn</span><br><span class="line">    chown nobody.nobody /var/log/openvpn</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) 准备客户端的配置文件：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vim client.ovpn</span><br><span class="line">client</span><br><span class="line">dev tun</span><br><span class="line">proto tcp</span><br><span class="line">remote 192.168.38.101 1194</span><br><span class="line">resolv-retry infinite</span><br><span class="line">nobind</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert gmf.crt</span><br><span class="line">key  gmf.key</span><br><span class="line">remote-cert-tls server</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">verb 3</span><br><span class="line">mute 20</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>7) 将/etc/openvpn/client/gmf目录下的文件与client.ovpn打包发给用户，放到openvpn的config目录下。</p>
+</blockquote>
+<blockquote>
+<p>8) 关于server.conf的详细配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">local 172.18.200.101 #本机监听IP</span><br><span class="line">port 1194 #端口</span><br><span class="line"># TCP or UDP server?</span><br><span class="line">proto tcp #协议，指定OpenVPN创建的通信隧道类型</span><br><span class="line">#proto udp</span><br><span class="line">#dev tap：创建一个以太网隧道，以太网使用tap</span><br><span class="line">dev tun：创建一个路由IP隧道，互联网使用tun一个TUN设备大多时候，被用于基于IP协议的通讯。一个TAP设</span><br><span class="line">备允许完整的以太网帧通过Openvpn隧道，因此提供非ip协议的支持，比如IPX协议和AppleTalk协议</span><br><span class="line">#dev-node MyTap #TAP-Win32适配器。非windows不需要</span><br><span class="line">#topology subnet #网络拓扑，不需要配置</span><br><span class="line">server 10.8.0.0 255.255.255.0 #客户端连接后分配IP的地址池，服务器默认会占用第一个IP 10.8.0.1</span><br><span class="line">#ifconfig-pool-persist ipp.txt #为客户端分配固定IP，不需要配置</span><br><span class="line">#server-bridge 10.8.0.4 255.255.255.0 10.8.0.50 10.8.0.100 #配置网桥模式，不需要</span><br><span class="line">push &quot;route 10.20.0.0 255.255.0.0&quot; #给客户端生成的静态路由表，下一跳为openvpn服务器的</span><br><span class="line">10.8.0.1,地址段为openvpn服务器后的公司内部网络，可以是多个网段</span><br><span class="line">push &quot;route 172.31.0.0 255.255.248.0&quot;</span><br><span class="line">;client-config-dir ccd #为指定的客户端添加路由，改路由通常是客户端后面的内网网段而不是服务端的，</span><br><span class="line">也不需要设置</span><br><span class="line">;route 192.168.40.128 255.255.255.248</span><br><span class="line">;client-config-dir ccd</span><br><span class="line">;route 10.9.0.0 255.255.255.252</span><br><span class="line">;learn-address ./script #运行外部脚本，创建不同组的iptables 规则，不配置</span><br><span class="line">;push &quot;redirect-gateway def1 bypass-dhcp&quot; #启用后，客户端所有流量都将通过VPN服务器，因此不</span><br><span class="line">需要配置</span><br><span class="line">#;push &quot;dhcp-option DNS 208.67.222.222&quot; #推送DNS服务器，不需要配置</span><br><span class="line">#;push &quot;dhcp-option DNS 208.67.220.220&quot;</span><br><span class="line">#client-to-client #允许不同的client通过openvpn server直接通信，不开启</span><br><span class="line">;duplicate-cn #多个用户共用一个账户，一般用于测试环境，生产环境都是一个用户一个证书</span><br><span class="line">keepalive 10 120 #设置服务端检测的间隔和超时时间，默认为每 10 秒 ping一次，如果 120 秒没有回应</span><br><span class="line">则认为对方已经 down</span><br><span class="line">#tls-auth /etc/openvpn/server/ta.key 0 #可使用以下命令来生成：openvpn –genkey –secret</span><br><span class="line">ta.key #服务器和每个客户端都需要拥有该密钥的一个拷贝。第二个参数在服务器端应该为’0’，在客户端应该</span><br><span class="line">为’1’</span><br><span class="line">cipher AES-256-CBC #加密算法</span><br><span class="line">;compress lz4-v2 #启用压缩</span><br><span class="line">;push &quot;compress lz4-v2&quot;</span><br><span class="line">;comp-lzo #旧户端兼容的压缩配置，需要客户端配置开启压缩</span><br><span class="line">;max-clients 100 #最大客户端数</span><br><span class="line">;user nobody #运行openvpn服务的用户和组</span><br><span class="line">;group nobody</span><br><span class="line">#persist-key #重启OpenVPN服务，重新读取keys文件，保留使用第一次的keys文件，不开启</span><br><span class="line">#persist-tun #重启OpenVPN服务，一直保持tun或者tap设备是up的，否则会先down然后再up，不开启</span><br><span class="line">status openvpn-status.log #openVPN状态记录文件，每分钟会记录一次</span><br><span class="line">#;log openvpn.log #日志记录方式和路径，log会在openvpn启动的时候清空日志文件</span><br><span class="line">log-append /var/log/openvpn/openvpn.log #重启openvpn后在之前的日志后面追加新的日志</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>9) 关于客户端的配置文件：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">client #声明自己是个客户端</span><br><span class="line">dev tun #接口类型，必须和服务端保持一致</span><br><span class="line">proto tcp #使用的协议，必须和服务端保持一致</span><br><span class="line">remote 172.18.200.101 1194 #server端的ip和端口，可以写域名但是需要可以解析成IP</span><br><span class="line">resolv-retry infinite #如果是写的server端的域名，那么就始终解析，如果域名发生变化，会重新连接到</span><br><span class="line">新的域名对应的IP</span><br><span class="line">nobind #本机不绑定监听端口，客户端是随机打开端口连接到服务端的1194</span><br><span class="line">persist-key #</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert zhangshijie.crt</span><br><span class="line">key zhangshijie.key</span><br><span class="line">remote-cert-tls server #指定采用服务器校验方式</span><br><span class="line">#tls-auth ta.key 1</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">verb 3</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/25/Openvpn的搭建与配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Openvpn的搭建与配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Tomcat共享session" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -966,85 +1068,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/13/Redis主从与常用命令/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Redis主从与常用命令">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Redis的安装及简单配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/13/Redis的安装及简单配置/" class="article-date">
-  	<time datetime="2019-11-13T12:05:24.000Z" itemprop="datePublished">2019-11-13</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/13/Redis的安装及简单配置/">
-        Redis的安装及简单配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 编译安装 redis：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-4.0.14.tar.gz</span><br><span class="line">yum install -y gcc</span><br><span class="line">mkdir /apps/redis/&#123;etc,logs,data,run&#125; -pv</span><br><span class="line">tar -xvf redis-4.0.14.tar.gz </span><br><span class="line">cd redis-4.0.14</span><br><span class="line">make install PREFIX=/apps/redis</span><br><span class="line">cp redis.conf /apps/redis/etc/</span><br><span class="line">ln -sv /apps/redis/bin/redis-* /usr/bin/</span><br><span class="line">useradd -u 2019 redis -s /sbin/nologin</span><br><span class="line">chown redis:redis -R /apps/redis/</span><br><span class="line"></span><br><span class="line">/apps/redis/bin/redis-server /apps/redis/etc/redis.conf  #启动会出现警告信息，处理相关警告。</span><br><span class="line">（1）backlog 参数控制的是三次握手的时候 server 端收到 client ack 确认号之后的队列的大小。默认为128。</span><br><span class="line">    我们修改内核参数，让它大于511。</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        net.core.somaxconn = 512</span><br><span class="line">（2）vm.overcommit_memory：</span><br><span class="line">    0. 表示内核将检查是否有足够的可用内存供应用进程使用；如果有足够的可用内存，内存申请允许；否则，内存申请失</span><br><span class="line">       败，并把错误返回给应用进程。</span><br><span class="line">    1. 表示内核允许分配所有的物理内存，而不管当前的内存状态如何。</span><br><span class="line">    2. 表示内核允许分配超过所有物理内存和交换空间总和的内存。</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        vm.overcommit_memory = 1</span><br><span class="line">（3）transparent hugepage：（该项需要添加到开机自动运行的文件中，否者重启机器会失效。）</span><br><span class="line">    开启大页内存动态分配，需要关闭让 redis 负责内存管理。</span><br><span class="line">    echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled</span><br><span class="line"></span><br><span class="line">创建service文件，通过systemd管理redis：</span><br><span class="line">vim /usr/lib/systemd/system/redis.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Redis persistent key-value database</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/apps/redis/bin/redis-server /apps/redis/etc/redis.conf --supervised systemd</span><br><span class="line">#ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID</span><br><span class="line">Type=notify</span><br><span class="line">User=redis</span><br><span class="line">Group=redis</span><br><span class="line">RuntimeDirectory=redis</span><br><span class="line">RuntimeDirectoryMode=0755</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 关于 redis 的简单配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">requirepass foobared #设置 redis 连接密码</span><br><span class="line">stop-writes-on-bgsave-error no #快照出错时是否禁止 redis 写入操作，该项默认为yes（在快照出错时，不再写入redis）</span><br><span class="line">该项建议关闭否者在磁盘用完时，会造成redis不能写快照，而引起redis停止服务的现象。</span><br><span class="line"></span><br><span class="line">dir ./ #快照文件保存路径，在使用非root用户启动redis时，注意该目录的权限问题。</span><br><span class="line"></span><br><span class="line">replica-serve-stale-data [yes|no]：当从库与主库失去连接或者正在进行数据同步，从库有两种运行方式（一般设置为yes）。</span><br><span class="line">    yes：(默认设置)，从库会继续响应客户端的读请求。</span><br><span class="line">    no：除去指定的命令之外的任何请求都会返回一个错误&quot;SYNC with master in progress&quot;。</span><br><span class="line"></span><br><span class="line">repl-diskless-sync [no|yes]：是否使用 socket 方式复制数据(无盘同步，默认为no，及使用磁盘同步，不使用socket模式)。</span><br><span class="line">新 slave 连接连接时候需要做数据的全量同步，redis server 就要从内存 dump 出新的 RDB 文件，然后从 master 传到 slave。</span><br><span class="line">1、基于硬盘（disk-backed）：master 创建一个新进程 dump RDB，RDB 完成之后由父进程（即主进程）经过硬盘传给 slaves。</span><br><span class="line">2、基于 socket（diskless）：master 创建一个新进程直接 dump RDB 到 slave 的socket，不经过主进程，不经过硬盘。</span><br><span class="line">    基于硬盘的话，RDB 文件创建后，一旦创建完毕，可以同时服务更多的 slave，但是基于 socket 的话， 新 slave 连接到 </span><br><span class="line">    master 之后得逐个同步数据。在磁盘IO较慢并且网络较快的时候，可以用 diskless(yes),否则使用磁盘(no)。</span><br><span class="line"></span><br><span class="line">repl-diskless-sync-delay 30 #diskless 复制的延迟时间，设置 0 为关闭，在延迟时间内</span><br><span class="line">连接的新客户端，会一起通过 disk 方式同步数据，但是一旦复制开始还没有结束之前，master</span><br><span class="line">节点不会再接收新 slave 的复制请求，直到下一次同步开始。(在基于磁盘复制时生效)</span><br><span class="line"></span><br><span class="line">repl-backlog-size 512mb #复制缓冲区内存大小，只有在 slave 连接之后才分配内存。</span><br><span class="line">repl-backlog-ttl 3600 #多次时间 master 没有 slave 连接，就清空 backlog 缓冲区。</span><br><span class="line"></span><br><span class="line">maxmemory # 最大内存 ，单位为 bytes 字节 ，8G内存的计算方式8(G)*1024(MB)*1024(KB)*1024(Kbyte)，</span><br><span class="line">需要注意的是 slave 的输出缓冲区是不计算在maxmemory 内。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 关于AOF日志的配置：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AppendOnly [yes|no] 默认为no，开启yes。</span><br><span class="line">File 是另一种持久化方式，可以提供更好的持久化特性，Redis 会把每次写入的数据在</span><br><span class="line">接收后都写入 appendonly.aof 文件，每次启动时 Redis 都会先把这个文件的数据读入</span><br><span class="line">内存里，先忽略 RDB 文件。</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/13/Redis的安装及简单配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Redis的安装及简单配置">
          &nbsp;
         view
     </span>

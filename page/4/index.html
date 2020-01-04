@@ -202,6 +202,85 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Redis的安装及简单配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/Redis的安装及简单配置/" class="article-date">
+  	<time datetime="2019-11-13T12:05:24.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/13/Redis的安装及简单配置/">
+        Redis的安装及简单配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 编译安装 redis：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-4.0.14.tar.gz</span><br><span class="line">yum install -y gcc</span><br><span class="line">mkdir /apps/redis/&#123;etc,logs,data,run&#125; -pv</span><br><span class="line">tar -xvf redis-4.0.14.tar.gz </span><br><span class="line">cd redis-4.0.14</span><br><span class="line">make install PREFIX=/apps/redis</span><br><span class="line">cp redis.conf /apps/redis/etc/</span><br><span class="line">ln -sv /apps/redis/bin/redis-* /usr/bin/</span><br><span class="line">useradd -u 2019 redis -s /sbin/nologin</span><br><span class="line">chown redis:redis -R /apps/redis/</span><br><span class="line"></span><br><span class="line">/apps/redis/bin/redis-server /apps/redis/etc/redis.conf  #启动会出现警告信息，处理相关警告。</span><br><span class="line">（1）backlog 参数控制的是三次握手的时候 server 端收到 client ack 确认号之后的队列的大小。默认为128。</span><br><span class="line">    我们修改内核参数，让它大于511。</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        net.core.somaxconn = 512</span><br><span class="line">（2）vm.overcommit_memory：</span><br><span class="line">    0. 表示内核将检查是否有足够的可用内存供应用进程使用；如果有足够的可用内存，内存申请允许；否则，内存申请失</span><br><span class="line">       败，并把错误返回给应用进程。</span><br><span class="line">    1. 表示内核允许分配所有的物理内存，而不管当前的内存状态如何。</span><br><span class="line">    2. 表示内核允许分配超过所有物理内存和交换空间总和的内存。</span><br><span class="line">    vim /etc/sysctl.conf</span><br><span class="line">        vm.overcommit_memory = 1</span><br><span class="line">（3）transparent hugepage：（该项需要添加到开机自动运行的文件中，否者重启机器会失效。）</span><br><span class="line">    开启大页内存动态分配，需要关闭让 redis 负责内存管理。</span><br><span class="line">    echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled</span><br><span class="line"></span><br><span class="line">创建service文件，通过systemd管理redis：</span><br><span class="line">vim /usr/lib/systemd/system/redis.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Redis persistent key-value database</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/apps/redis/bin/redis-server /apps/redis/etc/redis.conf --supervised systemd</span><br><span class="line">#ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID</span><br><span class="line">Type=notify</span><br><span class="line">User=redis</span><br><span class="line">Group=redis</span><br><span class="line">RuntimeDirectory=redis</span><br><span class="line">RuntimeDirectoryMode=0755</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 关于 redis 的简单配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">requirepass foobared #设置 redis 连接密码</span><br><span class="line">stop-writes-on-bgsave-error no #快照出错时是否禁止 redis 写入操作，该项默认为yes（在快照出错时，不再写入redis）</span><br><span class="line">该项建议关闭否者在磁盘用完时，会造成redis不能写快照，而引起redis停止服务的现象。</span><br><span class="line"></span><br><span class="line">dir ./ #快照文件保存路径，在使用非root用户启动redis时，注意该目录的权限问题。</span><br><span class="line"></span><br><span class="line">replica-serve-stale-data [yes|no]：当从库与主库失去连接或者正在进行数据同步，从库有两种运行方式（一般设置为yes）。</span><br><span class="line">    yes：(默认设置)，从库会继续响应客户端的读请求。</span><br><span class="line">    no：除去指定的命令之外的任何请求都会返回一个错误&quot;SYNC with master in progress&quot;。</span><br><span class="line"></span><br><span class="line">repl-diskless-sync [no|yes]：是否使用 socket 方式复制数据(无盘同步，默认为no，及使用磁盘同步，不使用socket模式)。</span><br><span class="line">新 slave 连接连接时候需要做数据的全量同步，redis server 就要从内存 dump 出新的 RDB 文件，然后从 master 传到 slave。</span><br><span class="line">1、基于硬盘（disk-backed）：master 创建一个新进程 dump RDB，RDB 完成之后由父进程（即主进程）经过硬盘传给 slaves。</span><br><span class="line">2、基于 socket（diskless）：master 创建一个新进程直接 dump RDB 到 slave 的socket，不经过主进程，不经过硬盘。</span><br><span class="line">    基于硬盘的话，RDB 文件创建后，一旦创建完毕，可以同时服务更多的 slave，但是基于 socket 的话， 新 slave 连接到 </span><br><span class="line">    master 之后得逐个同步数据。在磁盘IO较慢并且网络较快的时候，可以用 diskless(yes),否则使用磁盘(no)。</span><br><span class="line"></span><br><span class="line">repl-diskless-sync-delay 30 #diskless 复制的延迟时间，设置 0 为关闭，在延迟时间内</span><br><span class="line">连接的新客户端，会一起通过 disk 方式同步数据，但是一旦复制开始还没有结束之前，master</span><br><span class="line">节点不会再接收新 slave 的复制请求，直到下一次同步开始。(在基于磁盘复制时生效)</span><br><span class="line"></span><br><span class="line">repl-backlog-size 512mb #复制缓冲区内存大小，只有在 slave 连接之后才分配内存。</span><br><span class="line">repl-backlog-ttl 3600 #多次时间 master 没有 slave 连接，就清空 backlog 缓冲区。</span><br><span class="line"></span><br><span class="line">maxmemory # 最大内存 ，单位为 bytes 字节 ，8G内存的计算方式8(G)*1024(MB)*1024(KB)*1024(Kbyte)，</span><br><span class="line">需要注意的是 slave 的输出缓冲区是不计算在maxmemory 内。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 关于AOF日志的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AppendOnly [yes|no] 默认为no，开启yes。</span><br><span class="line">File 是另一种持久化方式，可以提供更好的持久化特性，Redis 会把每次写入的数据在</span><br><span class="line">接收后都写入 appendonly.aof 文件，每次启动时 Redis 都会先把这个文件的数据读入</span><br><span class="line">内存里，先忽略 RDB 文件。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/13/Redis的安装及简单配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Redis的安装及简单配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Centos7网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -927,77 +1006,6 @@
 <div class="counter-tag counter">
     <span id="/2019/11/01/Tengine的安装与配置/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Tengine的安装与配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Nginx下配置php" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/01/Nginx下配置php/" class="article-date">
-  	<time datetime="2019-11-01T13:44:41.000Z" itemprop="datePublished">2019-11-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/01/Nginx下配置php/">
-        Nginx下配置php
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) Nginx 通过fastCGI 调用php：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1) 通过调用本机的php-fpm解析php请求：</span><br><span class="line">    </span><br><span class="line">    location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; #主要通过该配置将请求的URI通过变量传递给后端PHP。</span><br><span class="line">        include fastcgi_params;     #该配置包含大量传递到php-fpm的变量。</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    location ~ ^/(ping|status) &#123;</span><br><span class="line">        include fastcgi_params;</span><br><span class="line">        fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_script_name;    </span><br><span class="line">    &#125;</span><br><span class="line">2) 通过调用其它服务器的PHP解析PHP请求：</span><br><span class="line">    1.安装remi源：</span><br><span class="line">        wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    2.安装epel源后，安装该rpm包：</span><br><span class="line">        yum install -y wget https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line">    3.安装php7.2版本的php:</span><br><span class="line">        yum install -y php72-php-fpm  </span><br><span class="line">    4.PHP启动需要至少3个配置文件在/opt/remi/php72/root/usr/etc下：</span><br><span class="line">        php.ini    #该文件不是php72-php-fpm安装，而是由php72-php-common安装的。</span><br><span class="line">        php-fpm.conf    #该文件默认包含了include=/etc/opt/remi/php72/php-fpm.d/*.conf，故而www.conf不用动。</span><br><span class="line">        www.conf #该文件在yum安装后默认在/etc/opt/remi/php72/php-fpm.d/www.conf。</span><br><span class="line">    5.默认php72监听在本机回环地址的9000端口，需要更改：</span><br><span class="line">        listen = 0.0.0.0:9000</span><br><span class="line">        listen.allowed_clients = 192.168.38.67</span><br><span class="line">    6.配置nginx:</span><br><span class="line">        location ~ \.php$ &#123;</span><br><span class="line">        root /data/php;</span><br><span class="line">        fastcgi_pass 192.168.38.57:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME /data/php$fastcgi_script_name; </span><br><span class="line">        include fastcgi_params;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/01/Nginx下配置php/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Nginx下配置php">
          &nbsp;
         view
     </span>

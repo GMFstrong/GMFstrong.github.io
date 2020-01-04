@@ -202,6 +202,89 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-ELK安装及配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/01/04/ELK安装及配置/" class="article-date">
+  	<time datetime="2020-01-04T05:00:09.000Z" itemprop="datePublished">2020-01-04</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/04/ELK安装及配置/">
+        ELK安装及配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 安装elasticsearch：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">1.准备环境，安装并配置(elasticsearch的安装包分为带JDK与不带JDK的)：</span><br><span class="line">    mkdir /data/elasticsearch/&#123;data,log&#125; -pv</span><br><span class="line">    dpkg -i /usr/local/src/elasticsearch-7.5.1-amd64.deb</span><br><span class="line">    chown elasticsearch:elasticsearch -R /data/elasticsearch/</span><br><span class="line"></span><br><span class="line">    vim /etc/elasticsearch/elasticsearch.yml  #修改以下几行</span><br><span class="line">        cluster.name: gmf-elk</span><br><span class="line">        node.name: node-1</span><br><span class="line">        path.data: /data/elasticsearch/data</span><br><span class="line">        path.logs: /data/elasticsearch/log</span><br><span class="line">        network.host: 192.168.38.212</span><br><span class="line">        http.port: 9200</span><br><span class="line">        discovery.seed_hosts: [&quot;192.168.38.212&quot;, &quot;192.168.38.213&quot;]</span><br><span class="line">        cluster.initial_master_nodes: [&quot;192.168.38.212&quot;, &quot;192.168.38.213&quot;]</span><br><span class="line"></span><br><span class="line">    systemctl restart elasticsearch.service</span><br><span class="line">    访问 192.168.38.&#123;212|213&#125;:9200 看web页面是否正常。</span><br><span class="line"></span><br><span class="line">2.安装elasticsearch-head（web插件用于管理查看elasticsearch）：</span><br><span class="line">    apt-get -y install apt-transport-https ca-certificates curl software-properties-common</span><br><span class="line">    add-apt-repository &quot;deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&quot;</span><br><span class="line">    apt-get -y update</span><br><span class="line">    apt-get -y install docker-ce=5:18.09.9~3-0~ubuntu-bionic</span><br><span class="line">    docker pull mobz/elasticsearch-head:5</span><br><span class="line">    docker run -d -p 9100:9100 mobz/elasticsearch-head:5</span><br><span class="line"></span><br><span class="line">    vim /etc/elasticsearch/elasticsearch.yml  #在各个elasticsearch节点开启http的管理权限</span><br><span class="line">        http.cors.enabled: true</span><br><span class="line">        http.cors.allow-origin: &quot;*&quot;</span><br><span class="line">    systemctl restart elasticsearch</span><br><span class="line"></span><br><span class="line">3.安装cerebro(web管理查看elasticsearch):</span><br><span class="line">    sed -i &quot;s@http://.*archive.ubuntu.com@http://mirrors.huaweicloud.com@g&quot; /etc/apt/sources.list &amp;&amp; \</span><br><span class="line">    sed -i &quot;s@http://.*security.ubuntu.com@http://mirrors.huaweicloud.com@g&quot; /etc/apt/sources.list &amp;&amp; apt update</span><br><span class="line"></span><br><span class="line">    apt install -y openjdk-8-jdk</span><br><span class="line">    mkdir /apps/cerebro -pv</span><br><span class="line">    tar -xvf cerebro-0.8.5.tgz -C /apps/cerebro</span><br><span class="line">    vim /apps/cerebro/cerebro-0.8.5/conf/application.conf</span><br><span class="line">        hosts = [</span><br><span class="line">            &#123;</span><br><span class="line">                host = &quot;http://192.168.38.212:9200&quot;</span><br><span class="line">                name = &quot;GMF-elk cluster&quot;</span><br><span class="line">            #  headers-whitelist = [ &quot;x-proxy-user&quot;, &quot;x-proxy-roles&quot;, &quot;X-Forwarded-For&quot; ]</span><br><span class="line">            &#125;</span><br><span class="line">    /apps/cerebro/cerebro-0.8.5/bin/cerebro</span><br><span class="line">    访问 http://192.168.38.211:9000</span><br><span class="line">4.锁定内存的使用量（及在服务启动时直接注册一定量的内存到内核，提升性能）：</span><br><span class="line">    vim /etc/elasticsearch/elasticsearch.yml</span><br><span class="line">        bootstrap.memory_lock: true</span><br><span class="line">    vim /usr/lib/systemd/system/elasticsearch.service</span><br><span class="line">        LimitMEMLOCK=infinity</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 安装配置logstash：</p>
+</blockquote>
+<p><strong><em><a href="https://www.elastic.co/guide/en/kibana/7.5/managing-indices.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/kibana/7.5/managing-indices.html</a></em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">1.安装：</span><br><span class="line">    apt install -y openjdk-8-jdk</span><br><span class="line">    dpkg -i /usr/local/src/logstash-7.5.1.deb</span><br><span class="line"></span><br><span class="line">2.测试logstash的使用（在屏幕实现标准输入输出）：</span><br><span class="line">    /usr/share/logstash/bin/logstash -e &apos;input &#123; stdin&#123;&#125; &#125; output &#123; stdout&#123; codec =&gt; rubydebug &#125;&#125;&apos;</span><br><span class="line">        成功标志：[INFO ] 2020-01-03 14:27:28.183 [Api Webserver] agent - Successfully started Logstash API endpoint &#123;:port=&gt;9600&#125;</span><br><span class="line"></span><br><span class="line">3.测试logstash写入文件：</span><br><span class="line">    /usr/share/logstash/bin/logstash -e &apos;input &#123; stdin&#123;&#125; &#125; output &#123; file &#123; path =&gt; &quot;/tmp/gmf_test.txt&quot;&#125;&#125;&apos;</span><br><span class="line"></span><br><span class="line">4.测试logstash写入elasticsearch：</span><br><span class="line">    /usr/share/logstash/bin/logstash -e &apos;input &#123; stdin&#123;&#125; &#125; output &#123; elasticsearch &#123; hosts =&gt; [&quot;192.168.38.212:9200&quot;]&#125;&#125;&apos;</span><br><span class="line"></span><br><span class="line">5.基于日志文件输入，输出到elasticsearch保存日志：</span><br><span class="line">    vim /etc/logstash/conf.d/gmf-1.conf</span><br><span class="line">        input &#123;</span><br><span class="line">            file &#123;</span><br><span class="line">                path =&gt; &quot;/var/log/syslog&quot;</span><br><span class="line">                stat_interval =&gt; 2</span><br><span class="line">                start_position =&gt; &quot;beginning&quot;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        output &#123;</span><br><span class="line">            elasticsearch &#123;</span><br><span class="line">                hosts =&gt; [&quot;192.168.38.212:9200&quot;]</span><br><span class="line">                index =&gt; &quot;gmf-test1-syslog-%&#123;+YYYY.MM.dd&#125;&quot;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/gmf-1.conf -t   #测试配置文件是否报错。</span><br><span class="line">    /usr/share/logstash/bin/logstash -f  /etc/logstash/conf.d/gmf-1.conf</span><br><span class="line"></span><br><span class="line">6.更改启动用户，防止因搜集日志时因没有读权限而报错：</span><br><span class="line">    vim /etc/systemd/system/logstash.service</span><br><span class="line">        User=root</span><br><span class="line">        Group=root</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>3) Kibana的安装及配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1.安装配置：</span><br><span class="line">    dpkg -i /usr/local/src/kibana-7.5.1-amd64.deb </span><br><span class="line">    root@els-2:~# grep ^[a-Z] /etc/kibana/kibana.yml</span><br><span class="line">        server.port: 5601</span><br><span class="line">        server.host: &quot;192.168.38.213&quot;</span><br><span class="line">        server.name: &quot;GMF-ELK&quot;</span><br><span class="line">        elasticsearch.hosts: [&quot;http://192.168.38.212:9200&quot;]</span><br><span class="line">        i18n.locale: &quot;zh-CN&quot;</span><br><span class="line">    systemctl restart kibana.service</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) logstash的常用配置项：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">    file &#123;</span><br><span class="line">        path =&gt; &quot;/var/log/syslog&quot;</span><br><span class="line">        stat_interval =&gt; 2</span><br><span class="line">        start_position =&gt; &quot;beginning&quot;</span><br><span class="line">        type =&gt; &quot;syslog&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    file &#123;</span><br><span class="line">        path =&gt; &quot;/var/log/kern.log&quot;</span><br><span class="line">        stat_interval =&gt; 2</span><br><span class="line">        start_position =&gt; &quot;beginning&quot;</span><br><span class="line">        type =&gt; &quot;kern.log&quot;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  if [type] == &quot;syslog&quot; &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">        hosts =&gt; [&quot;192.168.38.212:9200&quot;]</span><br><span class="line">        index =&gt; &quot;gmf-test1-syslog-%&#123;+YYYY.MM.dd&#125;&quot;</span><br><span class="line">        &#125;</span><br><span class="line"> &#125;</span><br><span class="line">  if [type] == &quot;kern.log&quot; &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">        hosts =&gt; [&quot;192.168.38.212:9200&quot;]</span><br><span class="line">        index =&gt; &quot;gmf-test1-kern.log-%&#123;+YYYY.MM.dd&#125;&quot;</span><br><span class="line">        &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">#       stdout&#123;</span><br><span class="line">#               codec =&gt; &quot;rubydebug&quot;</span><br><span class="line">#       &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/other/">other</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2020/01/04/ELK安装及配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="ELK安装及配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-RabbitMQ消息队列" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -965,98 +1048,6 @@
 <div class="counter-tag counter">
     <span id="/2019/12/08/Docker的资源限制/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Docker的资源限制">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Docker仓库的搭建与维护" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/12/06/Docker仓库的搭建与维护/" class="article-date">
-  	<time datetime="2019-12-06T12:00:11.000Z" itemprop="datePublished">2019-12-06</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/06/Docker仓库的搭建与维护/">
-        Docker仓库的搭建与维护
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 安装harbor：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">1.首先安装docker环境：</span><br><span class="line">    参考阿里云，华为云的安装方式：https://developer.aliyun.com/mirror/docker-ce?spm=a2c6h.13651102.0.0.53322f70SdHjMS</span><br><span class="line">    apt-get -y install apt-transport-https ca-certificates curl software-properties-common</span><br><span class="line">    curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line">    add-apt-repository &quot;deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&quot;</span><br><span class="line">    apt-get -y update</span><br><span class="line">    apt-get -y install docker-ce=5:18.09.9~3-0~ubuntu-bionic</span><br><span class="line">2.下载harbor的离线包：</span><br><span class="line">    wget https://storage.googleapis.com/harbor-releases/release-1.7.0/harbor-offline-installer-v1.7.6.tgz</span><br><span class="line">3.安装docker-compose：</span><br><span class="line">    apt  install -y python-pip</span><br><span class="line">    pip install docker-compose</span><br><span class="line">    或者：</span><br><span class="line">    curl -L https://github.com/docker/compose/releases/download/1.25.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose</span><br><span class="line">    chmod +x /usr/local/bin/docker-compose</span><br><span class="line">4.安装harbor：</span><br><span class="line">    tar -xvf harbor-offline-installer-v1.7.6.tgz</span><br><span class="line">    cd harbor</span><br><span class="line">    vim harbor.cfg</span><br><span class="line">        hostname = 192.168.38.202</span><br><span class="line">        harbor_admin_password = testroot</span><br><span class="line">    ./install.sh</span><br><span class="line">5.默认harbor监听80端口，默认用户名为admin。</span><br></pre></td></tr></table></figure>
-<p><strong><em>注意在docker重启后，需要在docker-compose的安装目录重启docker-compose</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose start</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>2) 将本地镜像上传到harbor:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">1.打标签：</span><br><span class="line">    docker tag edbe434432c9 192.168.38.202/gmf-test/tomcat-app1:v1</span><br><span class="line">2.更改本地dockerd，信任私有harbor仓库：</span><br><span class="line">    vim /lib/systemd/system/docker.service</span><br><span class="line">        ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --insecure-registry=192.168.38.202 --insecure-registry=192.168.38.204</span><br><span class="line">    systemctl daemon-reload</span><br><span class="line">    systemctl restart docker</span><br><span class="line">3.登录harbor仓库服务器：</span><br><span class="line">    root@gmf:~# docker login 192.168.38.202</span><br><span class="line">        Username: admin</span><br><span class="line">        Password:</span><br><span class="line">4.将本地镜像上传至harbor:</span><br><span class="line">    docker push 192.168.38.202/gmf-test/tomcat-app1:v1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 在打镜像的服务器实现镜像的自动上传：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim build.sh</span><br><span class="line">    #!/bin/bash</span><br><span class="line">    docker build -t 192.168.38.202/gmf-test/nginx-by:v1 .</span><br><span class="line">    docker push 192.168.38.202/gmf-test/nginx-by:v1</span><br><span class="line">    docker rmi 192.168.38.202/gmf-test/nginx-by:v1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 在其它节点配置从harbor上拉取镜像：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vim /lib/systemd/system/docker.service</span><br><span class="line">    ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --insecure-registry=192.168.38.202 --insecure-registry=192.168.38.204</span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl restart docker</span><br><span class="line">docker login 192.168.38.202   </span><br><span class="line">docker pull 192.168.38.202/gmf-test/nginx-by:v1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>5) harbor仓库的https模式的搭建：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1.创建证书存放目录：</span><br><span class="line">    mkdir /usr/local/src/harbor/certs/</span><br><span class="line">2.生成私钥key:</span><br><span class="line">    openssl genrsa -out /usr/local/src/harbor/certs/harbor-ca.key 2048</span><br><span class="line">3.生成公钥（证书）：</span><br><span class="line">    touch /root/.rnd</span><br><span class="line">    openssl req -x509 -new -nodes -key /usr/local/src/harbor/certs/harbor-ca.key -subj &quot;/CN=harbor.gmf.com&quot; -days 7120 -out /usr/local/src/harbor/certs/harbor-ca.crt</span><br><span class="line">4.修改harbor.cfg 中的如下五行：</span><br><span class="line">    hostname = harbor.gmf.com</span><br><span class="line">    ui_url_protocol = https</span><br><span class="line">    ssl_cert = /usr/local/src/harbor/certs/harbor-ca.crt</span><br><span class="line">    ssl_cert_key = /usr/local/src/harbor/certs/harbor-ca.key</span><br><span class="line">    harbor_admin_password = testroot</span><br><span class="line">5.同步harbor证书到node节点：</span><br><span class="line">    在node节点创建：</span><br><span class="line">        mkdir /etc/docker/certs.d/harbor.gmf.com/ -pv</span><br><span class="line">        scp 192.168.38.202:/usr/local/src/harbor/certs/harbor-ca.crt /etc/docker/certs.d/harbor.gmf.com/</span><br><span class="line">    在主节点登录harbor后才可push镜像，也需要harbor的证书。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>6) docker-compose.yaml的编写实例：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">nginx-server:</span><br><span class="line">        image: nginx_by:v1</span><br><span class="line">        container_name: nginx_web1</span><br><span class="line">        links:</span><br><span class="line">          - tomcat-server1</span><br><span class="line">          - tomcat-server2</span><br><span class="line">        volumes:</span><br><span class="line">          - /data2/nginx.conf:/apps/nginx/conf/nginx.conf</span><br><span class="line">        ports:</span><br><span class="line">          - &quot;8080:80&quot;</span><br><span class="line">          - &quot;8443:443&quot;</span><br><span class="line"></span><br><span class="line">tomcat-server1:</span><br><span class="line">        image: tomcat_app1:v1</span><br><span class="line">        container_name: tomcat_1</span><br><span class="line">        volumes:</span><br><span class="line">          - /data2/app1/:/data/app1/app1/</span><br><span class="line">        ports:</span><br><span class="line">          - &quot;8081:8080&quot;</span><br><span class="line"></span><br><span class="line">tomcat-server2:</span><br><span class="line">        image: tomcat_app1:v1</span><br><span class="line">        container_name: tomcat_2</span><br><span class="line">        volumes:</span><br><span class="line">          - /data2/app2/:/data/app1/app1/</span><br><span class="line">        ports:</span><br><span class="line">          - &quot;8082:8080&quot;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/12/06/Docker仓库的搭建与维护/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Docker仓库的搭建与维护">
          &nbsp;
         view
     </span>

@@ -202,6 +202,95 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Ubuntu的网卡配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/20/Ubuntu的网卡配置/" class="article-date">
+  	<time datetime="2019-08-20T02:41:39.000Z" itemprop="datePublished">2019-08-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/20/Ubuntu的网卡配置/">
+        Ubuntu的网卡配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>首先可以参考Ubuntu官方文档的详细介绍：</p>
+</blockquote>
+<pre><code>https://help.ubuntu.com/lts/serverguide/network-configuration.html.zh-CN
+</code></pre><blockquote>
+<p>ubuntu是通过yaml格式文件来管理网卡配置的：</p>
+</blockquote>
+<p>打开/etc/netplan/01-netcfg.yaml（yaml格式注意缩进）</p>
+<blockquote>
+<p>配置为自动获取IP:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">    version: 2</span><br><span class="line">    renderer: networkd</span><br><span class="line">    ethernets:</span><br><span class="line">        ens33:</span><br><span class="line">            dhcp4: yes</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>配置静态IP地址：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">network:</span><br><span class="line">    version: 2</span><br><span class="line">    renderer: networkd</span><br><span class="line">    ethernets:</span><br><span class="line">        eth0:</span><br><span class="line">            addresses:</span><br><span class="line">                - xxx.xxx.xxx.xxx/mask</span><br><span class="line">                - xxx.xxx.xxx.xxx/mask </span><br><span class="line">            gateway4:</span><br><span class="line">                xxx.xxx.xxx.xxx</span><br><span class="line">            nameservers:</span><br><span class="line">                addresses:[8.8.8.8,1.1.1.1]</span><br><span class="line">                search:[*****,******]</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>最后重启网络服务：</p>
+</blockquote>
+<pre><code>netplan apply
+</code></pre><p><strong><em>Ubuntu在最近的版本中网卡名默认不是eth0，eth1这种形式，为了便于将来自动化管理，有时需要将网卡名更改为传统的命名方式。</em></strong><br>（1）vim  /etc/default/grub<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRUB_CMDLINE_LINUX=&quot;net.ifnames=0&quot;</span><br></pre></td></tr></table></figure></p>
+<p>（2）生成有效的grub.cfg文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub-mkconfig -o /boot/grub/grub.cfg</span><br></pre></td></tr></table></figure></p>
+<p>（3）重启计算机<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/network/">network</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/08/20/Ubuntu的网卡配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Ubuntu的网卡配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Linux主机名管理" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1182,81 +1271,6 @@ uid=1000(tom) gid=1000(tom) groups=1000(tom),1001(jim)
 <div class="counter-tag counter">
     <span id="/2019/07/27/Linux用户组的添加及属性的更改/" class="leancloud_visitors post-title-link"
           style="font-size: 12px" data-flag-title="Linux用户组的添加及属性的更改">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-ACL权限控制总结" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/07/26/ACL权限控制总结/" class="article-date">
-  	<time datetime="2019-07-26T11:52:33.000Z" itemprop="datePublished">2019-07-26</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/26/ACL权限控制总结/">
-        ACL权限控制总结
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在centos7中默认创建的文件系统具有ACL功能。而在此之前的版本默认手工创建的文件系统并无ACL功能需要手动添加。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">getfacl file |directory</span><br><span class="line">setfacl -m u:wang:rwx file|directory</span><br><span class="line">setfacl -m g:admins:rw file| directory</span><br><span class="line">setfacl -x u:wang file |directory</span><br><span class="line">setfacl -b file1 清除所有ACL权限</span><br><span class="line">getfacl file1 | setfacl --set-file=- file2 复制file1的acl权限给file2</span><br></pre></td></tr></table></figure></p>
-<p>mask只影响除所有者和other的之外的人和组的最大权限。</p>
-<p>mask需要与用户的权限进行逻辑与运算后，才能变成有限的权限。</p>
-<p>用户或组的设置必须存在于mask权限设定范围内才会生效。</p>
-<pre><code>--set选项会把原有的ACL项都删除，用新的替代，需要注意的是一定要包含
-UGO的设置，不能象-m一样只是添加ACL就可以
-    setfacl --set u::rw,u:wang:rw,g::r,o::- file1
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">主要的文件操作命令cp和mv都支持ACL，只是cp命令需要加上-p 参数。但是</span><br><span class="line">tar等常见的备份工具是不会保留目录和文件的ACL信息</span><br><span class="line">getfacl -R /tmp/dir1 &gt; acl.txt</span><br><span class="line">setfacl -R -b /tmp/dir1</span><br><span class="line">setfacl -R --set-file=acl.txt /tmp/dir1</span><br><span class="line">setfacl --restore acl.txt</span><br><span class="line">getfacl -R /tmp/dir1</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux/">linux</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/07/26/ACL权限控制总结/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="ACL权限控制总结">
          &nbsp;
         view
     </span>
