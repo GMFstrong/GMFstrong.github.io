@@ -202,6 +202,249 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Redis的Cluster集群" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/Redis的Cluster集群/" class="article-date">
+  	<time datetime="2019-11-13T12:08:24.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/13/Redis的Cluster集群/">
+        Redis的Cluster集群
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 配置Redis Cluster 集群的必要条件：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.每个redis node节点采用相同的硬件配置、相同的密码、相同的redis版本。</span><br><span class="line">2.每个节点必须开启的参数cluster-enabled yes #必须开启集群状态，开启后redis 进程会有cluster显示。</span><br><span class="line">  cluster-config-file nodes6380.conf #此文件有redis cluster集群自动创建和维护，不需要任何手动操作。</span><br><span class="line">3.所有redis服务器必须没有任何数据。</span><br><span class="line">4.先启动为单机redis且没有任何key value。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 在6台机器上使用以下配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">vim /apps/redis/etc/redis.conf </span><br><span class="line">bind 0.0.0.0</span><br><span class="line">logfile &quot;/apps/redis/logs/6379.log&quot;</span><br><span class="line">stop-writes-on-bgsave-error no</span><br><span class="line">dir /apps/redis/data</span><br><span class="line">masterauth testroot</span><br><span class="line">requirepass testroot</span><br><span class="line">appendonly yes</span><br><span class="line">cluster-enabled yes</span><br><span class="line">cluster-config-file nodes-6379.conf</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 确保cluster配置生效：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ps aux | grep redis</span><br><span class="line">redis     10162  0.1  0.6 145316  2896 ?        Ssl  21:09   0:00 /apps/redis/bin/redis-server 0.0.0.0:6379 [cluster]</span><br><span class="line">root      10172  0.0  0.2 112708   976 pts/0    R+   21:09   0:00 grep --color=auto redis</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>4) 创建集群：</p>
+</blockquote>
+<p>Redis 3和 4版本：<br>需要使用到集群管理工具redis-trib.rb，这个工具是redis官方推出的管理redis集群的工具，<strong><em>集成在redis的源码src<br>目录下</em></strong>，是基于redis提供的集群命令封装成简单、便捷、实用的操作工具，redis-trib.rb是redis作者用ruby开发完<br>成的，centos 系统yum安装的ruby存在版本较低问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">1. 解决ruby版本低的问题：</span><br><span class="line">    yum install -y openssl-devel zlib-devel wget gcc </span><br><span class="line">    wget https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.5.tar.gz</span><br><span class="line">    tar xvf ruby-2.5.5.tar.gz</span><br><span class="line">    cd ruby-2.5.5</span><br><span class="line">    ./configure</span><br><span class="line">    make -j 2</span><br><span class="line">    make install</span><br><span class="line">    gem install redis   #安装redis模块。</span><br><span class="line">        如若redis模块无法在线安装，可以下载离线的包进行安装。</span><br><span class="line">            https://rubygems.org/gems/redis #先下载redis模块安装包</span><br><span class="line">            gem install -l redis-3.3.0.gem #安装redis模块</span><br><span class="line">2. 在Redis的源码包中找到redis-trib.rb管理工具：</span><br><span class="line">    cp redis-4.0.14/src/redis-trib.rb /usr/bin/</span><br><span class="line">3.检查redis-trib.rb命令能否执行。</span><br><span class="line">    [root@localhost ~]# redis-trib.rb </span><br><span class="line">        Usage: redis-trib &lt;command&gt; &lt;options&gt; &lt;arguments ...&gt;</span><br><span class="line">        create          host1:port1 ... hostN:portN</span><br><span class="line">                        --replicas &lt;arg&gt;</span><br><span class="line">        check           host:port</span><br><span class="line">        info            host:port</span><br><span class="line">4. 配置redis Cluster集群的登录密码（redis-trib.rb没有提供输入密码的选项）：</span><br><span class="line">    vim /usr/local/lib/ruby/gems/2.5.0/gems/redis-4.1.3/lib/redis/client.rb</span><br><span class="line">注意：（密码需要添加引号。）</span><br><span class="line"></span><br><span class="line">5. 创建集群：</span><br><span class="line">    redis-trib.rb create --replicas 1 192.168.38.101:6379 192.168.38.102:6379 192.168.38.103:6379 192.168.38.104:6379 192.168.38.105:6379 192.168.38.106:6379</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 错误解决：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">如果有之前的操作导致Redis集群创建报错，则执行清空数据和集群命令：</span><br><span class="line">    FLUSHALL</span><br><span class="line">    cluster reset</span><br><span class="line">    删除文件appendonly.aof  dump.rdb  nodes-6379.conf。</span><br><span class="line">    重启服务。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/13/Redis的Cluster集群/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Redis的Cluster集群">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Redis哨兵机制" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/Redis哨兵机制/" class="article-date">
+  	<time datetime="2019-11-13T12:07:24.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/13/Redis哨兵机制/">
+        Redis哨兵机制
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong><em>实现Redis的哨兵机制之前，必须实现Redis的主从复制，有3台以上机器构成的集群。</em></strong></p>
+<blockquote>
+<p>1) 配置哨兵进程的配置文件sentinel.conf：</p>
+</blockquote>
+<p><strong><em>该文件在源码包解压后的目录中，可以拷贝到/apps/redis/etc/目录下，哨兵可以不和Redis服务器部署在一起。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">1. 修改配置文件：</span><br><span class="line">    vim /apps/redis/etc/sentinel.conf</span><br><span class="line">        bind 0.0.0.0</span><br><span class="line">        port 26379</span><br><span class="line">        daemonize yes</span><br><span class="line">        pidfile &quot;redis-sentinel.pid&quot;</span><br><span class="line">        logfile &quot;sentinel_26379.log&quot;</span><br><span class="line">        dir &quot;/apps/redis/data/&quot;</span><br><span class="line">        sentinel monitor mymaster 192.168.38.105 6379 2 #法定人数限制(quorum，该数量必须大于集群数量的一半)，即有几个slave认为master down了就进行故障转移。</span><br><span class="line">        sentinel auth-pass mymaster testroot</span><br><span class="line">        sentinel down-after-milliseconds mymaster 30000 #(SDOWN)主观下线的时间。</span><br><span class="line">        sentinel parallel-syncs mymaster 1 #发生故障转移时候同时向新master同步数据的slave数量，数字越小总同步时间越长。</span><br><span class="line">        sentinel failover-timeout mymaster 180000 #所有slaves指向新的master所需的超时时间。</span><br><span class="line">        sentinel deny-scripts-reconfig yes #禁止修改脚本。</span><br><span class="line">2. 在其它的Redis节点配置同样的哨兵配置：</span><br><span class="line">    vim /apps/redis/etc/sentinel.conf</span><br><span class="line">        bind 0.0.0.0</span><br><span class="line">        port 26379</span><br><span class="line">        daemonize yes</span><br><span class="line">        pidfile &quot;redis-sentinel.pid&quot;</span><br><span class="line">        logfile &quot;sentinel_26379.log&quot;</span><br><span class="line">        dir &quot;/apps/redis/data/&quot;</span><br><span class="line">        sentinel monitor mymaster 192.168.38.105 6379 2 </span><br><span class="line">        sentinel auth-pass mymaster testroot</span><br><span class="line">        sentinel down-after-milliseconds mymaster 30000 </span><br><span class="line">        sentinel parallel-syncs mymaster 1 </span><br><span class="line">        sentinel failover-timeout mymaster 180000 </span><br><span class="line">        sentinel deny-scripts-reconfig yes </span><br><span class="line">3. 启动每一台机器哨兵进程：</span><br><span class="line">    redis-sentinel /apps/redis/etc/sentinel.conf</span><br><span class="line">4. 检查哨兵的信息：</span><br><span class="line">    redis-cli  -p 26379 </span><br><span class="line">        127.0.0.1:26379&gt; info</span><br><span class="line">            # Sentinel</span><br><span class="line">            sentinel_masters:1</span><br><span class="line">            sentinel_tilt:0</span><br><span class="line">            sentinel_running_scripts:0</span><br><span class="line">            sentinel_scripts_queue_length:0</span><br><span class="line">            sentinel_simulate_failure_flags:0</span><br><span class="line">            master0:name=mymaster,status=ok,address=192.168.38.105:6379,slaves=2,sentinels=3  #重点该行是否与实际情况相符。</span><br><span class="line">5. 测试能否自动切换主节点：</span><br><span class="line">    关闭主节点。</span><br><span class="line">6.再让原来主节点加入集群时必须清理原来的配置，并让其成为新主节点的从节点。</span><br><span class="line">    vim /apps/redis/etc/redis.conf</span><br><span class="line">        slaveof 192.168.38.104 6379         #指向新的主节点。</span><br><span class="line">        masterauth testroot</span><br><span class="line">7. 可以查看redis.conf和sentinel.conf 相关配置已经发生修改。</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/13/Redis哨兵机制/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Redis哨兵机制">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Redis主从与常用命令" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/Redis主从与常用命令/" class="article-date">
+  	<time datetime="2019-11-13T12:06:25.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/13/Redis主从与常用命令/">
+        Redis主从与常用命令
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) Redis 的常用命令：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">查看key的过期时间: TTL key</span><br><span class="line">设置key的过期时间:EXPIRE key 86400</span><br><span class="line">取消key的过期时间：PERSIST key</span><br><span class="line"></span><br><span class="line">config 命令用于查看当前redis配置、以及不重启服务的情况下更改redis配置等。</span><br><span class="line">CONFIG set maxmemory 8589934592</span><br><span class="line">CONFIG get maxmemory</span><br><span class="line">CONFIG get maxmemory</span><br><span class="line">CONFIG SET requirepass 123456   #临时设置密码。</span><br><span class="line"></span><br><span class="line">select [1-16] #更换使用当前库，默认为16个。</span><br><span class="line"></span><br><span class="line">BGSAVE  #手动在后台执行RDB持久化操作。</span><br><span class="line"></span><br><span class="line">DBSIZE  #返回当前库下的所有key 数量。</span><br><span class="line"></span><br><span class="line">FLUSHDB #强制清空当前库中的所有key。</span><br><span class="line"></span><br><span class="line">FLUSHALL #强制清空当前redis服务器所有数据库中的所有key，即删除所有数据。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 配置Redis主从：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">注意事项：</span><br><span class="line">    1.在设置主从时确保Redis大版本一致。</span><br><span class="line">    2.在开启安全模式但是没有bind地址，没有设置密码。</span><br><span class="line">    3.最好保持主从节点的密码一致，否则在主节点宕机后，前端应用会因为密码不一致连接Redis失败。</span><br><span class="line">具体步骤：</span><br><span class="line">    1) 主节点：</span><br><span class="line">        vim /apps/redis/etc/redis.conf </span><br><span class="line">            bind 0.0.0.0    </span><br><span class="line">            requirepass testroot</span><br><span class="line">            appendonly yes</span><br><span class="line">            dir /apps/redis/data</span><br><span class="line">    2) 从节点：</span><br><span class="line">        vim /apps/redis/etc/redis.conf</span><br><span class="line">            bind 0.0.0.0    </span><br><span class="line">            requirepass testroot</span><br><span class="line">            appendonly yes</span><br><span class="line">            dir /apps/redis/data</span><br><span class="line">            slaveof 192.168.38.105 6379 #主节点IP和端口</span><br><span class="line">            masterauth testroot         #主节点密码</span><br><span class="line">    3) 动态添加（在slave节点）：</span><br><span class="line">            slaveof 192.168.38.105 6379</span><br><span class="line">            config  set masterauth testroot</span><br><span class="line"></span><br><span class="line">主从同步的具体过程：</span><br><span class="line">    1）从服务器连接主服务器，发送SYNC命令；</span><br><span class="line">    2）主服务器接收到SYNC命名后，开始执行BGSAVE命令生成RDB快照文件并使用缓冲区记录此后执行的所有写命令；</span><br><span class="line">    3）主服务器BGSAVE执行完后，向所有从服务器发送快照文件，并在发送期间继续记录被执行的写命令；</span><br><span class="line">    4）从服务器收到快照文件后丢弃所有旧数据，载入收到的快照；</span><br><span class="line">    5）主服务器快照发送完毕后开始向从服务器发送缓冲区中的写命令；</span><br><span class="line">    6）从服务器完成对快照的载入，开始接收命令请求，并执行来自主服务器缓冲区的写命令；</span><br><span class="line">    7）后期同步会先发送自己slave_repl_offset位置，只同步新增加的数据，不再全量同步。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 主从同步优化：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1. repl-diskless-sync no #是否使用无盘同步RDB文件，默认为no，no为不使用无盘，需要将RDB文件保存到磁盘后</span><br><span class="line">再发送给slave，yes为支持无盘，支持无盘就是RDB文件不需要保存至本地磁盘，而且直接通过socket文件发送给slave。</span><br><span class="line">2. repl-diskless-sync-delay 5 #Master准备好RDB文件后等待传输时间。 </span><br><span class="line">3. repl-ping-slave-period 10 #slave端向server端发送ping的时间区间设置，默认为10秒 。</span><br><span class="line">4. repl-timeout 60 #设置超时时间一定大于repl-ping-slave-period的设置时间。</span><br><span class="line">5.repl-disable-tcp-nodelay no #是否启用TCP_NODELAY，如设置成yes，则redis会合并小的TCP包从而节省带宽，</span><br><span class="line">但会增加同步延迟（40ms），造成master与slave数据不一致，假如设置成no，则redis master会立即发送同步数</span><br><span class="line">据，没有延迟，前者关注性能，后者关注redis服务中的数据一致性。</span><br><span class="line">6. repl-backlog-size 1mb #master的写入数据缓冲区，用于记录自上一次同步后到下一次同步过程中间的写入命</span><br><span class="line">令，计算公式：repl-backlog-size = 允许从节点最大中断时长 * 主实例offset每秒写入量，比如master每秒最大写</span><br><span class="line">入64mb，最大允许60秒，那么就要设置为64mb*60秒=3840MB(3.8G)。</span><br><span class="line">7. repl-backlog-ttl 3600 #如果一段时间后没有slave连接到master，则backlog size的内存将会被释放。如果值为0则</span><br><span class="line">表示永远不释放这部份内存。</span><br><span class="line">8. slave-priority 100 #slave端的优先级设置，值是一个整数，数字越小表示优先级越高。当master故障时将会按照优先</span><br><span class="line">级来选择slave端进行恢复，如果值设置为0，则表示该slave永远不会被选择。</span><br><span class="line">9.  #min-slaves-to-write 1 #设置一个master端的可用slave少于多少个。</span><br><span class="line">10. #min-slaves-max-lag 20 #设置所有slave延迟时间都大于多少秒时，master不接收写操作(拒绝写入)，该时间如果设置</span><br><span class="line">要设置的长一点，否则在网络拥堵时可能会引起master不能写，引起服务不可用。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) Master节点宕机后，提升从节点为主节点：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">1. 首先清理slave节点的从节点的相关信息，因为默认从节点是不能写入数据的。</span><br><span class="line">    127.0.0.1:6379&gt; INFO replication</span><br><span class="line">                    # Replication</span><br><span class="line">                    role:slave</span><br><span class="line">                    master_host:192.168.38.106</span><br><span class="line">                    master_port:6379</span><br><span class="line">                    master_link_status:up</span><br><span class="line">                    master_last_io_seconds_ago:3</span><br><span class="line">                    master_sync_in_progress:0</span><br><span class="line">                    slave_repl_offset:5188</span><br><span class="line">                    slave_priority:100</span><br><span class="line">                    slave_read_only:1</span><br><span class="line">                    connected_slaves:0</span><br><span class="line">                    master_replid:489bf4401fc81f179c52c80b84a6dc51006c364f</span><br><span class="line">                    master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">                    master_repl_offset:5188</span><br><span class="line">                    second_repl_offset:-1</span><br><span class="line">                    repl_backlog_active:1</span><br><span class="line">                    repl_backlog_size:1048576</span><br><span class="line">                    repl_backlog_first_byte_offset:3831</span><br><span class="line">                    repl_backlog_histlen:1358</span><br><span class="line">    127.0.0.1:6379&gt; SLAVEOF no one          #清理slave节点的从节点的相关信息，在重启服务以后会回到从节点配置，需要修改配置文件。</span><br><span class="line">                    OK</span><br><span class="line">    127.0.0.1:6379&gt; INFO replication</span><br><span class="line">                    # Replication</span><br><span class="line">                    role:master</span><br><span class="line">                    connected_slaves:0</span><br><span class="line">                    master_replid:68a2bba1477df0b7e564835147da806447a1e7a0</span><br><span class="line">                    master_replid2:489bf4401fc81f179c52c80b84a6dc51006c364f</span><br><span class="line">                    master_repl_offset:5216</span><br><span class="line">                    second_repl_offset:5217</span><br><span class="line">                    repl_backlog_active:1</span><br><span class="line">                    repl_backlog_size:1048576</span><br><span class="line">                    repl_backlog_first_byte_offset:3831</span><br><span class="line">                    repl_backlog_histlen:1386</span><br><span class="line">2.测试是否具有写权限。</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2019/11/13/Redis主从与常用命令/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="Redis主从与常用命令">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-Redis的安装及简单配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -795,241 +1038,9 @@
 
 
   
-    <article id="post-HAproxy的配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/05/HAproxy的配置/" class="article-date">
-  	<time datetime="2019-11-05T12:04:23.000Z" itemprop="datePublished">2019-11-05</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/05/HAproxy的配置/">
-        HAproxy的配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong><em>HAproxy 的配置有gloable（全局配置段） 和 proxies（代理配置段） 两个配置段：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">global全局配置段中定义以下选项：</span><br><span class="line">    global</span><br><span class="line">        chroot /apps/haproxy #锁定HAproxy的运行目录，防止进程被劫持，造成更大损失。</span><br><span class="line">        daemon  #以守护进程的方式运行。</span><br><span class="line">        stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">        uid 99 #指定运行HAproxy进程的用户和组。</span><br><span class="line">        gid 99</span><br><span class="line">        nbproc  4     #开启的haproxy进程数，与CPU保持一致。</span><br><span class="line">        cpu-map 1 0   #绑定haproxy 进程至指定CPU核心。</span><br><span class="line">        spread-checks #后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间，防止同时产生大量检测报文。</span><br><span class="line">        pidfile /var/lib/haproxy/haproxy.pid    #指定pid文件路径。</span><br><span class="line">        log 127.0.0.1 local3 info       #定义全局的syslog服务器；最多可以定义两个。</span><br><span class="line">        maxconn    1000000   #每个haproxy进程的最大并发连接数。</span><br><span class="line">        maxsslconn   1000000 #每个haproxy进程ssl最大连接数,用于haproxy配置了证书的场景下。</span><br><span class="line">        maxconnrate   #每个进程每秒创建的最大连接数量。</span><br><span class="line">proxies配置段又包含以下两个字段：</span><br><span class="line">    defaults [name] : 其中定义的内容在frontend、backend和lsiten中没有定义时，为他们的默认选项。及优先级低于frontend、backend和lsiten中的定义。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>1) proxies 中defaults的常见配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">option redispatch     #当server Id对应的服务器挂掉后，强制定向到其他健康的服务器。</span><br><span class="line">option abortonclose   #当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接，根据自己的业务场景，在自己业务处理时间较长时，需要关闭该选项，</span><br><span class="line">否则会出现大量 50X 错误。</span><br><span class="line">option http-keep-alive #开启与客户端的会话保持</span><br><span class="line">mode tcp/http #默认工作类型，一般为了保证HAproxy的性能，设置为TCP模式。http应用层的代理一般由后端Nginx完成。</span><br><span class="line">option forwardfor     #透传客户端真实IP至后端web服务器，便于后端服务器做日志分析。</span><br><span class="line">timeout connect 120s #HAproxy与后端服务器建立TCP三次握手的超时时间，由于是内网，可以适当减小至（3-5秒）。</span><br><span class="line">timeout server 600s  #HAproxy与后端服务器建立TCP三次握手之后，等待后端服务器响应的时长，在一些涉及到写数据库等操作的业务，可能需要很长时间，</span><br><span class="line">所依该值适当调大，否者会出现大量 502 的报错。</span><br><span class="line">timeout client 600s #客户端的最长非活动时间。超过该时间，HAproxy会自动与客户端断开连接。</span><br><span class="line">timeout http-keep-alive 120s #session 会话保持超时时间，范围内会转发到相同的后端服务器。</span><br><span class="line">timeout check   5s   #对后端服务器的检测超时时间。</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 通过 listen 配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">listen Apache-PHP1</span><br><span class="line">   bind 192.168.38.57:80    #配置监听的地址与端口，供客户端访问。</span><br><span class="line">   mode http                #配置以http的方式转发给后端服务器。</span><br><span class="line">   option forwardfor        #开启客户端的真实IP透传。</span><br><span class="line">   server web1   192.168.38.26:80   check inter 3000 fall 3 rise 5</span><br><span class="line">   server web2   192.168.38.36:80   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>3) 通过 frontend + backend 的方式配置后端服务群组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">frontend 的配置：</span><br><span class="line">    frontend Apache-PHP1</span><br><span class="line">        bind :80</span><br><span class="line">        bind 192.168.38.57:10080,:8801-8810,:8080</span><br><span class="line">        mode tcp     #指定负载协议类型。</span><br><span class="line">        use_backend Apache-group1 #调用的后端服务器组名称。</span><br><span class="line">backend 的配置：</span><br><span class="line">    backend Apache-group1   #该处定义的name需要被frontenf中的use_backend调用。</span><br><span class="line">        mode tcp</span><br><span class="line">        option forwardfor   #开启客户端的真实IP透传。</span><br><span class="line">        server 192.168.38.26 192.168.38.26:80    check inter 3000 fall 3 rise 5</span><br><span class="line">        server 192.168.38.36 192.168.38.36:80    check inter 3000 fall 3 rise 5</span><br><span class="line">关于backend中的后端服务器检查存活性的选项：</span><br><span class="line">    check       #对指定real进行健康状态检查，默认不开启</span><br><span class="line">    addr IP     #可指定的健康状态监测IP</span><br><span class="line">    port num    #指定的健康状态监测端口</span><br><span class="line">    inter num   #健康状态检查间隔时间，默认2000 ms</span><br><span class="line">    fall num    #后端服务器失效检查次数，默认为3</span><br><span class="line">    rise num    #后端服务器从下线恢复检查次数，默认为2</span><br><span class="line">    weight      #默认为1，最大值为256，0表示不参与负载均衡</span><br><span class="line">    backup      #将后端服务器标记为备份状态</span><br><span class="line">    disabled    #将后端服务器标记为不可用状态</span><br><span class="line">    redirect prefix http://www.magedu.net/   #将请求临时重定向至其它URL，只适用于http模式</span><br><span class="line">    maxconn &lt;maxconn&gt;：当前后端server的最大并发连接数</span><br><span class="line">    backlog &lt;backlog&gt;：当server的连接数达到上限后的后援队列长度</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/05/HAproxy的配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HAproxy的配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-HAproxy的编译安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/05/HAproxy的编译安装/" class="article-date">
-  	<time datetime="2019-11-05T12:04:01.000Z" itemprop="datePublished">2019-11-05</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/05/HAproxy的编译安装/">
-        HAproxy的编译安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 准备Lua环境，默认版本的Lua不支持HAproxy2.0版本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install -y libtermcap-devel ncurses-devel libevent-devel readline-devel gcc</span><br><span class="line">wget http://www.lua.org/ftp/lua-5.3.5.tar.gz</span><br><span class="line">tar -xvf lua-5.3.5.tar.gz </span><br><span class="line">cd lua-5.3.5</span><br><span class="line">make linux test</span><br><span class="line">cd src</span><br><span class="line">[root@localhost src]#./lua -v</span><br><span class="line">Lua 5.3.5  Copyright (C) 1994-2018 Lua.org, PUC-Rio</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) 编译安装HAproxy：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">yum install -y gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel net-tools vim iotop bc zip unzip zlib-devel lrzsz tree screen lsof tcpdump wget ntpdate</span><br><span class="line">tar -xvf haproxy-2.0.8.tar.gz</span><br><span class="line">cd haproxy-2.0.8 </span><br><span class="line">make ARCH=x86_64 TARGET=linux-glibc USE_PCRE=1 USE_ZLIB=1 USE_SYSTEMD=1 USE_CPU_AFFINITY=1  USE_OPENSSL=1   USE_LUA=1 LUA_INC=/root/lua-5.3.5/src LUA_LIB=/root/lua-5.3.5/src PREFIX=/apps/haproxy</span><br><span class="line">#或者make install PREFIX=/apps/haproxy</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vim  /usr/lib/systemd/system/haproxy.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/apps/haproxy/sbin/haproxy -f /apps/haproxy/haproxy.cfg -c -q</span><br><span class="line">ExecStart=/apps/haproxy/sbin/haproxy -Ws -f /apps/haproxy/haproxy.cfg -p /var/lib/haproxy/haproxy.pid</span><br><span class="line">ExecReload=/bin/kill -USR2 $MAINPID</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.targe</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vim /apps/haproxy/haproxy.cfg </span><br><span class="line">global</span><br><span class="line">maxconn 100000</span><br><span class="line">chroot /apps/haproxy</span><br><span class="line">stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span><br><span class="line">uid 99</span><br><span class="line">gid 99</span><br><span class="line">daemon</span><br><span class="line">#nbproc 4</span><br><span class="line">#cpu-map 1 0</span><br><span class="line">#cpu-map 2 1</span><br><span class="line">#cpu-map 3 2</span><br><span class="line">#cpu-map 4 3</span><br><span class="line">pidfile /var/lib/haproxy/haproxy.pid</span><br><span class="line">log 127.0.0.1 local3 info</span><br><span class="line">defaults</span><br><span class="line">option http-keep-alive</span><br><span class="line">option forwardfor</span><br><span class="line">maxconn 100000</span><br><span class="line">mode http</span><br><span class="line">timeout connect 300000ms</span><br><span class="line">timeout client 300000ms</span><br><span class="line">timeout server 300000ms</span><br><span class="line">listen stats</span><br><span class="line"> mode http</span><br><span class="line"> bind 0.0.0.0:9999</span><br><span class="line"> stats enable</span><br><span class="line"> log global</span><br><span class="line"> stats uri     /haproxy-status</span><br><span class="line"> stats auth   haadmin:q1w2e3r4ys</span><br><span class="line">listen web_port</span><br><span class="line"> bind 192.168.38.67:80</span><br><span class="line"> mode http</span><br><span class="line"> log global</span><br><span class="line"> server web1 127.0.0.1:8080 check inter 3000 fall 2 rise 5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> mkdir /var/lib/haproxy</span><br><span class="line"> chown 99.99 /var/lib/haproxy/ -R</span><br><span class="line"> systemctl start haproxy</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<p>2) RPM安装HAproxy:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">wget https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64//haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br><span class="line">#系统默认的Lua版本太低。</span><br><span class="line">wget https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64//lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm</span><br><span class="line">yum install lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm</span><br><span class="line">rpm -qpl lua53u-libs-5.3.4-1.ius.centos7.x86_64.rpm </span><br><span class="line">yum install -y haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br><span class="line">rpm -qpl haproxy18u-1.8.19-1.ius.centos7.x86_64.rpm</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser2/">linux-ser2</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/05/HAproxy的编译安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="HAproxy的编译安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Tengine的安装与配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/11/01/Tengine的安装与配置/" class="article-date">
-  	<time datetime="2019-11-01T13:44:55.000Z" itemprop="datePublished">2019-11-01</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/01/Tengine的安装与配置/">
-        Tengine的安装与配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 编译安装tengine：</p>
-</blockquote>
-<p>在安装编译tengine时，tengine编译选项的支持取决于底层Nginx的版本。(例如Nginx1.18版本刚刚支持的一些编译选项，在基于1.16<br>版本的Tengine中不支持。)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1. 编译安装tengine:</span><br><span class="line">    ./configure --prefix=/apps/tengine --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-file-aio</span><br><span class="line">    make &amp;&amp; make install</span><br><span class="line">2. tengine 支持不停服务动态加载模块的功能：</span><br><span class="line">    ./configure --prefix=/apps/tengine --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-file-aio --with-http_concat_module=shared</span><br><span class="line">    make dso_install</span><br><span class="line">   以上操作后默认会在/apps/tengine/modules/目录下添加一个模块：ngx_http_concat_module.so</span><br><span class="line">   之后需要在tengine的主配置文件conf/nginx.conf中加载该模块：</span><br><span class="line">    dso &#123;</span><br><span class="line">     load ngx_http_concat_module.so;       </span><br><span class="line">        &#125;</span><br><span class="line">    最后可以在location中引用以上模块。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>2) Tengine模块中的concat模块使用：</p>
-</blockquote>
-<p>网站中的css、js等文件都是小文件，单个文件大小几k甚至几个字节，所以文件的特点是小而多，会造成网站加载<br>时http请求较多，且网络传输时间比较短，甚至有时候请求时间比传输时间还长，当公司网站中的这类小文件很多<br>时，大量的http请求就会造成传输效率低，影响网站的访问速度和客户端体验，这时合并http请求就非常有必要<br>了，concat模块就提供了合并文件http请求的功能，这个模块由淘宝开发，功能和apache的mod_concat模块类<br>似。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">也可以在编译Tengine中直接添加编译选项：--with-http_concat_module</span><br></pre></td></tr></table></figure></p>
-<p>在Tengine中启用Lua相关功能需要安装一下两个包：<br>yum install lua lua-devel</p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/11/01/Tengine的安装与配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Tengine的安装与配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
     </nav>
   
 </div>

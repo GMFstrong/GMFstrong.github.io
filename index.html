@@ -202,6 +202,254 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-MongoDB的认证及授权" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/03/28/MongoDB的认证及授权/" class="article-date">
+  	<time datetime="2020-03-28T12:05:05.000Z" itemprop="datePublished">2020-03-28</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/28/MongoDB的认证及授权/">
+        MongoDB的认证及授权
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) MongoDB是基于角色对用户进行授权的，常见的角色如下：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">read 可以读取指定数据库中任何数据。</span><br><span class="line">readWrite 可以读写指定数据库中任何数据，包括创建、重命名、删除集合。</span><br><span class="line">readAnyDatabase 可以读取所有数据库中任何数据(除了数据库config和local之外)。</span><br><span class="line">readWriteAnyDatabase 可以读写所有数据库中任何数据(除了数据库config和local之外)。</span><br><span class="line">userAdminAnyDatabase 可以在指定数据库创建和修改用户(除了数据库config和local之外)。</span><br><span class="line">dbAdminAnyDatabase 可以读取任何数据库以及对数据库进行清理、修改、压缩、获取统计信息、执行检查等操作(除了数据库config和local之外)。</span><br><span class="line">dbAdmin 可以读取指定数据库以及对数据库进行清理、修改、压缩、获取统计信息、执行检查等操作。</span><br><span class="line">userAdmin 可以在指定数据库创建和修改用户。</span><br><span class="line">clusterAdmin 可以对整个集群或数据库系统进行管理操作。</span><br><span class="line">backup 备份MongoDB数据最小的权限。</span><br><span class="line">restore 从备份文件中还原恢复MongoDB数据(除了system.profile集合)的权限。</span><br><span class="line">root 超级账号，超级权限</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 具体为单实例的MongoDB进行认证的配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1.先不开启认证配置启动服务进程。</span><br><span class="line">2.创建用户并对其进行授权：</span><br><span class="line">use admin</span><br><span class="line">db.createUser(&#123;user:&quot;root&quot;,pwd:&quot;123456&quot;,roles:[&quot;root&quot;]&#125;)  #创建超管用户</span><br><span class="line">db.createUser(&#123;user:&quot;admin&quot;,pwd:&quot;123456&quot;,roles:[&#123;role:&quot;userAdminAnyDatabase&quot;,db:&quot;admin&quot;&#125;]&#125;) #admin库的用户</span><br><span class="line"></span><br><span class="line">如果不指定数据库，则创建的指定的权限的用户在所有的数据库上有效。例如&#123;role:</span><br><span class="line">&quot;userAdminAnyDatabase&quot;, db:&quot;&quot;&#125;</span><br><span class="line"></span><br><span class="line">db.system.users.find()  #查看已经创建了的用户的情况</span><br><span class="line">db.dropUser(&quot;admin&quot;)  #删除用户</span><br><span class="line">db.changeUserPassword(&quot;root&quot;, &quot;123456&quot;) #修改密码</span><br><span class="line">db.auth(&quot;myroot&quot;,&quot;12345&quot;)  #切换到指定的库进行认证登录</span><br><span class="line"></span><br><span class="line">在创建某个指定数据库的用户是必须先登录具有权限操作admin库的用户。</span><br><span class="line">use articledb</span><br><span class="line">db.createUser(&#123;user: &quot;bobo&quot;, pwd: &quot;123456&quot;, roles: [&#123; role: &quot;readWrite&quot;, db:&quot;articledb&quot; &#125;]&#125;)</span><br><span class="line"></span><br><span class="line">3.修改配置文件就可开启认证功能：</span><br><span class="line">security:</span><br><span class="line">  authorization: enabled</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 关于副本集和分片集群的认证功能配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1.关于副本集和分片集群的认证都需要两方面：</span><br><span class="line">    （1）客户端登录服务端的认证。</span><br><span class="line">    （2）集群之间子节点的认证。</span><br><span class="line">2.我们先创建一个超管账号：</span><br><span class="line">use admin</span><br><span class="line">db.createUser(&#123;user:&quot;root&quot;,pwd:&quot;123456&quot;,roles:[&quot;root&quot;]&#125;)</span><br><span class="line">如若在启动服务之前就在配置文件中开启了授权的配置，则必须使用localhost登录，再创建用户。</span><br><span class="line">3.创建用于集群内部认证的秘钥文件：</span><br><span class="line">openssl rand -base64 756 &gt; server.key</span><br><span class="line">chmod 400 server.key</span><br><span class="line">将以上文件复制到其他节点。</span><br><span class="line">修改配置文件，重启服务。</span><br><span class="line">security:</span><br><span class="line">  keyFile: /apps/mongo/server.key</span><br><span class="line">  authorization: enabled</span><br><span class="line">4.在分片集群中配置认证时，除了mongos（路由节点）的配置是不开启认证，但是要配置密钥文件，其他配置和复制集</span><br><span class="line">相同，因为mongos只做路由，不保存数据。</span><br><span class="line">启动顺序。先启动配置节点，再启动分片节点，最后启动路由节点。</span><br><span class="line"></span><br><span class="line">通过mongos添加的账号信息，只会保存到配置节点的服务中，具体的数据节点不保存账号信息，因</span><br><span class="line">此，分片中的账号信息不涉及到同步问题。</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2020/03/28/MongoDB的认证及授权/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MongoDB的认证及授权">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-MongoDB的分片集群配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/03/28/MongoDB的分片集群配置/" class="article-date">
+  	<time datetime="2020-03-28T12:05:04.000Z" itemprop="datePublished">2020-03-28</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/28/MongoDB的分片集群配置/">
+        MongoDB的分片集群配置
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) MongoDB的分片集群的搭建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line">1.我们这里使用两个分片（使用副本集的方式3+3）与一个配置节点（副本集方式3，在3.4</span><br><span class="line">后必须采用副本集的方式）以及两个路由节点。</span><br><span class="line"></span><br><span class="line">两个分片副本集的搭建：</span><br><span class="line">mkdir /apps/mongo/27017/data/db -pv</span><br><span class="line">mkdir /apps/mongo/27017/log -pv</span><br><span class="line">vim /apps/mongo/27017/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/27017/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/27017/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27017</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: shardsvr</span><br><span class="line"></span><br><span class="line">mkdir /apps/mongo/27018/data/db -pv</span><br><span class="line">mkdir /apps/mongo/27018/log -pv</span><br><span class="line">vim /apps/mongo/27018/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/27018/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/27018/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27018</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: shardsvr</span><br><span class="line"></span><br><span class="line">mkdir /apps/mongo/27019/data/db -pv</span><br><span class="line">mkdir /apps/mongo/27019/log -pv</span><br><span class="line">vim /apps/mongo/27019/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/27019/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/27019/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27019</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: shardsvr</span><br><span class="line"></span><br><span class="line">mongod -f /apps/mongo/27017/mongod.conf</span><br><span class="line">mongod -f /apps/mongo/27018/mongod.conf</span><br><span class="line">mongod -f /apps/mongo/27019/mongod.conf</span><br><span class="line"></span><br><span class="line">mongo</span><br><span class="line">config = &#123; _id: &quot;GMFMongo&quot;, members: [</span><br><span class="line">&#123;_id: 0, host: &quot;192.168.38.104:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 1, host: &quot;192.168.38.104:27018&quot;&#125;, </span><br><span class="line">&#123;_id: 2, host: &quot;192.168.38.104:27019&quot;, arbiterOnly: true&#125;]</span><br><span class="line">&#125;</span><br><span class="line">rs.initiate(config)</span><br><span class="line"></span><br><span class="line">配置节点副本集的配置：</span><br><span class="line">仅仅需要修改配置文件的如下两行：</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongocon&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: configsvr</span><br><span class="line"></span><br><span class="line">mongo</span><br><span class="line">config = &#123; _id: &quot;GMFMongocon&quot;, members: [</span><br><span class="line">&#123;_id: 0, host: &quot;192.168.38.106:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 1, host: &quot;192.168.38.106:27018&quot;&#125;, </span><br><span class="line">&#123;_id: 2, host: &quot;192.168.38.106:27019&quot;&#125;]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">路由节点的配置：</span><br><span class="line"></span><br><span class="line">1.首先，创建相关目录：</span><br><span class="line">mkdir /apps/mongo/log -pv</span><br><span class="line"></span><br><span class="line">vim /apps/mongo/mongos.conf</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27017</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">sharding:</span><br><span class="line">  configDB: GMFMongocon/192.168.38.106:27017,192.168.38.106:27018,192.168.38.106:27019</span><br><span class="line"></span><br><span class="line">mongos -f /apps/mongo/mongos.conf</span><br><span class="line"></span><br><span class="line">2.此时还不能通过路由节点对分片进行读写操作，因为路由节点还不能连接到分片节点仅仅连接了配置节点，下面就将分片节点加入到集群中。</span><br><span class="line"></span><br><span class="line">mongo</span><br><span class="line"></span><br><span class="line">sh.addShard(&quot;GMFMongo/192.168.38.104:27017,192.168.38.104:27018,192.168.38.104:27019&quot;)</span><br><span class="line"></span><br><span class="line">sh.addShard(&quot;GMFMongo2/192.168.38.105:27017,192.168.38.105:27018,192.168.38.105:27019&quot;)</span><br><span class="line"></span><br><span class="line">sh.status()  查看分片状态</span><br><span class="line"></span><br><span class="line">如若添加分片失败，先移除分片再查看具体配置信息：</span><br><span class="line">use admin</span><br><span class="line">db.runCommand( &#123; removeShard: &quot;分片名&quot; &#125; )</span><br><span class="line"></span><br><span class="line">添加第二的路由节点直接根据配置文件启动服务即可，无需其他配置，因为关于分片的配置已经存放到配置服务器中了。</span><br></pre></td></tr></table></figure>
+<p><strong><em>如果只剩下最后一个 shard，是无法删除的，移除时会自动转移分片数据，需要一个时间过程，</em></strong><br><strong><em>完成后，再次执行删除分片命令才能真正删除。</em></strong></p>
+<blockquote>
+<p>2) 开启分片功能的常用命令：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh.enableSharding(&quot;库名&quot;)</span><br><span class="line">sh.shardCollection(&quot;库名.集合名&quot;,&#123;&quot;key&quot;:1&#125;)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2020/03/28/MongoDB的分片集群配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MongoDB的分片集群配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-MongoDB的配置安装" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/03/28/MongoDB的配置安装/" class="article-date">
+  	<time datetime="2020-03-28T12:05:03.000Z" itemprop="datePublished">2020-03-28</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/28/MongoDB的配置安装/">
+        MongoDB的配置安装
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) 首先，下载二进制包：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.mongodb.com/download-center/community</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2) 进行目录规划，并进行安装配置：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">mkdir /apps/mongo/&#123;data,log&#125; -pv</span><br><span class="line">tar xvf mongodb-linux-x86_64-4.0.10.tgz</span><br><span class="line"></span><br><span class="line">vim /etc/profile.d/mongod.sh</span><br><span class="line">export PATH=$PATH:/apps/mongo/mongodb-linux-x86_64-4.0.10/bin</span><br><span class="line"></span><br><span class="line">vim /apps/mongo/mongod.conf </span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27017</span><br><span class="line">  bindIp: 0.0.0.0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3) 启动MongoDB服务：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mongod --config=/apps/mongo/mongod.conf</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4) 在某些时候可能因为操作不当，造成数据库损坏，可以通过如下方式修复：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rm -f /apps/mongo/data/db/*.lock</span><br><span class="line">mongod --repair --dbpath=/apps/mongo/data/db</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5) 关闭MongoDB的方法：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mongo</span><br><span class="line">use admin</span><br><span class="line">db.shutdownServer()</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6) MongoDB副本集的搭建：</p>
+</blockquote>
+<p><strong><em>MongoDB的副本集中只有主节点具有写权限，从节点是根据主节点记录的OPlog日志进行数据的同步</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">我们这里使用三台服务器，搭建一个副本集，包含（一主两从）：</span><br><span class="line">分别在三台主机上执行如下命令：</span><br><span class="line"></span><br><span class="line">mkdir /apps/mongo/data/db -pv</span><br><span class="line">mkdir /apps/mongo/log -pv</span><br><span class="line">tar -xvf mongodb-linux-x86_64-4.0.10.tgz </span><br><span class="line"></span><br><span class="line">vim /etc/profile.d/mongo.sh</span><br><span class="line">export PATH=$PATH:/apps/mongo/mongodb-linux-x86_64-4.0.10/bin</span><br><span class="line"></span><br><span class="line">source /etc/profile.d/mongo.sh</span><br><span class="line"></span><br><span class="line">接下来我们需要对整个副本集集群进行具体配置：</span><br><span class="line">vim /apps/mongo/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27017</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line"></span><br><span class="line">启动各个服务器的MongoDB服务进程：</span><br><span class="line">mongod -f /apps/mongo/mongod.conf</span><br><span class="line"></span><br><span class="line">其次，我们需要对整个集群进行初始化，我们通过MongoDB的客户端需要连接到其中一台服务器：</span><br><span class="line">mongo -host=192.168.38.106 --port=27017</span><br><span class="line"></span><br><span class="line">config = &#123; _id: &quot;GMFMongo&quot;, members: [</span><br><span class="line">&#123;_id: 0, host: &quot;192.168.38.106:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 1, host: &quot;192.168.38.105:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 2, host: &quot;192.168.38.104:27017&quot;&#125;]</span><br><span class="line">&#125;</span><br><span class="line">rs.initiate(config)</span><br><span class="line"></span><br><span class="line">rs.conf() 查看当前集群的配置。</span><br><span class="line">rs.status() 当前集群的状态。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">添加测试数据：</span><br><span class="line">use articledb</span><br><span class="line">db.comment.insert(&#123;&quot;articleid&quot;:&quot;100000&quot;,&quot;content&quot;:&quot;今天天气真好，阳光明媚&quot;,&quot;userid&quot;:&quot;1001&quot;,&quot;nickname&quot;:&quot;Rose&quot;,&quot;createdatetime&quot;:new Date()&#125;)</span><br><span class="line"></span><br><span class="line">默认从节点没有读权限，开启读权限。</span><br><span class="line">rs.slaveOk()</span><br><span class="line">rs.slaveOk(false) 取消从节点的读权限</span><br><span class="line"></span><br><span class="line">若要搭建一主一从一仲裁：</span><br><span class="line">config = &#123; _id: &quot;GMFMongo&quot;, members: [</span><br><span class="line">&#123;_id: 0, host: &quot;192.168.38.106:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 1, host: &quot;192.168.38.105:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 2, host: &quot;192.168.38.104:27017&quot;, arbiterOnly: true&#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+      
+        
+<div class="counter-tag counter">
+    <span id="/2020/03/28/MongoDB的配置安装/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MongoDB的配置安装">
+         &nbsp;
+        view
+    </span>
+</div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
     <article id="post-ELK安装及配置" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -817,262 +1065,9 @@
 
 
   
-    <article id="post-K8S的五大组件及adm安装" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/12/12/K8S的五大组件及adm安装/" class="article-date">
-  	<time datetime="2019-12-12T12:00:09.000Z" itemprop="datePublished">2019-12-12</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/12/K8S的五大组件及adm安装/">
-        K8S的五大组件及adm安装
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 五大组件及etcd的作用：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1.Master节点的3大组件：</span><br><span class="line">    APIserver：整个集群的网关（入口），负责认证工作，同时负责接收响应用户的请求，所有其他组件通过它进行交互。</span><br><span class="line">    scheduler：调度器，集群在接到API请求后，根据集群当前资源状态，以及请求的所需资源要求做出合理调度。需要考虑独</span><br><span class="line">               立的和集体的资源需求、服务质量需求、硬件/软件/策略限制、亲和与反亲和规范、数据位置、内部负载接口、</span><br><span class="line">               截止时间等。</span><br><span class="line">    controller：控制器，集群内部的管理控制中心，确保集群始终处于预期的工作状态，负责集群内的 Node、Pod 副本、服务</span><br><span class="line">               端点（Endpoint）、命名空间（Namespace）、服务账号（ServiceAccount）、资源定额（ResourceQuota）的管理，</span><br><span class="line">               在以上资源意外停止服务，控制器负责还原至期望状态。</span><br><span class="line">2.Node节点的两大组件：</span><br><span class="line">    kube-proxy：负责维护各个节点间的pod,service的网络通信，引导访问当前service的请求到正确的pod对象。主要依靠生成的iptables</span><br><span class="line">                或者IPVS规制工作。</span><br><span class="line">    kubelet：工作在Node节点的代理客户端，会在Master注册当前节点并负责监视监视分配给自己节点的pod，主要功能如下：</span><br><span class="line">                （1）向 master 汇报 node 节点的状态信息（cup，内存，磁盘，网络IO的使用情况，便于Master做出合理调度。）</span><br><span class="line">                （2）负责接收APIserver发送的pod配置信息，并确保Pod在当前节点处于期望状态。</span><br><span class="line">                （3）准备 Pod 所需的数据卷，在 node 节点执行容器健康检查。</span><br><span class="line">3.关于etcd:</span><br><span class="line">    用于存储当前集群状态信息，并提供了watch（监听机制），当etcd的键值发生变化时，会主动推送变化到APIserver确保集群的高效协同。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 基于kubeadm安装K8S:</p>
-</blockquote>
-<p><strong><em>可以通过阿里云的镜像仓库把镜像先提前下载下来，可以避免后期因镜像下载异常而导致 k8s 部署异常。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">1.安装前准备:</span><br><span class="line">    1.禁用swap,selinux,iptables。</span><br><span class="line">        vim /etc/fstab</span><br><span class="line">            #/swapfile                                 none            swap    sw              0       0</span><br><span class="line">        swapoff -a</span><br><span class="line">    2.准备docker运行环境（注意docker版本，必须被K8S版本支持）。</span><br><span class="line">2.安装Master节点：</span><br><span class="line">    1.安装kubelet kubeadm kubectl：</span><br><span class="line">        apt-get update &amp;&amp; apt-get install -y apt-transport-https</span><br><span class="line">        curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -</span><br><span class="line">        echo &apos;deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main&apos; &gt;&gt; /etc/apt/sources.list</span><br><span class="line">        apt-get update</span><br><span class="line">        apt-cache madison kubectl</span><br><span class="line">        apt-get install -y kubelet=1.16.1-00 kubeadm=1.16.1-00 kubectl=1.16.1-00  #确保版本一致。</span><br><span class="line">    2.基于Keepalived实现双Master高可用：</span><br><span class="line">        apt install -y keepalived</span><br><span class="line">        cp /usr/share/doc/keepalived/samples/keepalived.conf.vrrp /etc/keepalived/keepalived.conf</span><br><span class="line">    3.Master初始化：</span><br><span class="line">        kubeadm config images list --kubernetes-version v1.16.1   #查看需要的镜像有哪些。</span><br><span class="line"></span><br><span class="line">        --apiserver-advertise-address string #API Server 将要监听的监听地址，为本机 IP</span><br><span class="line">        --control-plane-endpoint   #VIP的地址</span><br><span class="line">        --apiserver-bind-port int32 #API Server 绑定的端口,默认为 6443</span><br><span class="line">        --kubernetes-version string #选择 k8s 版本，默认为 stable-1</span><br><span class="line">        --pod-network-cidr #设置 pod ip 地址范围</span><br><span class="line">        --service-cidr #设置 service 网络地址范围</span><br><span class="line">        --service-dns-domain string #设置 k8s 内部域名，默认为 cluster.local，会有相应的 DNS 服务</span><br><span class="line">          (kube-dns/coredns)解析生成的域名记录。</span><br><span class="line">        --image-repository string #设置一个镜像仓库，默认为 k8s.gcr.io</span><br><span class="line"></span><br><span class="line">        kubeadm  init  --apiserver-advertise-address=192.168.38.206 \</span><br><span class="line">                       --control-plane-endpoint=192.168.38.66 \</span><br><span class="line">                       --apiserver-bind-port=6443 \</span><br><span class="line">                       --kubernetes-version=v1.16.1 \</span><br><span class="line">                       --pod-network-cidr=10.10.0.0/16 \</span><br><span class="line">                       --service-cidr=172.66.0.0/16 \</span><br><span class="line">                       --service-dns-domain=gmf.local \</span><br><span class="line">                       --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers</span><br><span class="line"></span><br><span class="line">    4.安装flannel插件：</span><br><span class="line">        wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml</span><br><span class="line">        vim kube-flannel.yml</span><br><span class="line">            &quot;Network&quot;: &quot;10.10.0.0/16&quot;   # 和--pod-network-cidr保持一致。</span><br><span class="line">        kubectl apply -f kube-flannel.yml</span><br><span class="line">    5.为集群添加另一个Master:</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy:v1.16.1    </span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.16.1</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.3.15-0</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.2</span><br><span class="line">        docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.1</span><br><span class="line">        生成一个--certificate-key：</span><br><span class="line">            kubeadm init phase upload-certs --upload-certs</span><br><span class="line"></span><br><span class="line">            kubeadm join 192.168.38.66:6443 --token vohtj2.ggikgjmbrm6tkd3m \</span><br><span class="line">                --discovery-token-ca-cert-hash sha256:1d0956ac42f9eff52f34ab9472c7dca4df153de430b90ac3b57e05e780f67209 \</span><br><span class="line">                --control-plane --certificate-key d8e606d50f404d009fffdde36e0aee7503145f498e9cad1a0468155e47c619e4</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>3) 添加Node节点:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.在node节点安装kubelet=1.16.1-00 kubeadm=1.16.1-00。</span><br><span class="line">2.添加节点：</span><br><span class="line">    kubeadm join 192.168.38.66:6443 --token vohtj2.ggikgjmbrm6tkd3m \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:1d0956ac42f9eff52f34ab9472c7dca4df153de430b90ac3b57e05e780f67209</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) kubeadm init初始化流程图：</p>
-</blockquote>
-<img src="/2019/12/12/K8S的五大组件及adm安装/k8s-1.jpg">
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/12/12/K8S的五大组件及adm安装/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="K8S的五大组件及adm安装">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Jumpservrer安装配置" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/12/09/Jumpservrer安装配置/" class="article-date">
-  	<time datetime="2019-12-09T12:00:09.000Z" itemprop="datePublished">2019-12-09</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/09/Jumpservrer安装配置/">
-        Jumpservrer安装配置
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 准备mysql数据库:</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">1.准备镜像：</span><br><span class="line">docker pull mysql:5.6.46</span><br><span class="line"></span><br><span class="line">2.准备配置文件：</span><br><span class="line">mkdir -pv /etc/mysql/mysql.conf.d/</span><br><span class="line">vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">pid-file        = /var/run/mysqld/mysqld.pid</span><br><span class="line">socket          = /var/run/mysqld/mysqld.sock</span><br><span class="line">datadir         = /var/lib/mysql</span><br><span class="line">symbolic-links=0</span><br><span class="line">character-set-server=utf8</span><br><span class="line"></span><br><span class="line">mkdir -pv /etc/mysql/conf.d/</span><br><span class="line">vim /etc/mysql/conf.d/mysql.cnf</span><br><span class="line">[mysql]</span><br><span class="line">default-character-set=utf8</span><br><span class="line"></span><br><span class="line">3.创建数据目录，防止容器出现异常，引起jumpserver的数据丢失：</span><br><span class="line">mkdir /data/mysql -p</span><br><span class="line"></span><br><span class="line">4.运行mysql容器：</span><br><span class="line">docker run -it -d -p 3306:3306 -v /etc/mysql/mysql.conf.d/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf \</span><br><span class="line">                               -v /etc/mysql/conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf \</span><br><span class="line">                               -v /data/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=&quot;testroot&quot; mysql:5.6.46</span><br><span class="line"></span><br><span class="line">5.进入容器为jumpserver创建数据库并授权：</span><br><span class="line">    create database jumpserver default charset &apos;utf8&apos;;</span><br><span class="line">    grant all on jumpserver.* to &apos;jumpserver&apos;@&apos;192.168.38.%&apos; identified by &apos;testroot&apos;;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) 安装redis；</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apt-cache madison redis</span><br><span class="line">apt install -y redis=5:4.0.9-1ubuntu0.2</span><br><span class="line">修改如下两项：</span><br><span class="line">vim /etc/redis/redis.conf</span><br><span class="line">    bind 192.168.38.205</span><br><span class="line">    requirepass testroot</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>3) 启动jumpserver容器：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1.生成key和token:</span><br><span class="line">    if [ &quot;$SECRET_KEY&quot; = &quot;&quot; ]; then SECRET_KEY=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 50`; echo &quot;SECRET_KEY=$SECRET_KEY&quot; &gt;&gt; ~/.bashrc; echo $SECRET_KEY; else echo $SECRET_KEY; fi</span><br><span class="line">    if [ &quot;$BOOTSTRAP_TOKEN&quot; = &quot;&quot; ]; then BOOTSTRAP_TOKEN=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 16`; echo &quot;BOOTSTRAP_TOKEN=$BOOTSTRAP_TOKEN&quot; &gt;&gt; ~/.bashrc; echo $BOOTSTRAP_TOKEN; else echo $BOOTSTRAP_TOKEN; fi</span><br><span class="line">2.拉取jumpserver镜像;</span><br><span class="line">    docker pull jumpserver/jms_all:1.4.10</span><br><span class="line">3.启动容器：</span><br><span class="line">docker run --name jms_all -d \</span><br><span class="line">    -v /opt/jumpserver:/opt/jumpserver/data/media \</span><br><span class="line">    -p 80:80 \</span><br><span class="line">    -p 2222:2222 \</span><br><span class="line">    -e SECRET_KEY=aDsuxpjtGZ3YtdMC2S0BYVO85GXDDfd6aM9NANhWraITRWsumH \</span><br><span class="line">    -e BOOTSTRAP_TOKEN=LLfYIMS3Wbj7Vi5e \</span><br><span class="line">    -e DB_HOST=192.168.38.205 \</span><br><span class="line">    -e DB_PORT=3306 \</span><br><span class="line">    -e DB_USER=jumpserver \</span><br><span class="line">    -e DB_PASSWORD=testroot \</span><br><span class="line">    -e DB_NAME=jumpserver \</span><br><span class="line">    -e REDIS_HOST=192.168.38.205 \</span><br><span class="line">    -e REDIS_PORT=6379 \</span><br><span class="line">    -e REDIS_PASSWORD=testroot \</span><br><span class="line">    jumpserver/jms_all:1.4.10</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/12/09/Jumpservrer安装配置/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Jumpservrer安装配置">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
-    <article id="post-Docker的资源限制" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2019/12/08/Docker的资源限制/" class="article-date">
-  	<time datetime="2019-12-08T12:00:09.000Z" itemprop="datePublished">2019-12-08</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/08/Docker的资源限制/">
-        Docker的资源限制
-        
-      </a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>1) 关于Linux的OOM机制：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">OOM (Out of Memory Exception,内存溢出，随后系统会开始杀死进程以释放内存，凡是运行在宿主机的进程都有可能被 kill，</span><br><span class="line">linux 会为每个进程算一个分数，最终他会将分数最高的进程 kill，不推荐通过在守护程序或容器上手动设置--oom-score-adj </span><br><span class="line">为极端负数，或通过在容器上设置--oom-kill-disable 来绕过这些安全措施。</span><br><span class="line"></span><br><span class="line">/proc/PID/oom_score_adj #范围为-1000 到 1000，值越高越容易被宿主机 kill，如果将该值设置为-1000，则进程永远不会被宿主机 kernel kill。</span><br><span class="line">/proc/PID/oom_adj #范围为-17 到+15，取值越高越容易被干掉，如果是-17，则表示不能被 kill，该设置参数的存在是为了和旧版本的 Linux 内核兼容。</span><br><span class="line">/proc/PID/oom_score #这个值是系统综合进程的内存消耗量、CPU 时间，(utime + stime)、存活时间(uptime - start time)和 oom_adj 计算出的进程</span><br><span class="line">得分，消耗内存越多得分越高，越容易被宿主机 kernel 强制杀死。</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>2) Docker的内存限制：</p>
-</blockquote>
-<p><strong><em>Docker 可以强制执行硬性内存限制，即只允许容器使用给定的内存大小。Docker 也可以执行非硬性内存限制，即容器可以使用尽可能多的内存，除非内核检测到主机上的内存不够用了。假如一个容器未做内存使用限制，则该容器可以利用到系统内存最大空间，默认创建的容器没有做内存资源限制。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">--oom-score-adj #宿主机 kernel 对进程使用的内存进行评分，评分最高的将被宿主机内核 kill 掉，可以指定一个容器的评分但是不推荐手动指定。</span><br><span class="line">--oom-kill-disable #对某个容器关闭 oom 机制，在已设置-m / - memory 选项的容器上禁用 OOM否者无效。</span><br><span class="line">-m or --memory #容器可以使用的最大内存量，如果设置此选项，则允许的最小存值为 4m （4 兆字节）。</span><br><span class="line">--memory-reservation #允许指定小于--memory 的软限制，在超过该限制后会日志仅仅记录一条警告。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>3) 内存限制认证：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">1.首先安装压力测试工具：</span><br><span class="line">    docker pull lorel/docker-stress-ng</span><br><span class="line">2.查看帮助：</span><br><span class="line">    docker run -it --rm lorel/docker-stress-ng --help</span><br><span class="line">3.对启动的容器进行内存限制（限制该容器最大使用256m内存）：</span><br><span class="line">    --vm-bytes XXXM 限制一个工作进程最大使用的内存（该工具产生的进程）。</span><br><span class="line">    docker run -it --rm -m 256M lorel/docker-stress-ng --vm 2 --vm-bytes 256M</span><br><span class="line">4.查看限制结果：</span><br><span class="line">    docker stats</span><br><span class="line">5.docker对资源的限制是基于Cgroup实现的，可以在以下命令查看：</span><br><span class="line">    cat /sys/fs/cgroup/memory/docker/容器 ID /memory.limit_in_bytes</span><br><span class="line">6.动态修改内存限制大小：</span><br><span class="line">    通过 echo 命令可以改内存限制的值。</span><br><span class="line">    echo 536870912 &gt; /sys/fs/cgroup/memory/docker/dbebef4bd1896231ee096ba7bb99e14bcb0847f56585aadf4d729e9414ddccaf/memory.limit_in_bytes</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>4) 关于CPU的限制：</p>
-</blockquote>
-<p>CPU 密集型的场景：优先级越低越好，计算密集型任务的特点是要进行大量的计算，消耗 CPU 资源，比如计算圆周率、数据处理、对视频进行高<br>清解码等等，全靠 CPU 的运算能力。</p>
-<p>IO 密集型的场景：优先级值高点，涉及到网络、磁盘 IO 的任务都是 IO 密集型任务，这类任务的特点是 CPU 消耗很少，任务的大部分时间都<br>在等待 IO 操作完成（因为 IO 的速度远远低于 CPU 和内存的速度），比如 Web 应用，高并发，数据量大的动态网站来说，数据库应该为 IO<br>密集型。</p>
-<p><strong><em>查看磁盘调度算法：</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /sys/block/sda/queue/scheduler</span><br></pre></td></tr></table></figure></p>
-<p><strong><em>默认情况下，每个容器对主机 CPU 周期的访问权限是不受限制的。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">--cpus #指定容器可以使用多少可用 CPU 资源，例如，如果主机有两个 CPU，并且设置了--cpus =“1.5”，那么该容器将保证最多可以访问 </span><br><span class="line">1.5 个的 CPU(如果是 4 核 CPU，那么还可以是 4 核心上每核用一点，但是总计是 1.5 核心的CPU)。</span><br><span class="line">--cpuset-cpus #用于指定容器运行的 CPU 编号，也就是我们所谓的绑核</span><br><span class="line">--cpu-shares #用于设置 cfs 中调度的相对最大比例权重,cpu-share 的值越高的容器，将会分得更多的时间片。</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>5) cpu限制测试；</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">1.限制一个docker容器最多用1.5个CUP；</span><br><span class="line">    docker run -it --rm -m 256M --cpus 1.5 lorel/docker-stress-ng --cpu 2 --vm 2 </span><br><span class="line">2.top命令查看（按‘1’键）：</span><br><span class="line">    top - 15:26:08 up 9 min,  2 users,  load average: 3.12, 2.17, 1.16</span><br><span class="line">        Tasks: 184 total,   3 running,  99 sleeping,   0 stopped,   0 zombie</span><br><span class="line">        %Cpu0  : 70.3 us,  0.3 sy,  0.0 ni, 28.7 id,  0.0 wa,  0.0 hi,  0.7 si,  0.0 st</span><br><span class="line">        %Cpu1  :  0.3 us,  3.7 sy,  0.0 ni, 53.5 id, 41.9 wa,  0.0 hi,  0.7 si,  0.0 st</span><br><span class="line">        %Cpu2  :  0.0 us,  2.6 sy,  0.0 ni, 11.3 id, 80.0 wa,  0.0 hi,  6.1 si,  0.0 st</span><br><span class="line">        %Cpu3  : 71.9 us,  0.0 sy,  0.0 ni, 28.1 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span><br><span class="line">3.将容器运行在指定的cpu上（在第2和第4核CPU上）：</span><br><span class="line">    docker run -it --rm -m 256M --cpus 1.5 --cpuset-cpus 1,3 lorel/docker-stress-ng --cpu 2 --vm 2</span><br><span class="line">        top - 15:31:03 up 14 min,  2 users,  load average: 3.14, 2.66, 1.66</span><br><span class="line">        Tasks: 186 total,   3 running,  99 sleeping,   0 stopped,   0 zombie</span><br><span class="line">        %Cpu0  :  0.0 us,  0.7 sy,  0.0 ni, 97.3 id,  0.0 wa,  0.0 hi,  2.0 si,  0.0 st</span><br><span class="line">        %Cpu1  : 64.3 us, 10.7 sy,  0.0 ni, 11.0 id, 14.0 wa,  0.0 hi,  0.0 si,  0.0 st</span><br><span class="line">        %Cpu2  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span><br><span class="line">        %Cpu3  : 72.9 us,  1.0 sy,  0.0 ni, 20.5 id,  4.3 wa,  0.0 hi,  1.3 si,  0.0 st</span><br><span class="line">4.对容器使用cpu时间片的比例进行控制：</span><br><span class="line">    docker run -it --rm  --name gmf-test1 --cpu-shares 500 lorel/docker-stress-ng --cpu 2 --vm 2</span><br><span class="line">    docker run -it --rm  --name gmf-test2 --cpu-shares 1000 lorel/docker-stress-ng --cpu 2 --vm 2</span><br><span class="line">    docker stats</span><br><span class="line">        CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT    MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">        983a9e1523e0        gmf-test1           135.94%             532.8MiB / 3.83GiB   13.59%              726B / 0B           0B / 0B             7</span><br><span class="line">        1631b8cfddc8        gmf-test2           269.80%             533MiB / 3.83GiB     13.59%              726B / 0B           0B / 0B             7</span><br><span class="line">5.可以动态修改容器使用cpu时间片的值：</span><br><span class="line">    echo 2000 &gt; /sys/fs/cgroup/cpu,cpuacct/docker/容器 ID/cpu.shares</span><br><span class="line">    echo 1500 &gt; /sys/fs/cgroup/cpu/docker/1631b8cfddc82495faff2680f13dc0258d6f168a788b176ea13aa277df99d0ee/cpu.shares</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/other/">other</a>
-	</div>
-
-
-      
-        
-<div class="counter-tag counter">
-    <span id="/2019/12/08/Docker的资源限制/" class="leancloud_visitors post-title-link"
-          style="font-size: 12px" data-flag-title="Docker的资源限制">
-         &nbsp;
-        view
-    </span>
-</div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </div>

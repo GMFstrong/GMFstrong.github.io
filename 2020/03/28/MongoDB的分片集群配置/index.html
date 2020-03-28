@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>MongoDB的分片集群配置 | ConqUeroR</title>
+
+  <!-- keywords -->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1) MongoDB的分片集群的搭建：  1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MongoDB的分片集群配置">
+<meta property="og:url" content="http://gmfdevops.com.com/2020/03/28/MongoDB的分片集群配置/index.html">
+<meta property="og:site_name" content="ConqUeroR">
+<meta property="og:description" content="1) MongoDB的分片集群的搭建：  1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-28T13:12:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MongoDB的分片集群配置">
+<meta name="twitter:description" content="1) MongoDB的分片集群的搭建：  1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939">
+  
+    <link rel="alternative" href="/atom.xml" title="ConqUeroR" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+
+  <script src="//cdn.bootcss.com/require.js/2.3.2/require.min.js"></script>
+  <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+  
+      <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+<script>AV.initialize("your_app_id", "your_app_key");</script>
+<script src="/js/Counter.js"></script>
+  
+</head>
+<body>
+  <div id="container">
+    <div id="particles-js"></div>
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">ConqUeroR</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/websec">Web安全</a></li>
+				        
+							<li><a href="/categories/linux">Linux基础</a></li>
+				        
+							<li><a href="/categories/linux-ser1">Linux服务</a></li>
+				        
+							<li><a href="/categories/linux-ser2">Linux集群</a></li>
+				        
+							<li><a href="/categories/shell">Shell编程</a></li>
+				        
+							<li><a href="/categories/python">Python脚本</a></li>
+				        
+							<li><a href="/categories/network">网络配置</a></li>
+				        
+							<li><a href="/categories/other">其它</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/smackgg/hexo-theme-smackdown">smackdown</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">ConqUeroR</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">ConqUeroR</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/websec">Web安全</a></li>
+		        
+					<li><a href="/categories/linux">Linux基础</a></li>
+		        
+					<li><a href="/categories/linux-ser1">Linux服务</a></li>
+		        
+					<li><a href="/categories/linux-ser2">Linux集群</a></li>
+		        
+					<li><a href="/categories/shell">Shell编程</a></li>
+		        
+					<li><a href="/categories/python">Python脚本</a></li>
+		        
+					<li><a href="/categories/network">网络配置</a></li>
+		        
+					<li><a href="/categories/other">其它</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-MongoDB的分片集群配置" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/03/28/MongoDB的分片集群配置/" class="article-date">
+  	<time datetime="2020-03-28T12:05:04.000Z" itemprop="datePublished">2020-03-28</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MongoDB的分片集群配置
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/linux-ser1/">linux-ser1</a>
+	</div>
+
+
+        
+          
+<div class="counter-tag counter">
+    <span id="/2020/03/28/MongoDB的分片集群配置/" class="leancloud_visitors post-title-link"
+          style="font-size: 12px" data-flag-title="MongoDB的分片集群配置">
+         &nbsp;
+        view
+    </span>
+</div>
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>1) MongoDB的分片集群的搭建：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line">1.我们这里使用两个分片（使用副本集的方式3+3）与一个配置节点（副本集方式3，在3.4</span><br><span class="line">后必须采用副本集的方式）以及两个路由节点。</span><br><span class="line"></span><br><span class="line">两个分片副本集的搭建：</span><br><span class="line">mkdir /apps/mongo/27017/data/db -pv</span><br><span class="line">mkdir /apps/mongo/27017/log -pv</span><br><span class="line">vim /apps/mongo/27017/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/27017/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/27017/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27017</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: shardsvr</span><br><span class="line"></span><br><span class="line">mkdir /apps/mongo/27018/data/db -pv</span><br><span class="line">mkdir /apps/mongo/27018/log -pv</span><br><span class="line">vim /apps/mongo/27018/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/27018/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/27018/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27018</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: shardsvr</span><br><span class="line"></span><br><span class="line">mkdir /apps/mongo/27019/data/db -pv</span><br><span class="line">mkdir /apps/mongo/27019/log -pv</span><br><span class="line">vim /apps/mongo/27019/mongod.conf</span><br><span class="line">storage:</span><br><span class="line">  dbPath: /apps/mongo/27019/data/db</span><br><span class="line">  journal:</span><br><span class="line">    enabled: true</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/27019/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27019</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongo&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: shardsvr</span><br><span class="line"></span><br><span class="line">mongod -f /apps/mongo/27017/mongod.conf</span><br><span class="line">mongod -f /apps/mongo/27018/mongod.conf</span><br><span class="line">mongod -f /apps/mongo/27019/mongod.conf</span><br><span class="line"></span><br><span class="line">mongo</span><br><span class="line">config = &#123; _id: &quot;GMFMongo&quot;, members: [</span><br><span class="line">&#123;_id: 0, host: &quot;192.168.38.104:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 1, host: &quot;192.168.38.104:27018&quot;&#125;, </span><br><span class="line">&#123;_id: 2, host: &quot;192.168.38.104:27019&quot;, arbiterOnly: true&#125;]</span><br><span class="line">&#125;</span><br><span class="line">rs.initiate(config)</span><br><span class="line"></span><br><span class="line">配置节点副本集的配置：</span><br><span class="line">仅仅需要修改配置文件的如下两行：</span><br><span class="line">replication:</span><br><span class="line">  replSetName: &quot;GMFMongocon&quot;</span><br><span class="line">sharding:</span><br><span class="line">  clusterRole: configsvr</span><br><span class="line"></span><br><span class="line">mongo</span><br><span class="line">config = &#123; _id: &quot;GMFMongocon&quot;, members: [</span><br><span class="line">&#123;_id: 0, host: &quot;192.168.38.106:27017&quot;&#125;, </span><br><span class="line">&#123;_id: 1, host: &quot;192.168.38.106:27018&quot;&#125;, </span><br><span class="line">&#123;_id: 2, host: &quot;192.168.38.106:27019&quot;&#125;]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">路由节点的配置：</span><br><span class="line"></span><br><span class="line">1.首先，创建相关目录：</span><br><span class="line">mkdir /apps/mongo/log -pv</span><br><span class="line"></span><br><span class="line">vim /apps/mongo/mongos.conf</span><br><span class="line">systemLog:</span><br><span class="line">  destination: file</span><br><span class="line">  logAppend: true</span><br><span class="line">  path: /apps/mongo/log/mongod.log</span><br><span class="line">processManagement:</span><br><span class="line">  fork: true</span><br><span class="line">net:</span><br><span class="line">  port: 27017</span><br><span class="line">  bindIp: 0.0.0.0</span><br><span class="line">sharding:</span><br><span class="line">  configDB: GMFMongocon/192.168.38.106:27017,192.168.38.106:27018,192.168.38.106:27019</span><br><span class="line"></span><br><span class="line">mongos -f /apps/mongo/mongos.conf</span><br><span class="line"></span><br><span class="line">2.此时还不能通过路由节点对分片进行读写操作，因为路由节点还不能连接到分片节点仅仅连接了配置节点，下面就将分片节点加入到集群中。</span><br><span class="line"></span><br><span class="line">mongo</span><br><span class="line"></span><br><span class="line">sh.addShard(&quot;GMFMongo/192.168.38.104:27017,192.168.38.104:27018,192.168.38.104:27019&quot;)</span><br><span class="line"></span><br><span class="line">sh.addShard(&quot;GMFMongo2/192.168.38.105:27017,192.168.38.105:27018,192.168.38.105:27019&quot;)</span><br><span class="line"></span><br><span class="line">sh.status()  查看分片状态</span><br><span class="line"></span><br><span class="line">如若添加分片失败，先移除分片再查看具体配置信息：</span><br><span class="line">use admin</span><br><span class="line">db.runCommand( &#123; removeShard: &quot;分片名&quot; &#125; )</span><br><span class="line"></span><br><span class="line">添加第二的路由节点直接根据配置文件启动服务即可，无需其他配置，因为关于分片的配置已经存放到配置服务器中了。</span><br></pre></td></tr></table></figure>
+<p><strong><em>如果只剩下最后一个 shard，是无法删除的，移除时会自动转移分片数据，需要一个时间过程，</em></strong><br><strong><em>完成后，再次执行删除分片命令才能真正删除。</em></strong></p>
+<blockquote>
+<p>2) 开启分片功能的常用命令：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh.enableSharding(&quot;库名&quot;)</span><br><span class="line">sh.shardCollection(&quot;库名.集合名&quot;,&#123;&quot;key&quot;:1&#125;)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/03/28/MongoDB的认证及授权/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          MongoDB的认证及授权
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/03/28/MongoDB的配置安装/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MongoDB的配置安装</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="MongoDB的分片集群配置" data-title="MongoDB的分片集群配置" data-url="http://gmfdevops.com.com/2020/03/28/MongoDB的分片集群配置/"  data-images="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1530275036756&amp;di=fbef4a64ede1f8237b28de7618e9a502&amp;imgtype=0&amp;src=http%3A%2F%2Ftx.haiqq.com%2Fuploads%2Fallimg%2F170507%2F0Q25BU9-8.jpg" data-content="MongoDB的分片集群配置">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2020 ConqUeroR
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smackgg/hexo-theme-smackdown" target="_blank">Smackdown</a>
+        </div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="/js/main.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js"></script>
+
+
+  </div>
+</body>
+</html>
